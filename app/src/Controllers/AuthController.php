@@ -51,7 +51,7 @@ function showRegisterForm(): void
     public function showLoginForm(): void
     {
         $error = $this->popFlash('login_error');
-        require __DIR__ . '/../Views/auth/login.php';
+        require __DIR__ . '/../Views/auth/login.php';   //Maniaaa
     }
 
     public function showForgotPassword(): void

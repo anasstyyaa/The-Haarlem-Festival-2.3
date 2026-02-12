@@ -45,7 +45,7 @@ class AuthController
 function showRegisterForm(): void
     {
         $errors = $this->popFlash('register_errors', []);
-        require __DIR__ . '/../Views/auth/register.php';
+        require __DIR__ . '/../Views/auth/register.php'; // SIAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
     }
 
     public function showLoginForm(): void

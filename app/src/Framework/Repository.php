@@ -12,18 +12,16 @@ class Repository
 
     public function __construct()
     {
-        $host = Config::DB_SERVER_NAME;
-        $db   = Config::DB_NAME;
-        $user = Config::DB_USERNAME;
-        $pass = Config::DB_PASSWORD;
+        $server = getenv('DB_SERVER');
+        $port   = getenv('DB_PORT') ?: '1433';
+        $db     = getenv('DB_NAME');
+        $user   = getenv('DB_USER');
+        $pass   = getenv('DB_PASS');
 
-        $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+        $dsn = "sqlsrv:Server=$server,$port;Database=$db;Encrypt=yes;TrustServerCertificate=no;LoginTimeout=30;";
 
-        try {
-            $this->connection = new PDO($dsn, $user, $pass);
-            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
-        }
+        $pdo = new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]);
     }
 }

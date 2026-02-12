@@ -1,35 +1,27 @@
 version: '3'
 
 services:
-    nginx:
-        image: nginx:latest
-        ports:
-            - "80:80"
-        volumes:
-            - ./nginx.conf:/etc/nginx/nginx.conf
-            - ./app:/app
-    php:
-        build:
-            context: .
-            dockerfile: PHP.Dockerfile
-        volumes:
-            - ./app:/app
-    mysql:
-        image: mariadb:latest
-        environment:
-            MYSQL_ROOT_PASSWORD: 'secret123'
-            MYSQL_USER: 'developer'
-            MYSQL_PASSWORD: 'secret123'
-            MYSQL_DATABASE: 'developmentdb'
-        volumes:
-            - mysqldata:/var/lib/mysql
-        ports:
-            - 3306:3306
-    phpmyadmin:
-        image: phpmyadmin:latest
-        ports:
-            - 8080:80
-        environment:
-            - PMA_HOST=mysql
-volumes:
-    mysqldata: {}
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./app:/app
+    depends_on:
+      - php
+
+  php:
+    build:
+      context: .
+      dockerfile: PHP.Dockerfile
+    volumes:
+      - ./app:/app
+    environment:
+      DB_SERVER: "somerendbv2.database.windows.net"
+      DB_PORT: "1433"
+      DB_NAME: "anastasia"
+      DB_USER: "frankde"
+      DB_PASS: "__ka3tana2@@"
+
+volumes: {}

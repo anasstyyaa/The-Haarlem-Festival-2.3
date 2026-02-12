@@ -7,7 +7,7 @@ use App\Services\PcService;
 use Throwable;
 
 class AdminPcController
-{
+{//testtt
     /**
      * @var IPcService
      */

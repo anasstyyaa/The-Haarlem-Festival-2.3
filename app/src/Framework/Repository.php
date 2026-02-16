@@ -20,7 +20,7 @@ class Repository
 
         $dsn = "sqlsrv:Server=$server,$port;Database=$db;Encrypt=yes;TrustServerCertificate=no;LoginTimeout=30;";
 
-        $pdo = new PDO($dsn, $user, $pass, [
+        $this->connection = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ]);
     }

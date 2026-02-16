@@ -12,6 +12,7 @@ class UserModel
     private string $created_at;
     private ?string $updated_at;
     private ?string $profilePicture;
+    private ?string $deleted_at;
 
     public function __construct(
         int $id,
@@ -23,7 +24,9 @@ class UserModel
         string $role,
         string $created_at,
         ?string $updated_at = null,
-        ?string $profilePicture = null
+        ?string $profilePicture = null,
+        ?string $deleted_at = null
+        
     ) {
         $this->id = $id;
         $this->setEmail($email);
@@ -35,6 +38,7 @@ class UserModel
         $this->created_at = $created_at;
         $this->updated_at = $updated_at;
         $this->profilePicture = $profilePicture;
+        $this->deleted_at = $deleted_at;
     }
 
     public function getId(): int
@@ -77,6 +81,16 @@ class UserModel
         return $this->updated_at;
     }
 
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function getDeletedAt(): ?string
+    {
+        return $this->deleted_at;
+    }
+
     public function setEmail(string $email): void
     {
         $this->email = $email;
@@ -115,5 +129,10 @@ class UserModel
     public function getProfilePicture(): ?string
     {
         return $this->profilePicture;
+    }
+
+    public function setDeletedAt(?string $deleted_at): void
+    {
+        $this->deleted_at = $deleted_at;
     }
 }

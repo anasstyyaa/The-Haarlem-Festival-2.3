@@ -1,5 +1,5 @@
 <?php
-
+namespace App\Models;
 use App\Models\EventModel;
 use App\Models\UserModel;
 
@@ -7,13 +7,13 @@ class TicketModel
 {
     private int $id;
     private EventModel $event;
-    private UserModel $user;
+    private ?UserModel $user;
     private int $numberOfPeople;
 
     public function __construct(
         int $id,
         EventModel $event,
-        UserModel $user,
+        ?UserModel $user,
         int $numberOfPeople
     ) {
         $this->id = $id;

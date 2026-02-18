@@ -1,6 +1,8 @@
 <?php
 session_start();
-
+error_reporting(E_ALL);
+ini_set('display_errors', '0'); // hide from browser
+ini_set('log_errors', '1');     // log instead
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -14,12 +16,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/login', ['App\Controllers\AuthController', 'showLoginForm']);
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
     $r->addRoute('GET',  '/logout', ['App\Controllers\AuthController', 'logout']);
-
-
-
-
-
-
+    $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
+    $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
 
 });
 

@@ -1,8 +1,6 @@
 <?php
 namespace App\Controllers;
 
-use App\Models\UserModel;
-use App\Models\UserRepository as ModelsUserRepository;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 
@@ -49,7 +47,7 @@ class AuthController
             return ob_get_clean();
         }
 
-        header('Location: /profile');
+        header('Location: /login');
         exit;
     }
 
@@ -65,7 +63,10 @@ class AuthController
     // POST /login
     public function login(): string
     {
-        $result = $this->auth->login($_POST['email'] ?? '', $_POST['password'] ?? '');
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        $result = $this->auth->login($email, $password);
 
         if (!$result['ok']) {
             $error = $result['error'];
@@ -74,7 +75,7 @@ class AuthController
             return ob_get_clean();
         }
 
-        header('Location: /profile');
+        header('Location: /login');
         exit;
     }
 

@@ -27,13 +27,13 @@ class UserRepository extends Repository implements IUserRepository
 
     public function create(UserModel $user): bool
     {
-        $sql = "INSERT INTO users (email, password, userName, fullName, phoneNumber, role, created_at, profilePicture) 
-                VALUES (:email, :password, :userName, :fullName, :phoneNumber, :role, :created_at, :profilePicture)";
+        $sql = "INSERT INTO dbo.Users (Email, Password, UserName, FullName, PhoneNumber, Role, Created_At,     ProfilePicture) 
+        VALUES (:email, :password, :userName, :fullName, :phoneNumber, :role, :created_at, :profilePicture)";
         
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'email'          => $user->getEmail(),
-            'password'       => password_hash($user->getPassword(), PASSWORD_DEFAULT),
+            'password'       => $user->getPassword(), //Already hashed in Service 
             'userName'       => $user->getUserName(),
             'fullName'       => $user->getFullName(),
             'phoneNumber'    => $user->getPhoneNumber(),
@@ -101,12 +101,13 @@ class UserRepository extends Repository implements IUserRepository
         return $stmt->fetch() ?: null;
     }
 
-    public function findByUserName(string $userName): ?array
+    /*public function findByUserName(string $userName): ?array
     {
-        $stmt = $this->connection->prepare("SELECT * FROM Users WHERE UserName = :userName");
+        $stmt = $this->connection->prepare("SELECT * FROM Users WHERE userName = :userName");
         $stmt->execute(['userName' => $userName]);
         return $stmt->fetch() ?: null;
     }
+        */
 }
 
 

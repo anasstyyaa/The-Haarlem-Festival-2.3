@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Framework\Repository;
+use PDO; 
 
 class UserRepository extends Repository
 {

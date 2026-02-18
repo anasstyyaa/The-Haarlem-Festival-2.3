@@ -107,6 +107,21 @@ class UserRepository extends Repository implements IUserRepository
         $stmt->execute(['userName' => $userName]);
         return $stmt->fetch() ?: null;
     }
+
+    
+    public function updatePassword(int $id, string $passwordHash): bool
+{
+    $sql = "UPDATE Users 
+            SET Password = :password, Updated_At = GETDATE()
+            WHERE Id = :id";
+
+    $stmt = $this->connection->prepare($sql);
+    return $stmt->execute([
+        'password' => $passwordHash,
+        'id'       => $id
+    ]);
+}
+
 }
 
 

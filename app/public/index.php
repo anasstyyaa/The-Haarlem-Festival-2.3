@@ -15,8 +15,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
     $r->addRoute('GET',  '/logout', ['App\Controllers\AuthController', 'logout']);
 
+        // Password reset
+    $r->addRoute('GET',  '/forgot-password',        ['App\Controllers\AuthController', 'showForgotPassword']);
+    $r->addRoute('POST', '/api/forgot-password',    ['App\Controllers\AuthController', 'apiForgotPassword']);
 
-
+    $r->addRoute('GET',  '/reset-password/{token}', ['App\Controllers\AuthController', 'showResetPassword']);
+    $r->addRoute('POST', '/api/reset-password',     ['App\Controllers\AuthController', 'apiResetPassword']);
 
 
 

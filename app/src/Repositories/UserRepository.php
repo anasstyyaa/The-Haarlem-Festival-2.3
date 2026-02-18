@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 namespace App\Models;
 
 use App\Framework\Repository;

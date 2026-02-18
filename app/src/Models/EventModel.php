@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\EventType;
+
+class EventModel
+{
+    private int $id;
+    private EventType $eventType;
+    private int $subEventId;
+
+    public function __construct(int $id, EventType $eventType, int $subEventId)
+    {
+        $this->id = $id;
+        $this->eventType = $eventType;
+        $this->subEventId = $subEventId;
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getEventType(): EventType
+    {
+        return $this->eventType;
+    }
+
+    public function getSubEventId(): int
+    {
+        return $this->subEventId;
+    }
+}

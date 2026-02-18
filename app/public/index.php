@@ -15,6 +15,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
     $r->addRoute('GET',  '/logout', ['App\Controllers\AuthController', 'logout']);
 
+    // Admin routes
+    $r->addRoute('GET', '/admin/users', ['App\Controllers\AdminController', 'index']);
+    $r->addRoute('POST', '/admin/users/delete', ['App\Controllers\AdminController', 'delete']);
 
 
 
@@ -47,36 +50,17 @@ switch ($routeInfo[0]) {
         break;
     // Handle found routes
     case FastRoute\Dispatcher::FOUND:
-        /**
-         * $routeInfo contains the data about the matched route.
-         * 
-         * $routeInfo[1] is the whatever we define as the third argument the `$r->addRoute` method.
-         *  For instance for: `$r->addRoute('GET', '/hello/{name}', ['App\Controllers\HelloController', 'greet']);`
-         *  $routeInfo[1] will be `['App\Controllers\HelloController', 'greet']`
-         * 
-         * Hint: we can use class strings like `App\Controllers\HelloController` to create new instances of that class.
-         * Hint: in PHP we can use a string to call a class method dynamically, like this: `$instance->$methodName($args);`
-         */
+        [$class, $method] = $routeInfo[1];
+        $vars = $routeInfo[2];
 
-        // TODO: invoke the controller and method using the data in $routeInfo[1]
+        if ($class === 'App\Controllers\AdminController') {
+            $repository = new \App\Repositories\UserRepository();
+            $service = new \App\Services\UserService($repository);
+            $controller = new $class($service);
+        } else {
+            $controller = new $class();
+        }
 
-        /**
-         * $route[2] contains any dynamic parameters parsed from the URL.
-         * For instance, if we add a route like:
-         *  $r->addRoute('GET', '/hello/{name}', ['App\Controllers\HelloController', 'greet']);
-         * and the URL is `/hello/dan-the-man`, then `$routeInfo[2][name]` will be `dan-the-man`.
-         */
-
-        // TODO: pass the dynamic route data to the controller method
-        // When done, visiting `http://localhost/hello/dan-the-man` should output "Hi, dan-the-man!"
-       
-// var_dump($routeInfo[1]);
-// die();
-
-        [$class, $method] = $routeInfo[1]; // getting class + method
-        $vars = $routeInfo[2]; // getting dynamic parameters 
-        $controller = new $class(); // creating controller instance
-        echo $controller->$method($vars); // calling the method and passing parameters
-
+        echo $controller->$method($vars);
         break;
 }

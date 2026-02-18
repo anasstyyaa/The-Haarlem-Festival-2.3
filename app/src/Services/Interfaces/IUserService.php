@@ -12,4 +12,5 @@ interface IUserService
     public function updateUser(UserModel $user): bool;
     public function deleteUser(int $id): bool;
     public function restoreUser(int $id): bool;
+    public function adminGetAll(): array;
 }

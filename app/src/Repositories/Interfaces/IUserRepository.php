@@ -14,5 +14,5 @@ interface IUserRepository
     public function restore(int $id): bool;
     public function findByEmail (string $email): ?array; 
     public function findByUserName (string $userName): ?array; 
-
+    public function adminGetAll(): array;
 }

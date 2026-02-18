@@ -80,17 +80,17 @@ class UserRepository extends Repository implements IUserRepository
     private function mapToModel(array $row): UserModel
     {
         return new UserModel(
-            (int)$row['id'],
-            $row['email'],
-            $row['password'],
-            $row['userName'],
-            $row['fullName'],
-            $row['phoneNumber'],
-            $row['role'],
-            $row['created_at'],
-            $row['updated_at'],
-            $row['profilePicture'],
-            $row['deleted_at']
+        (int)($row['Id'] ?? 0),
+        $row['Email'] ?? '',
+        $row['Password'] ?? '',
+        $row['UserName'] ?? '',
+        $row['FullName'] ?? '',
+        $row['PhoneNumber'] ?? '',
+        $row['Role'] ?? '',
+        $row['Created_at'] ?? '', 
+        $row['Updated_at'] ?? null,
+        $row['ProfilePicture'] ?? null,
+        $row['Deleted_at'] ?? null
         );
     }
 
@@ -106,6 +106,14 @@ class UserRepository extends Repository implements IUserRepository
         $stmt = $this->connection->prepare("SELECT * FROM Users WHERE UserName = :userName");
         $stmt->execute(['userName' => $userName]);
         return $stmt->fetch() ?: null;
+    }
+
+    public function adminGetAll(): array
+    {
+        $stmt = $this->connection->query("SELECT * FROM users");
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return array_map(fn($row) => $this->mapToModel($row), $results);
     }
 }
 

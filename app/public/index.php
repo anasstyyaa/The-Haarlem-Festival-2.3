@@ -43,6 +43,8 @@ $r->addRoute('GET', '/api/pcs', ['App\Controllers\ApiPcController', 'index']);
 
 
 
+    $r->addRoute('POST',  '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
+
 
 });
 

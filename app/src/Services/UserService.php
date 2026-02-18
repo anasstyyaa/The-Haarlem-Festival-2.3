@@ -45,4 +45,9 @@ class UserService implements IUserService
     {
         return $this->userRepository->restore($id);
     }
+
+    public function adminGetAll(): array
+    {
+        return $this->userRepository->adminGetAll();
+    }
 }

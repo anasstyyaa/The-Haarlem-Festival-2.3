@@ -11,33 +11,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     //$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);
     $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
 
-    $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
-    $r->addRoute('POST', '/register', ['App\Controllers\AuthController', 'register']);
     $r->addRoute('GET',  '/login', ['App\Controllers\AuthController', 'showLoginForm']);
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
     $r->addRoute('GET',  '/logout', ['App\Controllers\AuthController', 'logout']);
 
-    $r->addRoute('GET',  '/reservations/create/{pcId}', ['App\Controllers\ReservationController', 'showCreateForm']);
-    $r->addRoute('POST', '/reservations/create',        ['App\Controllers\ReservationController', 'create']);
-    $r->addRoute('GET',  '/my-reservations',            ['App\Controllers\ReservationController', 'myReservations']);
-    $r->addRoute('GET',  '/admin/reservations',         ['App\Controllers\ReservationController', 'adminIndex']);
-    $r->addRoute('POST', '/reservations/cancel/{id}', ['App\Controllers\ReservationController', 'cancel']);
-$r->addRoute('GET',  '/admin/pcs',                ['App\Controllers\AdminPcController', 'index']);
-$r->addRoute('GET',  '/admin/pcs/create',         ['App\Controllers\AdminPcController', 'showCreate']);
-$r->addRoute('POST', '/admin/pcs/create',         ['App\Controllers\AdminPcController', 'create']);
-$r->addRoute('GET',  '/admin/pcs/edit/{id}',      ['App\Controllers\AdminPcController', 'showEdit']);
-$r->addRoute('POST', '/admin/pcs/edit/{id}',      ['App\Controllers\AdminPcController', 'update']);
-$r->addRoute('POST', '/admin/pcs/toggle/{id}',    ['App\Controllers\AdminPcController', 'toggleActive']);
-$r->addRoute('POST', '/admin/pcs/delete/{id}',    ['App\Controllers\AdminPcController', 'delete']);
-
-$r->addRoute('GET', '/forgot-password', ['App\Controllers\AuthController', 'showForgotPassword']);
-$r->addRoute('GET', '/reset-password/{token}', ['App\Controllers\AuthController', 'showResetPassword']);
-$r->addRoute('POST', '/api/forgot-password', ['App\Controllers\AuthController', 'apiForgotPassword']);
-$r->addRoute('POST', '/api/reset-password', ['App\Controllers\AuthController', 'apiResetPassword']);
-$r->addRoute('GET',  '/profile', ['App\Controllers\ProfileController', 'index']);
-$r->addRoute('POST', '/profile', ['App\Controllers\ProfileController', 'update']);
-
-$r->addRoute('GET', '/api/pcs', ['App\Controllers\ApiPcController', 'index']);
 
 
 

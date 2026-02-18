@@ -2,7 +2,7 @@
 
 namespace App\Framework;
 
-use App\Config;
+
 use PDO;
 use PDOException;
 

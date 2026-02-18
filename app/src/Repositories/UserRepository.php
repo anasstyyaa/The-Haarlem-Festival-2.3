@@ -27,13 +27,13 @@ class UserRepository extends Repository implements IUserRepository
 
     public function create(UserModel $user): bool
     {
-        $sql = "INSERT INTO users (email, password, userName, fullName, phoneNumber, role, created_at, profilePicture) 
-                VALUES (:email, :password, :userName, :fullName, :phoneNumber, :role, :created_at, :profilePicture)";
+        $sql = "INSERT INTO dbo.Users (Email, Password, UserName, FullName, PhoneNumber, Role, Created_At,     ProfilePicture) 
+        VALUES (:email, :password, :userName, :fullName, :phoneNumber, :role, :created_at, :profilePicture)";
         
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'email'          => $user->getEmail(),
-            'password'       => password_hash($user->getPassword(), PASSWORD_DEFAULT),
+            'password'       => $user->getPassword(), //Already hashed in Service 
             'userName'       => $user->getUserName(),
             'fullName'       => $user->getFullName(),
             'phoneNumber'    => $user->getPhoneNumber(),
@@ -80,17 +80,17 @@ class UserRepository extends Repository implements IUserRepository
     private function mapToModel(array $row): UserModel
     {
         return new UserModel(
-            (int)$row['id'],
-            $row['email'],
-            $row['password'],
-            $row['userName'],
-            $row['fullName'],
-            $row['phoneNumber'],
-            $row['role'],
-            $row['created_at'],
-            $row['updated_at'],
-            $row['profilePicture'],
-            $row['deleted_at']
+        (int)($row['Id'] ?? 0),
+        $row['Email'] ?? '',
+        $row['Password'] ?? '',
+        $row['UserName'] ?? '',
+        $row['FullName'] ?? '',
+        $row['PhoneNumber'] ?? '',
+        $row['Role'] ?? '',
+        $row['Created_at'] ?? '', 
+        $row['Updated_at'] ?? null,
+        $row['ProfilePicture'] ?? null,
+        $row['Deleted_at'] ?? null
         );
     }
 
@@ -101,26 +101,21 @@ class UserRepository extends Repository implements IUserRepository
         return $stmt->fetch() ?: null;
     }
 
-    public function findByUserName(string $userName): ?array
+    /*public function findByUserName(string $userName): ?array
     {
-        $stmt = $this->connection->prepare("SELECT * FROM Users WHERE UserName = :userName");
+        $stmt = $this->connection->prepare("SELECT * FROM Users WHERE userName = :userName");
         $stmt->execute(['userName' => $userName]);
         return $stmt->fetch() ?: null;
     }
+    */
 
-    
-    public function updatePassword(int $id, string $passwordHash): bool
-{
-    $sql = "UPDATE Users 
-            SET Password = :password, Updated_At = GETDATE()
-            WHERE Id = :id";
-
-    $stmt = $this->connection->prepare($sql);
-    return $stmt->execute([
-        'password' => $passwordHash,
-        'id'       => $id
-    ]);
-}
+    public function adminGetAll(): array
+    {
+        $stmt = $this->connection->query("SELECT * FROM users");
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return array_map(fn($row) => $this->mapToModel($row), $results);
+    }
 
 }
 

@@ -1,6 +1,8 @@
 <?php
 session_start();
-
+error_reporting(E_ALL);
+ini_set('display_errors', '0'); // hide from browser
+ini_set('log_errors', '1');     // log instead
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -19,9 +21,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/admin/users', ['App\Controllers\AdminController', 'index']);
     $r->addRoute('POST', '/admin/users/delete', ['App\Controllers\AdminController', 'delete']);
 
-
-
-
+    $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
+    $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
 
 
 });

@@ -23,7 +23,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <a href="/dance" class="nav-item">Dance</a>
     <a href="/yummy" class="nav-item">Yummy</a>
     <a href="/history" class="nav-item">History</a>
-    <a href="/kids" class="nav-item">Kids</a>
+    <a href="/kidsEvent" class="nav-item">Kids</a>
   </nav>
 
   <div class="nav-icons">

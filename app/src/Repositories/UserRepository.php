@@ -87,10 +87,10 @@ class UserRepository extends Repository implements IUserRepository
         $row['FullName'] ?? '',
         $row['PhoneNumber'] ?? '',
         $row['Role'] ?? '',
-        $row['Created_at'] ?? '', 
-        $row['Updated_at'] ?? null,
+        $row['Created_At'] ?? '', 
+        $row['Updated_At'] ?? null,
         $row['ProfilePicture'] ?? null,
-        $row['Deleted_at'] ?? null
+        $row['Deleted_At'] ?? null
         );
     }
 

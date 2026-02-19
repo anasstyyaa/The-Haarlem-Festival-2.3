@@ -19,12 +19,13 @@ class TicketController
 
     $userId = $_SESSION['user_id'] ?? null;
 
-    // $this->programService->addTicketToProgram(
-    //     $eventId,
-    //     $numberOfPeople,
-    //     $userId
-    // );
-
+    $this->programService->addTicketToProgram(
+        $eventId,
+        $numberOfPeople,
+        $userId
+    );
+    header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
+exit;
 }
 
 }

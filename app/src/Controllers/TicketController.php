@@ -7,9 +7,9 @@ class TicketController
 {
     private PersonalProgramService $programService;
 
-    public function __construct(PersonalProgramService $programService)
+    public function __construct()
     {
-        $this->programService = $programService;
+        $this->programService = new PersonalProgramService();
     }
 
    public function addTicket(): void
@@ -24,6 +24,9 @@ class TicketController
         $numberOfPeople,
         $userId
     );
+    echo '<pre>';
+print_r($_SESSION);
+echo '</pre>';
     header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
 exit;
 }

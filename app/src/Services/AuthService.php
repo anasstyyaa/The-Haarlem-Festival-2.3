@@ -11,6 +11,9 @@ class AuthService
     public function register(array $input): array
     {
     $email = trim($input['email'] ?? '');
+    //email format must be correct 
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    return ['ok' => false, 'error' => 'Invalid email format.'];} 
     $password = $input['password'] ?? '';
     $userName = trim($input['userName'] ?? '');
     $fullName = trim($input['fullName'] ?? '');

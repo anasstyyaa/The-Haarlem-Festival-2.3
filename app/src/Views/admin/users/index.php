@@ -44,12 +44,27 @@
                             </td>
                             <td><?= date('d-m-Y', strtotime($user->getCreatedAt())) ?></td>
                             <td class="text-center">
-                                <a href="/admin/users/edit?id=<?= $user->getId() ?>" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-pencil"></i> Edit
-                                </a>
-                                <a href="/admin/users/delete?id=<?= $user->getId() ?>" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i> Delete
-                                </a>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="/admin/users/edit?id=<?= $user->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    
+                                    <?php if (!$user->getDeletedAt()): ?>
+                                        <form action="/admin/users/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this user?')">
+                                            <input type="hidden" name="id" value="<?= $user->getId() ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <form action="/admin/users/restore" method="POST" class="d-inline">
+                                            <input type="hidden" name="id" value="<?= $user->getId() ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

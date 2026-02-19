@@ -131,6 +131,11 @@ class UserModel
         return $this->profilePicture;
     }
 
+    public function setProfilePicture(?string $profilePicture): void 
+    {
+        $this->profilePicture = $profilePicture;
+    }
+
     public function setDeletedAt(?string $deleted_at): void
     {
         $this->deleted_at = $deleted_at;

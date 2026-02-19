@@ -7,9 +7,9 @@ class TicketController
 {
     private PersonalProgramService $programService;
 
-    public function __construct(PersonalProgramService $programService)
+    public function __construct()
     {
-        $this->programService = $programService;
+        $this->programService = new PersonalProgramService();
     }
 
    public function addTicket(): void

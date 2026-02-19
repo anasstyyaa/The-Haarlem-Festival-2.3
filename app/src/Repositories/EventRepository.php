@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\EventModel;
-use App\Enums\EventType;
+use App\Models\Enums\EventTypeEnum;
 use PDO;
 
 class EventRepository extends Repository
@@ -67,7 +67,7 @@ class EventRepository extends Repository
     {
         return new EventModel(
             (int)($row['id'] ?? 0),
-            EventType::from($row['eventType']),
+            EventTypeEnum::from($row['eventType']),
             (int)($row['subEventId'] ?? 0)
         );
     }

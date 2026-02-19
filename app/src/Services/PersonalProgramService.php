@@ -12,11 +12,9 @@ class PersonalProgramService
     private UserRepository $userRepository;
 
     public function __construct(
-        EventRepository $eventRepository,
-        UserRepository $userRepository
     ) {
-        $this->eventRepository = $eventRepository;
-        $this->userRepository = $userRepository;
+        $this->eventRepository = new EventRepository();
+        $this->userRepository = new UserRepository();
     }
 
     public function addTicketToProgram(int $eventId, int $numberOfPeople, ?int $userId): void {

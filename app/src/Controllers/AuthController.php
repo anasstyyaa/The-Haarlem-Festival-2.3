@@ -142,7 +142,7 @@ class AuthController
     public function logout(): string
     {
         $this->auth->logout();
-        header('Location: /login');
+        header('Location: /');
         exit;
     }
 }

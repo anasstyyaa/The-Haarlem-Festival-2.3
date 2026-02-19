@@ -71,4 +71,17 @@ class EventRepository extends Repository
             (int)($row['subEventId'] ?? 0)
         );
     }
+
+    public function checkEventType(int $subEventId, string $eventType):int{
+    $sql = "SELECT id FROM Event WHERE subEventId = :subEventId AND eventType = :eventType ";
+    $stmt = $this->connection->prepare($sql);
+    $stmt->execute([
+        'subEventId' => $subEventId,
+        'eventType'  => $eventType
+    ]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return (int)$row['id'];
+    }
 }

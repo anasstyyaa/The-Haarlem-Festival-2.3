@@ -48,6 +48,7 @@ use App\ViewModels\KidsEventViewModel;
                         <form method="POST" action="/addTicket">
                            
     <input type="hidden" name="event_id" value="<?= $event->getId() ?>">
+       <input type="hidden" name="event_type" value="kids">
     <input type="number" name="number_of_people" value="1" min="1" style="width:50px;">
 
 

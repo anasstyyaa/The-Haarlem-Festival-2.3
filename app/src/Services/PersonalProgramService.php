@@ -34,4 +34,5 @@ class PersonalProgramService
     $_SESSION['program'] = $program;
 }
 
+
 }

@@ -1,89 +1,176 @@
-/* ===== Global Page Styling ===== */
+/* =========================
+   GLOBAL SITE LAYOUT
+   ========================= */
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f5f2ef;
 
-    /* Background Image + Overlay */
-    background:
-        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
-        url('/assets/images/login.jpg') no-repeat center center;
-    background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ===== Card Styling ===== */
-
-.auth-card {
-    background: white;
-    padding: 40px;
-    width: 380px;
-    border-radius: 12px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+.container {
+  padding: 60px 40px;
+  flex: 1;
 }
 
-.auth-card h1 {
-    margin-bottom: 25px;
-    text-align: center;
+/* =========================
+   HEADER
+   ========================= */
+
+.main-header {
+  background-color: #4b1f0e;
+  padding: 15px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* ===== Inputs ===== */
-
-.auth-card input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 14px;
+.logo {
+  color: #f4d9c6;
+  font-weight: bold;
+  font-size: 20px;
 }
 
-.auth-card input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+.nav-links {
+  display: flex;
+  gap: 15px;
 }
 
-/* ===== Button ===== */
-
-.auth-card button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: #de9733;
-    color: white;
-    font-size: 15px;
-    cursor: pointer;
-    transition: 0.2s;
+.nav-item {
+  text-decoration: none;
+  color: #f4d9c6;
+  padding: 8px 18px;
+  border: 1px solid #f4d9c6;
+  border-radius: 25px;
+  transition: 0.3s ease;
+  font-size: 14px;
 }
 
-.auth-card button:hover {
-    background: #5a67d8;
+.nav-item:hover {
+  background-color: #f4d9c6;
+  color: #4b1f0e;
 }
 
-/* ===== Error Message ===== */
+.nav-icons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.icon-link {
+  text-decoration: none;
+  color: #f4d9c6;
+  font-size: 18px;
+  transition: 0.3s ease;
+}
+
+.icon-link:hover {
+  transform: scale(1.2);
+}
+
+.login-btn {
+  text-decoration: none;
+  color: #f4d9c6;
+  margin-left: 10px;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.main-footer {
+  background-color: #4b1f0e;
+  color: #f4d9c6;
+  text-align: center;
+  padding: 20px;
+}
+
+/* =========================
+   AUTH PAGES (LOGIN/REGISTER)
+   Works when <body class="auth-page">
+   ========================= */
+
+body.auth-page {
+  background:
+    linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+    url("/assets/images/login.jpg") no-repeat center center;
+  background-size: cover;
+}
+
+/* center ONLY the content area (between header & footer) */
+body.auth-page .container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 40px 20px; /* better centering */
+}
+
+body.auth-page .auth-card {
+  background: white;
+  padding: 40px;
+  width: 380px;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+body.auth-page .auth-card h1 {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+body.auth-page .auth-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+body.auth-page .auth-card input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+}
+
+body.auth-page .auth-card button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #de9733;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+body.auth-page .auth-card button:hover {
+  background: #c98325;
+}
 
 .error {
-    color: red;
-    margin-bottom: 15px;
-    text-align: center;
+  color: red;
+  margin-bottom: 15px;
+  text-align: center;
 }
 
-/* ===== Links ===== */
-
 .auth-link {
-    display: block;
-    text-align: center;
-    margin-top: 15px;
-    text-decoration: none;
-    color: #667eea;
-    font-size: 14px;
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  text-decoration: none;
+  color: #667eea;
+  font-size: 14px;
 }
 
 .auth-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

@@ -47,7 +47,7 @@ class AuthController
             return ob_get_clean();
         }
 
-        header('Location: /login');
+        header('Location: /profile');
         exit;
     }
 
@@ -63,10 +63,7 @@ class AuthController
     // POST /login
     public function login(): string
     {
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
-
-        $result = $this->auth->login($email, $password);
+        $result = $this->auth->login($_POST['email'] ?? '', $_POST['password'] ?? '');
 
         if (!$result['ok']) {
             $error = $result['error'];

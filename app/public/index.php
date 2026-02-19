@@ -18,7 +18,7 @@ use function FastRoute\simpleDispatcher;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     //$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);
- $r->addRoute('GET', '/', ['App\Controllers\HomeController', 'index']);
+    $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
 
 
     $r->addRoute('GET',  '/login', ['App\Controllers\AuthController', 'showLoginForm']);

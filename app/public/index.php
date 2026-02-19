@@ -26,8 +26,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/logout', ['App\Controllers\AuthController', 'logout']);
 
     // Admin routes
-    $r->addRoute('GET', '/admin/users', ['App\Controllers\AdminController', 'index']);
-    $r->addRoute('POST', '/admin/users/delete', ['App\Controllers\AdminController', 'delete']);
+    $r->addRoute('GET', '/admin/users', ['App\Controllers\UserController', 'index']);
+    $r->addRoute('POST', '/admin/users/delete', ['App\Controllers\UserController', 'delete']);
 
     $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
     $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
@@ -65,7 +65,7 @@ switch ($routeInfo[0]) {
         [$class, $method] = $routeInfo[1];
         $vars = $routeInfo[2];
 
-        if ($class === 'App\Controllers\AdminController') {
+        if ($class === 'App\Controllers\UserController') {
             $repository = new \App\Repositories\UserRepository();
             $service = new \App\Services\UserService($repository);
             $controller = new $class($service);

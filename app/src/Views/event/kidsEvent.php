@@ -3,11 +3,7 @@ use App\ViewModels\KidsEventViewModel;
 /** @var KidsEventViewModel $vm */
 
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Kids Events</title>
+<?php require __DIR__ . '/../partials/header.php'; ?>
     <style>
         table {
             border-collapse: collapse;

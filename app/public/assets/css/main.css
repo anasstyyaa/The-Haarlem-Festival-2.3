@@ -102,7 +102,7 @@ body.auth-page .container {
 body.auth-page .auth-card {
   background: white;
   padding: 40px;
-  width: 380px;
+  width: 750px;
   border-radius: 12px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
@@ -161,4 +161,42 @@ body.auth-page .auth-card button:hover {
 
 .auth-link:hover {
   text-decoration: underline;
+}
+
+.g-recaptcha { margin: 10px 0 15px; }
+
+.captcha-wrapper {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.register-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: #d29544;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.register-btn:hover {
+  background: #b87f34;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }

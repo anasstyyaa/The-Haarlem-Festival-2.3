@@ -39,91 +39,124 @@ class AuthController
         $fullName = trim($_POST['fullName'] ?? '');
         $phoneNumber = trim($_POST['phoneNumber'] ?? '');
 
-    // 1) Basic required fields
-    if ($email === '' || $password === '' || $userName === '' || $fullName === '' || $phoneNumber === '') {
-        $error = 'Please fill in all fields!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        // 1) Basic required fields
+        if ($email === '' || $password === '' || $userName === '' || $fullName === '' || $phoneNumber === '') {
+            $error = 'Please fill in all fields!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
 
-    // 2) Must be valid email format
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Invalid email format!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        // 2) Must be valid email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Invalid email format!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
 
-    // 3) Uniqueness checks
-    if ($this->auth->emailExists($email)) {
-        $error = 'Email already exists!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        // 3) Uniqueness checks
+        if ($this->auth->emailExists($email)) {
+            $error = 'Email already exists!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
 
-    //PROFILE PICTURE UPLOAD
-    $uploadedFile = $_FILES['profilePicture'] ?? null;
+        //CAPTCHA
+        $recaptchaResponse = $_POST['g-recaptcha-response'] ?? '';
 
-    // Validate file type
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if ($recaptchaResponse === '') {
+            $error = 'Please complete the CAPTCHA!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
 
-    if (!in_array($uploadedFile['type'], $allowedTypes)) {
-        $error = 'Only JPG, PNG, or WEBP images are allowed!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        $secretKey = '6LfGDHEsAAAAAFBAacq2RPG--EfmK1493YRtvlsd';
 
-    // Generate safe filename
-    $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-    $fileName = uniqid('user_', true) . '.' . $extension;
+        $verifyResponse = file_get_contents(
+            'https://www.google.com/recaptcha/api/siteverify?' .
+            http_build_query([
+                'secret' => $secretKey,
+                'response' => $recaptchaResponse,
+                'remoteip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ])
+        );
 
-    $uploadDir = __DIR__ . '/../../public/assets/uploads/';
-    $destination = $uploadDir . $fileName;
+        $captchaResult = json_decode($verifyResponse, true);
 
-    if (!move_uploaded_file($uploadedFile['tmp_name'], $destination)) {
-        $error = 'Failed to upload image!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        if (empty($captchaResult['success'])) {
+            $error = 'CAPTCHA failed. Please try again!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
 
-    // 5) Build model + hash password
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        //PROFILE PICTURE UPLOAD
+        $uploadedFile = $_FILES['profilePicture'] ?? null;
 
-    $user = new \App\Models\UserModel(
-        0,
-        $email,
-        $hashedPassword,
-        $userName,
-        $fullName,
-        $phoneNumber,
-        'User',
-        date('Y-m-d H:i:s'), 
-        null, 
-        $fileName, 
-        null
-    );
+        // Validate file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-    // 6) Create user (service does work only)
-    if (!$this->auth->createUser($user)) {
-        $error = 'Registration failed. Please try again!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        if (!in_array($uploadedFile['type'], $allowedTypes)) {
+            $error = 'Only JPG, PNG, or WEBP images are allowed!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
 
-    // 7) Session + redirect
-    $_SESSION['user'] = [
-        'email' => $email,
-        'userName' => $userName,
-        'role' => 'User',
-    ];
+        // Generate safe filename
+        //getting the file extensin
+        $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+        //generating a unique name (forexample two people upload profile.png)
+        $fileName = uniqid('user_', true) . '.' . $extension;
+        //define where to store it
+        $uploadDir = __DIR__ . '/../../public/assets/uploads/';
+        //actually storing it 
+        $destination = $uploadDir . $fileName;
 
-    header('Location: /login');
-    exit;
+        if (!move_uploaded_file($uploadedFile['tmp_name'], $destination)) {
+            $error = 'Failed to upload image!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
+
+        // 5) Build model + hash password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $user = new \App\Models\UserModel(
+            0,
+            $email,
+            $hashedPassword,
+            $userName,
+            $fullName,
+            $phoneNumber,
+            'User',
+            date('Y-m-d H:i:s'), 
+            null, 
+            $fileName, 
+            null
+        );
+
+        // 6) Create user (service does work only)
+        if (!$this->auth->createUser($user)) {
+            $error = 'Registration failed. Please try again!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/register.php';
+            return ob_get_clean();
+        }
+
+        // 7) Session + redirect
+        $_SESSION['user'] = [
+            'email' => $email,
+            'userName' => $userName,
+            'role' => 'User',
+        ];
+
+        header('Location: /login');
+        exit;
     }
 
     // GET /login
@@ -141,28 +174,42 @@ class AuthController
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
 
-    if ($email === '' || $password === '') {
-        $error = 'Enter email and password!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/login.php';
-        return ob_get_clean();
-    }
+        if ($email === '' || $password === '') {
+            $error = 'Enter email and password!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/login.php';
+            return ob_get_clean();
+        }
 
-    $user = $this->auth->getUserByEmail($email);
+        /*if ($email === 'admin@gmail.com' && $password === 'admin123') {
+        $_SESSION['user'] = [
+            'id' => 0,
+            'email' => 'admin@gmail.com',
+            'userName' => 'admin',
+            'role' => 'Admin',
+        ];
+        
 
-    if (!$user || !password_verify($password, $user['Password'])) {
-        $error = 'Invalid credentials!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/login.php';
-        return ob_get_clean();
-    }
+            header('Location: /admin/users');
+            exit;
+        }*/
 
-    $_SESSION['user'] = [
-        'id' => (int)$user['Id'],
-        'email' => $user['Email'],
-        'userName' => $user['UserName'],
-        'role' => $user['Role'],
-    ];
+        $user = $this->auth->getUserByEmail($email);
+
+        if (!$user || !password_verify($password, $user['Password'])) {
+            $error = 'Invalid credentials!';
+            ob_start();
+            require __DIR__ . '/../Views/auth/login.php';
+            return ob_get_clean();
+        }
+
+
+        $_SESSION['user'] = [
+            'id' => (int)$user['Id'],
+            'email' => $user['Email'],
+            'userName' => $user['UserName'],
+            'role' => $user['Role'],
+        ];
 
         header('Location: /');
         exit;

@@ -66,6 +66,33 @@ class AuthController
         return ob_get_clean();
     }
 
+    //PROFILE PICTURE UPLOAD
+    $uploadedFile = $_FILES['profilePicture'] ?? null;
+
+    // Validate file type
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!in_array($uploadedFile['type'], $allowedTypes)) {
+        $error = 'Only JPG, PNG, or WEBP images are allowed!';
+        ob_start();
+        require __DIR__ . '/../Views/auth/register.php';
+        return ob_get_clean();
+    }
+
+    // Generate safe filename
+    $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+    $fileName = uniqid('user_', true) . '.' . $extension;
+
+    $uploadDir = __DIR__ . '/../../public/assets/uploads/';
+    $destination = $uploadDir . $fileName;
+
+    if (!move_uploaded_file($uploadedFile['tmp_name'], $destination)) {
+        $error = 'Failed to upload image!';
+        ob_start();
+        require __DIR__ . '/../Views/auth/register.php';
+        return ob_get_clean();
+    }
+
     // 5) Build model + hash password
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -77,7 +104,10 @@ class AuthController
         $fullName,
         $phoneNumber,
         'User',
-        date('Y-m-d H:i:s')
+        date('Y-m-d H:i:s'), 
+        null, 
+        $fileName, 
+        null
     );
 
     // 6) Create user (service does work only)

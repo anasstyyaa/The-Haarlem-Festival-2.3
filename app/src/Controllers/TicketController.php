@@ -24,9 +24,6 @@ class TicketController
         $numberOfPeople,
         $userId
     );
-    echo '<pre>';
-print_r($_SESSION);
-echo '</pre>';
     header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
 exit;
 }

@@ -11,7 +11,8 @@ use function FastRoute\simpleDispatcher;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     //$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);
-    $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
+ $r->addRoute('GET', '/', ['App\Controllers\HomeController', 'index']);
+
 
     $r->addRoute('GET',  '/login', ['App\Controllers\AuthController', 'showLoginForm']);
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
@@ -23,6 +24,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
     $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
+
+    $r->addRoute('POST',  '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
+     $r->addRoute('GET',  '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
 
 
 });

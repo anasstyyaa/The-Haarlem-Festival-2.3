@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Enums;
+namespace App\Models\Enums;
 
-enum EventType: string 
+enum EventTypeEnum: string 
 {
     case Reservation = 'reservation';
     case JazzEvent = 'jazz';

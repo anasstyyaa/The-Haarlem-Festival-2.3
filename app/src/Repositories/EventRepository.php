@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\EventModel;
-use App\Enums\EventType;
+use App\Models\Enums\EventTypeEnum;
 use PDO;
 
 class EventRepository extends Repository
@@ -67,8 +67,21 @@ class EventRepository extends Repository
     {
         return new EventModel(
             (int)($row['id'] ?? 0),
-            EventType::from($row['eventType']),
+            EventTypeEnum::from($row['eventType']),
             (int)($row['subEventId'] ?? 0)
         );
+    }
+
+    public function checkEventType(int $subEventId, string $eventType):int{
+    $sql = "SELECT id FROM Event WHERE subEventId = :subEventId AND eventType = :eventType ";
+    $stmt = $this->connection->prepare($sql);
+    $stmt->execute([
+        'subEventId' => $subEventId,
+        'eventType'  => $eventType
+    ]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return (int)$row['id'];
     }
 }

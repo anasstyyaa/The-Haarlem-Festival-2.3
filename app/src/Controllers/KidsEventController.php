@@ -16,7 +16,6 @@ private KidsEventService $service;
 
    public function index(): void
 {
-   
     $kidsEvents = $this->service->getAll();
    //  var_dump($kidsEvents);
     $vm = new KidsEventViewModel($kidsEvents);

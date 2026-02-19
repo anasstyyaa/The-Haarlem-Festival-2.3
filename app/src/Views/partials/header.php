@@ -34,6 +34,12 @@ if (session_status() === PHP_SESSION_NONE) {
     <?php if (!isset($_SESSION['user'])): ?>
       <a href="/login" class="login-btn">Login</a>
     <?php endif; ?>
+    <?php if (isset($_SESSION['user'])): ?>
+      <a href="/logout" class="login-btn">Logout</a>
+    <?php endif; ?>
+
+    
+    
   </div>
 </header>
 

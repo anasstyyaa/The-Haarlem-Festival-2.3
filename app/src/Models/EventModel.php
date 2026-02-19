@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use App\Enums\EventType;
+use App\Models\Enums\EventTypeEnum;
 
 class EventModel
 {
     private int $id;
-    private EventType $eventType;
+    private EventTypeEnum $eventType;
     private int $subEventId;
 
-    public function __construct(int $id, EventType $eventType, int $subEventId)
+    public function __construct(int $id, EventTypeEnum $eventType, int $subEventId)
     {
         $this->id = $id;
         $this->eventType = $eventType;

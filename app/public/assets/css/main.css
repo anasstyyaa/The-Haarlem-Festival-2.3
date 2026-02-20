@@ -162,3 +162,76 @@ body.auth-page .auth-card button:hover {
 .auth-link:hover {
   text-decoration: underline;
 }
+
+
+/* --- Admin Management Styles --- */
+
+body.admin-page {
+    display: flex !important;
+    flex-direction: row !important;
+    background-color: #f8f9fa;
+    margin: 0;
+}
+
+body.admin-page #admin-wrapper {
+    display: flex;
+    width: 100%;
+}
+
+
+body.admin-page #sidebar .nav-item {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: transparent !important;
+    display: block;
+    width: 100%;
+}
+
+
+#sidebar {
+    min-width: 260px;
+    max-width: 260px;
+    background: #212529;
+    color: #fff;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar .nav-link {
+    color: #adb5bd;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+#sidebar .nav-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.1);
+}
+
+
+#sidebar .nav-link.active {
+    color: #fff !important;
+    background-color: #0d6efd !important; 
+    border-radius: 4px;      
+    margin: 2px 10px; 
+}
+
+.sidebar-heading {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    letter-spacing: 1px;
+}
+
+#main-content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #f8f9fa;
+}

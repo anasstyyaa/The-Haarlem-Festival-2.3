@@ -35,19 +35,19 @@ require __DIR__ . '/../partials/header.php';
         <div class="form-group">
           <label for="phoneNumber">Phone Number</label>
           <input id="phoneNumber" name="phoneNumber"
-                placeholder="+31 6 12345678" required>
+                placeholder="+31 612345678" required>
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
           <input id="password" type="password" name="password"
-                placeholder="Minimum 8 characters" required>
+                placeholder="Password" required>
         </div>
 
         <div class="form-group">
           <label for="profilePicture">Profile Picture</label>
           <input id="profilePicture" type="file"
-                name="profilePicture" accept="image/*" required>
+                name="profilePicture" accept="image/*">
         </div>
 
       </div>

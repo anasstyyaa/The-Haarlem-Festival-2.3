@@ -25,6 +25,13 @@ if (session_status() === PHP_SESSION_NONE) {
     <a href="/yummy" class="nav-item">Yummy</a>
     <a href="/history" class="nav-item">History</a>
     <a href="/kidsEvent" class="nav-item">Kids</a>
+
+    <?php if (isset($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'Admin'): ?>
+      <a href="/admin/users" class="nav-item border-warning text-warning" style="border-width: 2px;">
+        <i class="bi bi-shield-lock me-1"></i> CMS
+      </a>
+    <?php endif; ?>
+
   </nav>
 
   <div class="nav-icons">

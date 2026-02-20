@@ -1,5 +1,10 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
+
+function isActive($url) {
+    return strpos($_SERVER['REQUEST_URI'], $url) === 0 ? 'active' : '';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -9,25 +14,25 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/main.css"> 
 </head>
 
 <body class="admin-page"> 
     <div id="admin-wrapper">
         <nav id="sidebar">
             <div class="px-4 mb-4">
-                <h5 class="text-white">Haarlem CMS</h5>
+                <h5 class="text-white">CMS</h5>
             </div>
             
             <div class="sidebar-heading">Management</div>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a href="/admin/dashboard" class="nav-link">
+                    <a href="/admin/dashboard" class="nav-link <?= isActive('/admin/dashboard') ?>">
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/admin/users" class="nav-link active">
+                    <a href="/admin/users" class="nav-link <?= isActive('/admin/users') ?>">
                         <i class="bi bi-people me-2"></i> Manage Users
                     </a>
                 </li>
@@ -35,8 +40,21 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
             <div class="sidebar-heading mt-4">Events</div>
             <ul class="nav flex-column">
-                <li class="nav-item"><a href="/admin/jazz" class="nav-link"><i class="bi bi-music-note-beamed me-2"></i> Jazz</a></li>
-                <li class="nav-item"><a href="/admin/dance" class="nav-link"><i class="bi bi-activity me-2"></i> Dance</a></li>
+                <li class="nav-item">
+                    <a href="/admin/jazz" class="nav-link <?= isActive('/admin/jazz') ?>">
+                        <i class="bi bi-music-note-beamed me-2"></i> Jazz
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/dance" class="nav-link <?= isActive('/admin/dance') ?>">
+                        <i class="bi bi-activity me-2"></i> Dance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/yummy" class="nav-link <?= isActive('/admin/yummy') ?>">
+                        <i class="bi bi-cup-hot me-2"></i> Yummy
+                    </a>
+                </li>
             </ul>
 
             <div class="mt-auto p-3">

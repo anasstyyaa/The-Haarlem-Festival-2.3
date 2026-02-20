@@ -89,7 +89,7 @@ class UserController
 
             $newImage = $this->handleImageUpload('profilePicture', 'user');
             if ($newImage) {
-                $user->setProfilePicture($newImage);
+                $user->setProfilePicture('/assets/uploads/users/' . $newImage);
             }
 
             if ($this->userService->updateUser($user)) {
@@ -127,7 +127,7 @@ class UserController
             return null;
         }
 
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/';
+        $uploadDir = __DIR__ . '/../../public/assets/uploads/users/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }

@@ -100,9 +100,9 @@ class AuthController
         //getting the file extensin
         $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
         //generating a unique name (forexample two people upload profile.png)
-        $fileName = uniqid('user_', true) . '.' . $extension;
+        $fileName = uniqid('assets/uploads/users/' . 'user_', true) . '.' . $extension;
         //define where to store it
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/';
+        $uploadDir = __DIR__ . '/../../public/assets/uploads/users/';
         //actually storing it 
         $destination = $uploadDir . $fileName;
 

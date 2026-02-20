@@ -19,7 +19,14 @@ class UserController
 
     public function index($vars=[])
     {
-        $users = $this->userService->adminGetAll(); 
+        //Forbiden login for non-admins even if they type /admin/users in URL
+        if (empty($_SESSION['user']) || ($_SESSION['user']['role'] ?? '') !== 'Admin') {
+        http_response_code(403);
+        echo 'Forbidden';
+        exit;
+    }
+    
+    $users = $this->userService->adminGetAll(); 
         require_once __DIR__ . '/../Views/admin/users/index.php';
     }
 

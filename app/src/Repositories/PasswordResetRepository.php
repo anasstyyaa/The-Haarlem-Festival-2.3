@@ -1,47 +1,62 @@
 <?php
+
 namespace App\Repositories;
 
-use App\Framework\Repository;
-use PDO;
+use App\Config\Config; // adjust if your PDO class is elsewhere
 
-class PasswordResetRepository extends Repository
+class PasswordResetRepository
 {
-    public function create(int $userId, string $tokenHash, string $expiresAt): bool
+    public function createForUserId(int $userId): string
     {
-        $sql = "INSERT INTO password_resets (user_id, token_hash, expires_at)
-                VALUES (:user_id, :token_hash, :expires_at)";
+        $pdo = Config::getPDO();
 
-        $stmt = $this->connection->prepare($sql);
-        return $stmt->execute([
+        $token = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $token);
+        $expiresAt = date('Y-m-d H:i:s', time() + 3600);
+
+        // optional: delete old tokens for same user
+        $pdo->prepare("DELETE FROM password_resets WHERE user_id = :uid")
+            ->execute(['uid' => $userId]);
+
+        $stmt = $pdo->prepare("
+            INSERT INTO password_resets (user_id, token_hash, expires_at)
+            VALUES (:user_id, :token_hash, :expires_at)
+        ");
+
+        $stmt->execute([
             'user_id'    => $userId,
             'token_hash' => $tokenHash,
             'expires_at' => $expiresAt,
         ]);
+
+        return $token; // return plain token so you can email it
     }
 
-    public function findValidByTokenHash(string $tokenHash): ?array
+    public function findValidByToken(string $token): ?array
     {
-        $sql = "SELECT TOP 1 *
-                FROM password_resets
-                WHERE token_hash = :token_hash
-                  AND used_at IS NULL
-                  AND expires_at > SYSDATETIME()
-                ORDER BY id DESC";
+        $pdo = Config::getPDO();
 
-        $stmt = $this->connection->prepare($sql);
+        $tokenHash = hash('sha256', $token);
+
+        $stmt = $pdo->prepare("
+            SELECT id, user_id, token_hash, expires_at
+            FROM password_resets
+            WHERE token_hash = :token_hash
+              AND expires_at > NOW()
+            LIMIT 1
+        ");
+
         $stmt->execute(['token_hash' => $tokenHash]);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $row ?: null;
     }
 
-    public function markUsed(int $id): bool
+    public function consumeById(int $id): void
     {
-        $sql = "UPDATE password_resets
-                SET used_at = SYSDATETIME()
-                WHERE id = :id";
+        $pdo = Config::getPDO();
 
-        $stmt = $this->connection->prepare($sql);
-        return $stmt->execute(['id' => $id]);
+        $stmt = $pdo->prepare("DELETE FROM password_resets WHERE id = :id");
+        $stmt->execute(['id' => $id]);
     }
 }

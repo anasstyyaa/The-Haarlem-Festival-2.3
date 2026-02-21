@@ -9,6 +9,17 @@ class TicketModel
     private EventModel $event;
     private ?UserModel $user;
     private int $numberOfPeople;
+    private ?int $programItemId = null;
+
+public function setProgramItemId(int $id): void
+{
+    $this->programItemId = $id;
+}
+
+public function getProgramItemId(): ?int
+{
+    return $this->programItemId;
+}
 
     public function __construct(
         int $id,

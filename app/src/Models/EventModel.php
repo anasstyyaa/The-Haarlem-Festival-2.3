@@ -22,7 +22,7 @@ class EventModel
         return $this->id;
     }
 
-    public function getEventType(): EventType
+    public function getEventType(): EventTypeEnum
     {
         return $this->eventType;
     }

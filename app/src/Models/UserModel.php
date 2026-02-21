@@ -73,7 +73,7 @@ class UserModel
 
     public function getCreatedAt(): string
     {
-        return $this->created_at;
+        return (!empty($this->created_at)) ? $this->created_at : date('Y-m-d H:i:s');
     }
 
     public function getUpdatedAt(): ?string
@@ -129,6 +129,11 @@ class UserModel
     public function getProfilePicture(): ?string
     {
         return $this->profilePicture;
+    }
+
+    public function setProfilePicture(?string $profilePicture): void 
+    {
+        $this->profilePicture = $profilePicture;
     }
 
     public function setDeletedAt(?string $deleted_at): void

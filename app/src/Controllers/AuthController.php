@@ -13,21 +13,25 @@ class AuthController
         $this->auth = new AuthService(new UserRepository());
     }
 
-    // GET /
-    public function index(): string
+    //helper to render a view with variables like $error
+    private function render(string $view, array $data = []): string
     {
-            ob_start();
-        require __DIR__ . '/../Views/home/index.php';
+        extract($data);
+        ob_start();
+        require __DIR__ . '/../Views/' . $view . '.php';
         return ob_get_clean();
+    }
+
+    // GET 
+    public function index(): string
+    {  
+        return $this->render('/home/index') ;
     }
 
     // GET /register
     public function showRegisterForm(): string
     {
-        $error = null;
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
+       return $this->render('auth/register', ['error' => null]);
     }
 
     // POST /register
@@ -39,70 +43,112 @@ class AuthController
         $fullName = trim($_POST['fullName'] ?? '');
         $phoneNumber = trim($_POST['phoneNumber'] ?? '');
 
-    // 1) Basic required fields
-    if ($email === '' || $password === '' || $userName === '' || $fullName === '' || $phoneNumber === '') {
-        $error = 'Please fill in all fields!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        // 1) Basic required fields
+        if ($email === '' || $password === '' || $userName === '' || $fullName === '' || $phoneNumber === '') {
+            return $this->render('auth/register', ['error' => 'Please fill in all fields!']);
+        }
 
-    // 2) Must be valid email format
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Invalid email format!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        // 2) Must be valid email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->render('auth/register', ['error' => 'Invalid email format!']);
+        }
 
-    // 3) Uniqueness checks
-    if ($this->auth->emailExists($email)) {
-        $error = 'Email already exists!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        // 3) Uniqueness checks
+        if ($this->auth->emailExists($email)) {
+            return $this->render('auth/register', ['error' => 'Email already exists!']);
+        }
 
-    // 5) Build model + hash password
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        //CAPTCHA
+        $recaptchaResponse = $_POST['g-recaptcha-response'] ?? '';
 
-    $user = new \App\Models\UserModel(
-        0,
-        $email,
-        $hashedPassword,
-        $userName,
-        $fullName,
-        $phoneNumber,
-        'User',
-        date('Y-m-d H:i:s')
-    );
+        if ($recaptchaResponse === '') {
+            return $this->render('auth/register', ['error' => 'Please complete the CAPTCHA!']);
+        }
 
-    // 6) Create user (service does work only)
-    if (!$this->auth->createUser($user)) {
-        $error = 'Registration failed. Please try again!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/register.php';
-        return ob_get_clean();
-    }
+        $secretKey = '6LfGDHEsAAAAAFBAacq2RPG--EfmK1493YRtvlsd';
 
-    // 7) Session + redirect
-    $_SESSION['user'] = [
-        'email' => $email,
-        'userName' => $userName,
-        'role' => 'User',
-    ];
+        $verifyResponse = file_get_contents(
+            'https://www.google.com/recaptcha/api/siteverify?' .
+            http_build_query([
+                'secret' => $secretKey,
+                'response' => $recaptchaResponse,
+                'remoteip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ])
+        );
 
-    header('Location: /login');
-    exit;
+        $captchaResult = json_decode($verifyResponse, true);
+
+        if (empty($captchaResult['success'])) {
+            return $this->render('auth/register', ['error' => 'CAPTCHA failed. Please try again!']);
+        }
+
+        //PROFILE PICTURE UPLOAD
+        $uploadedFile = $_FILES['profilePicture'] ?? null;
+        $fileName = null;   //default is null 
+
+        //only process if the file was uploaded successfully without errors   
+        if ($uploadedFile && $uploadedFile['error'] === UPLOAD_ERR_OK){
+
+        // Validate file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!in_array($uploadedFile['type'], $allowedTypes)) {
+            return $this->render('auth/register', ['error' => 'Only JPG, PNG, or WEBP images are allowed!']);
+        }
+
+        // Generate safe filename
+        //getting the file extensin
+        $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+        //generating a unique name (forexample two people upload profile.png)
+        $fileName = uniqid('assets/uploads/users/' . 'user_', true) . '.' . $extension;
+        //define where to store it
+        $uploadDir = __DIR__ . '/../../public/assets/uploads/users/';
+        //actually storing it 
+        $destination = $uploadDir . $fileName;
+
+        if (!move_uploaded_file($uploadedFile['tmp_name'], $destination)) {
+            return $this->render('auth/register', ['error' => 'Failed to upload image!']);
+        }
+
+        }
+
+        // 5) Build model + hash password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $user = new \App\Models\UserModel(
+            0,
+            $email,
+            $hashedPassword,
+            $userName,
+            $fullName,
+            $phoneNumber,
+            'User',
+            date('Y-m-d H:i:s'), 
+            null, 
+            $fileName, 
+            null
+        );
+
+        // 6) Create user (service does work only)
+        if (!$this->auth->createUser($user)) {
+            return $this->render('auth/register', ['error' => 'Registration failed. Please try again!']);
+        }
+
+        // 7) Session + redirect
+        $_SESSION['user'] = [
+            'email' => $email,
+            'userName' => $userName,
+            'role' => 'User',
+        ];
+
+        header('Location: /login');
+        exit;
     }
 
     // GET /login
     public function showLoginForm(): string
     {
-        $error = null;
-        ob_start();
-        require __DIR__ . '/../Views/auth/login.php';
-        return ob_get_clean();
+       return $this->render('auth/login', ['error' => null]);
     }
 
     // POST /login
@@ -111,30 +157,30 @@ class AuthController
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
 
-    if ($email === '' || $password === '') {
-        $error = 'Enter email and password!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/login.php';
-        return ob_get_clean();
-    }
+        if ($email === '' || $password === '') {
+            return $this->render('auth/login', ['error' => 'Enter email and password!']);
+        }
 
-    $user = $this->auth->getUserByEmail($email);
+        $user = $this->auth->getUserByEmail($email);
 
-    if (!$user || !password_verify($password, $user['Password'])) {
-        $error = 'Invalid credentials!';
-        ob_start();
-        require __DIR__ . '/../Views/auth/login.php';
-        return ob_get_clean();
-    }
+        if (!$user || !password_verify($password, $user['Password'])) {
+            return $this->render('auth/login', ['error' => 'Invalid credentials!']);
+        }
 
-    $_SESSION['user'] = [
-        'id' => (int)$user['Id'],
-        'email' => $user['Email'],
-        'userName' => $user['UserName'],
-        'role' => $user['Role'],
-    ];
 
-        header('Location: /');
+        $_SESSION['user'] = [
+            'id' => (int)$user['Id'],
+            'email' => $user['Email'],
+            'userName' => $user['UserName'],
+            'role' => $user['Role'],
+        ];
+
+        if ($user['Role'] === 'Admin') {
+        header('Location: /admin/users');
+        } else {
+            header('Location: /');
+        }
+
         exit;
     }
 

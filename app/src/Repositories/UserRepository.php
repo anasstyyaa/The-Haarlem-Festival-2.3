@@ -33,13 +33,13 @@ class UserRepository extends Repository implements IUserRepository
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'email'          => $user->getEmail(),
-            'password'       => $user->getPassword(), //Already hashed in Service 
+            'password'       => $user->getPassword(),  
             'userName'       => $user->getUserName(),
             'fullName'       => $user->getFullName(),
             'phoneNumber'    => $user->getPhoneNumber(),
             'role'           => $user->getRole(),
             'created_at'     => $user->getCreatedAt(),
-            'profilePicture' => $user->getProfilePicture()
+            'profilePicture' => $user->getProfilePicture()  //should be fileName 
         ]);
     }
 
@@ -87,10 +87,10 @@ class UserRepository extends Repository implements IUserRepository
         $row['FullName'] ?? '',
         $row['PhoneNumber'] ?? '',
         $row['Role'] ?? '',
-        $row['Created_at'] ?? '', 
-        $row['Updated_at'] ?? null,
+        $row['Created_At'] ?? '', 
+        $row['Updated_At'] ?? null,
         $row['ProfilePicture'] ?? null,
-        $row['Deleted_at'] ?? null
+        $row['Deleted_At'] ?? null
         );
     }
 

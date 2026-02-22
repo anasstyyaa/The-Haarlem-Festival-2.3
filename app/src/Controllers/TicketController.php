@@ -14,6 +14,9 @@ class TicketController
         $this->programService = new PersonalProgramService();
         $this->eventRepo = new EventRepository();
     }
+    public function index():void{
+          require __DIR__ . '/../Views/personalProgram/personalProgram.php';
+    }
 
    public function addTicket(): void
 {
@@ -29,6 +32,8 @@ class TicketController
         $numberOfPeople,
         $userId
     );
+//     var_dump($_SESSION['program']);
+// exit;
     header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
 exit;
 }

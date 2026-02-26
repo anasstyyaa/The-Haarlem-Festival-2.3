@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-class ImageModel
+class ImageModel implements Renderable
 {
     private int $id;
     private string $imgURL;
@@ -28,5 +28,15 @@ class ImageModel
     public function getAltText(): ?string
     {
         return $this->altText;
+    }
+      public function render(): string
+    {
+        ob_start();
+
+        $model = $this;
+
+        require __DIR__ . '/../Views/components/image.php';
+
+        return ob_get_clean();
     }
 }

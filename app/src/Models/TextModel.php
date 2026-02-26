@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-class TextModel
+class TextModel implements Renderable
 {
     private int $id;
     private string $content;
@@ -21,5 +21,15 @@ class TextModel
     public function getContent(): string
     {
         return $this->content;
+    }
+     public function render(): string
+    {
+        ob_start();
+
+        $model = $this; 
+
+        require __DIR__ . '/../Views/components/text.php';
+
+        return ob_get_clean();
     }
 }

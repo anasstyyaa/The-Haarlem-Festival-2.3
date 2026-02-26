@@ -1,6 +1,8 @@
 <?php 
 use App\ViewModels\KidsEventViewModel;
-/** @var KidsEventViewModel $vm */
+use App\ViewModels\PageElementViewModel;
+/** @var KidsEventViewModel $vmKids */
+/** @var PageElementViewModel $vm */
 
 ?>
 <?php require __DIR__ . '/../partials/header.php'; ?>
@@ -25,6 +27,17 @@ use App\ViewModels\KidsEventViewModel;
     </style>
 </head>
 <body>
+    <?php foreach ($vm->getSections() as $section => $elements): ?>
+    
+    <div class="section <?= htmlspecialchars($section) ?>">
+        
+        <?php foreach ($elements as $element): ?>
+            <?= $element->render(); ?>
+        <?php endforeach; ?>
+
+    </div>
+
+<?php endforeach; ?>
     <h2 style="text-align:center;">Kids Events</h2>
     <table>
         <thead>
@@ -37,7 +50,7 @@ use App\ViewModels\KidsEventViewModel;
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($vm->kidsEvents as $event): ?>
+            <?php foreach ($vmKids->kidsEvents as $event): ?>
  
                 <tr>
                     <td><?= htmlspecialchars($event->getId()) ?></td>

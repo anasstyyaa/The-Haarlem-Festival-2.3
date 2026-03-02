@@ -17,20 +17,21 @@ class UserController
         $this->authService = $authService;
     }
 
-    public function index($vars=[])
+    public function index($vars = [])
     {
         //Forbiden login for non-admins even if they type /admin/users in URL
         if (empty($_SESSION['user']) || ($_SESSION['user']['role'] ?? '') !== 'Admin') {
-        http_response_code(403);
-        echo 'Forbidden';
-        exit;
-    }
-    
-    $users = $this->userService->adminGetAll(); 
+            http_response_code(403);
+            echo 'Forbidden';
+            exit;
+        }
+
+        $users = $this->userService->adminGetAll();
         require_once __DIR__ . '/../Views/admin/users/index.php';
     }
 
-    public function create() {
+    public function create()
+    {
         $error = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -45,19 +46,25 @@ class UserController
                 $error = 'Email, Password, and Username are required!';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = 'Invalid email format!';
-            } 
-            elseif ($this->authService->emailExists($email)) {
+            } elseif ($this->authService->emailExists($email)) {
                 $error = 'Email already exists!';
             }
 
             if (!$error) {
                 $fileName = $this->handleImageUpload('profilePicture', 'user');
-                
+
                 $user = new UserModel(
-                    0, $email, password_hash($_POST['password'], PASSWORD_DEFAULT),
-                    trim($_POST['userName'] ?? ''), trim($_POST['fullName'] ?? ''),
-                    trim($_POST['phoneNumber'] ?? ''), $_POST['role'] ?? 'User',
-                    date('Y-m-d H:i:s'), null, $fileName, null
+                    0,
+                    $email,
+                    password_hash($_POST['password'], PASSWORD_DEFAULT),
+                    trim($_POST['userName'] ?? ''),
+                    trim($_POST['fullName'] ?? ''),
+                    trim($_POST['phoneNumber'] ?? ''),
+                    $_POST['role'] ?? 'User',
+                    date('Y-m-d H:i:s'),
+                    null,
+                    $fileName,
+                    null
                 );
 
                 if ($this->userService->createUser($user)) {
@@ -139,5 +146,119 @@ class UserController
             return $newFileName;
         }
         return null;
+    }
+    private function requireLogin(): void //helper method
+{
+    if (empty($_SESSION['user'])) {
+        header('Location: /login');
+        exit;
+    }
+}
+    public function profile()
+    {
+        $this->requireLogin();
+
+        $id = (int)($_SESSION['user']['id'] ?? 0);
+        $user = $this->userService->getUserById($id);
+
+        if (!$user) {
+            header('Location: /');
+            exit;
+        }
+
+        $success = $_SESSION['flash_success'] ?? null;
+        unset($_SESSION['flash_success']);
+
+        require_once __DIR__ . '/../Views/profile/show.php';
+    }
+
+    public function editProfile()
+    {
+        $this->requireLogin();
+
+        $error = null;
+
+        $id = (int)($_SESSION['user']['id'] ?? 0);
+        $user = $this->userService->getUserById($id);
+
+        if (!$user) {
+            header('Location: /');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $newEmail = strtolower(trim($_POST['email'] ?? ''));
+            $newUserName = trim($_POST['userName'] ?? '');
+            $newFullName = trim($_POST['fullName'] ?? '');
+            $newPhoneNumber = trim($_POST['phoneNumber'] ?? '');
+
+            if (empty($newEmail) || empty($newUserName)) {
+                $error = 'Email and Username are required!';
+            } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                $error = 'Invalid email format!';
+            } elseif ($newEmail !== strtolower($user->getEmail()) && $this->authService->emailExists($newEmail)) {
+                $error = 'Email already exists!';
+            }
+
+            $newPassword = $_POST['newPassword'] ?? '';
+            $confirmPassword = $_POST['confirmPassword'] ?? '';
+
+            if (!$error && !empty($newPassword)) {
+                if (strlen($newPassword) < 6) {
+                    $error = 'Password must be at least 6 characters!';
+                } elseif ($newPassword !== $confirmPassword) {
+                    $error = 'Passwords do not match!';
+                }
+            }
+
+            if (!$error) {
+                $user->setEmail($newEmail);
+                $user->setUserName($newUserName);
+                $user->setFullName($newFullName);
+                $user->setPhoneNumber($newPhoneNumber);
+
+                $newImage = $this->handleImageUpload('profilePicture', 'user');
+                if ($newImage) {
+                    $user->setProfilePicture('/assets/uploads/users/' . $newImage);
+                }
+
+                if (!empty($newPassword)) {
+                    $user->setPassword(password_hash($newPassword, PASSWORD_DEFAULT));
+                }
+
+                if ($this->userService->updateOwnProfile($user)) {
+                    $_SESSION['user']['email'] = $newEmail;
+                    $_SESSION['user']['userName'] = $newUserName;
+
+                    $_SESSION['flash_success'] = 'Profile updated successfully!';
+                    header('Location: /profile');
+                    exit;
+                }
+
+                $error = 'Failed to update profile.';
+            }
+        }
+
+        require_once __DIR__ . '/../Views/profile/edit.php';
+    }
+
+    public function deleteSelf()
+    {
+        $this->requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)($_SESSION['user']['id'] ?? 0);
+
+            if ($id > 0) {
+                $this->userService->deleteUser($id);
+            }
+
+            session_destroy();
+            header('Location: /');
+            exit;
+        }
+
+        header('Location: /profile');
+        exit;
     }
 }

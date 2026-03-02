@@ -50,4 +50,8 @@ class UserService implements IUserService
     {
         return $this->userRepository->adminGetAll();
     }
+    public function updateOwnProfile(UserModel $user): bool
+    {
+        return $this->userRepository->updateProfile($user);
+    }
 }

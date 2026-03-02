@@ -52,6 +52,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
 
+    // User Profile Routes
+    $r->addRoute('GET',  '/profile',       ['App\Controllers\UserController', 'profile']);
+    $r->addRoute('GET',  '/profile/edit',  ['App\Controllers\UserController', 'editProfile']);
+    $r->addRoute('POST', '/profile/edit',  ['App\Controllers\UserController', 'editProfile']); // same method handles POST like your admin edit()
+    $r->addRoute('POST', '/profile/delete',['App\Controllers\UserController', 'deleteSelf']);
 
 });
 

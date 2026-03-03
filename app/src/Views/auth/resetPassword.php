@@ -1,98 +1,50 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reset Password</title>
+<?php
+$bodyClass = 'auth-page';
+require __DIR__ . '/../partials/header.php';
+?>
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+<div class="auth-card">
+  <h1>Reset Password</h1>
 
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-md-8 col-lg-5">
+  <?php if (!empty($error)) : ?>
+    <p class="error"><?= htmlspecialchars($error) ?></p>
+  <?php endif; ?>
 
-        <div class="card shadow-sm border-0 rounded-4">
-          <div class="card-body p-4 p-md-5">
+  <?php if (!empty($success)) : ?>
+    <p class="success"><?= htmlspecialchars($success) ?></p>
+  <?php endif; ?>
 
-            <div class="text-center mb-4">
-              <h1 class="h3 fw-bold mb-2">Reset password</h1>
-              <p class="text-muted mb-0">
-                Create a new strong password for your account.
-              </p>
-            </div>
+  <?php if (!empty($errors) && is_array($errors)) : ?>
+    <?php foreach ($errors as $msg) : ?>
+      <p class="error"><?= htmlspecialchars($msg) ?></p>
+    <?php endforeach; ?>
+  <?php endif; ?>
 
-            <?php if (!empty($error)): ?>
-              <div class="alert alert-danger rounded-3" role="alert">
-                <?= htmlspecialchars($error) ?>
-              </div>
-            <?php endif; ?>
+  <?php if (empty($success)) : ?>
+    <form method="POST" action="/resetPassword">
+      <input type="hidden" name="token" value="<?= htmlspecialchars($token ?? '') ?>">
 
-            <form method="POST" action="/api/reset-password" class="needs-validation" novalidate>
-              <input type="hidden" name="token" value="<?= htmlspecialchars($token ?? '') ?>">
+      <input
+        id="password"
+        type="password"
+        name="password"
+        placeholder="New password"
+        required
+      >
 
-              <div class="mb-3">
-                <label class="form-label fw-semibold">New password</label>
-                <input
-                  type="password"
-                  name="password"
-                  class="form-control form-control-lg rounded-3"
-                  placeholder="At least 8 characters"
-                  minlength="8"
-                  required
-                >
-                <div class="invalid-feedback">Password must be at least 8 characters.</div>
-              </div>
+      <input
+        id="password_confirm"
+        type="password"
+        name="password_confirm"
+        placeholder="Confirm new password"
+        required
+      >
 
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Confirm password</label>
-                <input
-                  type="password"
-                  name="password_confirm"
-                  class="form-control form-control-lg rounded-3"
-                  placeholder="Repeat your password"
-                  minlength="8"
-                  required
-                >
-                <div class="invalid-feedback">Please confirm your password.</div>
-              </div>
+      <button type="submit">Reset password</button>
+    </form>
 
-              <button type="submit" class="btn btn-success btn-lg w-100 rounded-3">
-                Update password
-              </button>
-            </form>
+    <a class="auth-link" href="/login">Back to login</a>
+  <?php endif; ?>
+</div>
 
-            <div class="text-center mt-4">
-              <a href="/login" class="text-decoration-none">← Back to login</a>
-            </div>
-
-          </div>
-        </div>
-
-        <p class="text-center text-muted small mt-4 mb-0">
-          Haarlem Festival • Customer Portal
-        </p>
-
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    (() => {
-      const forms = document.querySelectorAll('.needs-validation');
-      Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-          if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          form.classList.add('was-validated');
-        }, false);
-      });
-    })();
-  </script>
-</body>
-</html>
+<?php require __DIR__ . '/../partials/footer.php'; ?>

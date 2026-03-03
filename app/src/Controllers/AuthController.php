@@ -4,17 +4,31 @@ namespace App\Controllers;
 use App\Repositories\UserRepository;
 use App\Repositories\PasswordResetRepository;
 use App\Services\AuthService;
+use App\Services\PasswordResetService;
+use App\Services\Mailer;
 
-
-
-class AuthController
+final class AuthController
 {
-    private AuthService $auth;
+   private AuthService $auth;
+    private PasswordResetService $passwordReset;
 
-    public function __construct()
-    {
-        $this->auth = new AuthService(new UserRepository());
-    }
+  public function __construct()
+{
+    $users  = new UserRepository();
+    $resets = new PasswordResetRepository();
+    $mailer = new Mailer();   
+
+    $this->auth = new AuthService($users);
+
+    $appUrl = getenv('APP_URL') ?: 'http://localhost';
+
+    $this->passwordReset = new PasswordResetService(
+        $users,
+        $resets,
+        $mailer,      
+        $appUrl
+    );
+}
 
     //helper to render a view with variables like $error
     private function render(string $view, array $data = []): string
@@ -194,102 +208,93 @@ class AuthController
         header('Location: /');
         exit;
     }
-// GET /forgot-password
-public function showForgotPassword(): string
-{
-    $error = null;
-    $success = null;
 
-    ob_start();
-    require __DIR__ . '/../Views/auth/forgot_password.php';
-    return ob_get_clean();
-}
 
-public function showResetPassword(array $vars): string
-{
-    $error = null;
-    $token = $vars['token'] ?? '';
-
-    ob_start();
-    require __DIR__ . '/../Views/auth/reset_password.php';
-    return ob_get_clean();
-}
-
-// POST /api/forgot-password
-public function apiForgotPassword(): string
-{
-    $email = trim($_POST['email'] ?? '');
-    $error = null;
-    $success = null;
-
-    if ($email === '') {
-        $error = "Email is required.";
-        ob_start();
-        require __DIR__ . '/../Views/auth/forgot_password.php';
-        return ob_get_clean();
+// GET forgetPassword
+    public function showForgetPassword(): string
+    {
+        return $this->render('auth/forgetPassword');
     }
 
-    $userRepo = new \App\Repositories\UserRepository();
-    $resetRepo = new \App\Repositories\PasswordResetRepository();
+    // POST forgetPassword
+    public function sendResetLink(): string
+    {
+        $email = trim((string)($_POST['email'] ?? ''));
 
-    $user = $userRepo->findByEmail($email);
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(422);
+            return $this->render('auth/forgetPassword', [
+                'error' => 'Enter a valid email address.'
+            ]);
+        }
 
-    // Always show generic message (security)
-    $success = "If this email exists, a reset link has been sent.";
+        try {
+            $this->passwordReset->sendResetLink($email);
+        } catch (\Throwable $e) {
+           
+        }
 
-    if ($user) {
-        $token = bin2hex(random_bytes(32));
-        $tokenHash = hash('sha256', $token);
-
-        $expiresAt = (new \DateTime('+60 minutes'))->format('Y-m-d H:i:s');
-
-        $resetRepo->create((int)$user['Id'], $tokenHash, $expiresAt);
-
-        // TEMP for testing
-        $success .= "<br><strong>Test link:</strong> <a href='/reset-password/$token'>Click here</a>";
+        return $this->render('auth/forgetPassword', [
+            'success' => 'A password reset link has been sent.'
+        ]);
     }
 
-    ob_start();
-    require __DIR__ . '/../Views/auth/forgot_password.php';
-    return ob_get_clean();
-}
+    // GET /resetPassword?token=...
+    public function showResetForm(): string
+    {
+        $token = trim((string)($_GET['token'] ?? ''));
 
-// POST /api/reset-password
-public function apiResetPassword(): string
-{
-    $token = trim($_POST['token'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm = $_POST['password_confirm'] ?? '';
-    $error = null;
+        if ($token === '') {
+            http_response_code(400);
+            return $this->render('auth/resetPassword', [
+                'error' => 'Invalid reset link.'
+            ]);
+        }
 
-    if ($token === '' || $password === '' || $confirm === '') {
-        $error = "All fields are required.";
-    } elseif ($password !== $confirm) {
-        $error = "Passwords do not match.";
-    } elseif (strlen($password) < 8) {
-        $error = "Password must be at least 8 characters.";
+        return $this->render('auth/resetPassword', [
+            'token' => $token
+        ]);
     }
 
-    $resetRepo = new \App\Repositories\PasswordResetRepository();
-    $userRepo = new \App\Repositories\UserRepository();
+    // POST resetPassword
+    public function resetPassword(): string
+    {
+        $token    = trim((string)($_POST['token'] ?? ''));
+        $password = (string)($_POST['password'] ?? '');
+        $confirm  = (string)($_POST['password_confirm'] ?? '');
 
-    $tokenHash = hash('sha256', $token);
-    $resetRow = $resetRepo->findValidByTokenHash($tokenHash);
+        $errors = [];
 
-    if ($error || !$resetRow) {
-        $error = $error ?? "Invalid or expired reset link.";
+        if ($token === '') {
+            $errors['token'] = 'Invalid reset token.';
+        }
+        if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $password)) {
+            $errors['password'] = 'Password must be at least 8 characters, contain at least one letter and one number.';
+        }
+        if ($password !== $confirm) {
+            $errors['password_confirm'] = 'Passwords do not match.';
+        }
 
-        ob_start();
-        require __DIR__ . '/../Views/auth/reset_password.php';
-        return ob_get_clean();
+        if (!empty($errors)) {
+            http_response_code(422);
+            return $this->render('auth/resetPassword', [
+                'errors' => $errors,
+                'token' => $token
+            ]);
+        }
+
+        try {
+            $this->passwordReset->resetPasswordByToken($token, $password);
+
+            return $this->render('auth/resetPassword', [
+                'success' => 'Password updated. You can now log in.'
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(400);
+            return $this->render('auth/resetPassword', [
+                'error' => $e->getMessage(),
+                'token' => $token
+            ]);
+        }
     }
-
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-    $userRepo->updatePassword((int)$resetRow['user_id'], $passwordHash);
-    $resetRepo->markUsed((int)$resetRow['id']);
-
-    header("Location: /login");
-    exit;
-}
 }

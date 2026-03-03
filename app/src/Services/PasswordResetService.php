@@ -1,119 +1,68 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Services;
-
-use App\Services\Interfaces\IPasswordResetService;
+use App\Services\Mailer;
 use App\Repositories\UserRepository;
-use App\Repositories\PasswordResetRepository;
+use App\Repositories\Interfaces\IPasswordResetRepository;
 
-class PasswordResetService implements IPasswordResetService
+final class PasswordResetService
 {
     public function __construct(
-        private UserRepository $userRepository,
-        private PasswordResetRepository $passwordResetRepository
+        private UserRepository $users,
+        private IPasswordResetRepository $resets,
+        private Mailer $mailer,
+        private string $appUrl
     ) {}
 
-    public function forgotPasswordPage(array $session): array
+    public function sendResetLink(string $email): void
     {
-        return [
-            'data' => [
-                'title'   => 'Forgot Password',
-                'error'   => $session['error'] ?? null,
-                'success' => $session['success'] ?? null,
-                'oldEmail'=> $session['old_email'] ?? '',
-            ]
-        ];
-    }
+        $user = $this->users->findByEmail($email);
 
-    public function requestPassword(string $email): void
-    {
-        $email = trim($email);
-
-        // optional basic validation
-        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['error'] = 'Please enter a valid email.';
-            $_SESSION['old_email'] = $email;
+        // do not leak whether email exists
+        if (!$user) {
             return;
         }
 
-        $user = $this->userRepository->findByEmail($email);
+        $rawToken  = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $rawToken);
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+10 minutes'));
 
-        // security: never reveal if user exists
-        if ($user !== null) {
-            // Repo generates token, stores hash, sets expiry
-            // It returns the plain token so you can email it (later).
-            $token = $this->passwordResetRepository->createForUserId((int)$user['id']);
-
-            // TODO: send email containing link:
-            // /resetPassword?token=YOUR_TOKEN
-            // (For now you can log it or test manually)
-            // error_log("RESET LINK: /resetPassword?token=" . $token);
+        //  User row key might be Id or id depending on your query
+        $userId = (int)($user['Id'] ?? $user['id'] ?? 0);
+        if ($userId <= 0) {
+            throw new \RuntimeException('User id not found.');
         }
 
-        $_SESSION['success'] = 'If the email exists, a reset link has been sent.';
-        unset($_SESSION['error']);
+        $this->resets->create($userId, $tokenHash, $expiresAt);
+
+        $link = rtrim($this->appUrl, '/') . '/resetPassword?token=' . urlencode($rawToken);
+
+        // Testing no email yet
+       $this->mailer->send(
+    $email,
+    'Reset your password',
+    "Click this link to reset your password:\n\n{$link}\n\nIf you did not request this, ignore this email."
+);
+        
+        
     }
 
-    public function resetPasswordPage(string $token): array
+    public function resetPasswordByToken(string $rawToken, string $newPassword): void
     {
-        $token = trim($token);
+        $tokenHash = hash('sha256', $rawToken);
 
-        if ($token === '') {
-            $_SESSION['error'] = 'Reset link is invalid.';
-            return ['redirect' => '/forgetPassword', 'data' => []];
+        $row = $this->resets->findValidToken($tokenHash);
+        if (!$row) {
+            throw new \RuntimeException('Token is invalid or expired.');
         }
 
-        $row = $this->passwordResetRepository->findValidByToken($token);
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
 
-        if ($row === null) {
-            $_SESSION['error'] = 'Reset link is invalid or expired.';
-            return ['redirect' => '/forgetPassword', 'data' => []];
-        }
+        
+        // updatePassword int $userId, string $hash
+        $this->users->updatePassword((int)$row['user_id'], $hash);
 
-        return [
-            'redirect' => null,
-            'data' => [
-                'title' => 'Reset Password',
-                'error' => $_SESSION['error'] ?? null,
-                'token' => $token,
-            ],
-        ];
-    }
-
-    public function resetPassword(string $token, string $password, string $confirm): array
-    {
-        $token = trim($token);
-
-        if ($token === '' || $password === '' || $confirm === '') {
-            $_SESSION['error'] = 'All fields are required.';
-            return ['redirect' => '/resetPassword?token=' . urlencode($token)];
-        }
-
-        if ($password !== $confirm) {
-            $_SESSION['error'] = 'Passwords do not match.';
-            return ['redirect' => '/resetPassword?token=' . urlencode($token)];
-        }
-
-        if (strlen($password) < 8) {
-            $_SESSION['error'] = 'Password must be at least 8 characters.';
-            return ['redirect' => '/resetPassword?token=' . urlencode($token)];
-        }
-
-        $row = $this->passwordResetRepository->findValidByToken($token);
-
-        if ($row === null) {
-            $_SESSION['error'] = 'Reset link is invalid or expired.';
-            return ['redirect' => '/forgetPassword'];
-        }
-
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-        $this->userRepository->updatePasswordHash((int)$row['user_id'], $passwordHash);
-        $this->passwordResetRepository->consumeById((int)$row['id']);
-
-        $_SESSION['success'] = 'Password updated successfully. Please login.';
-        unset($_SESSION['error']);
-
-        return ['redirect' => '/login'];
+        $this->resets->markAsUsed((int)$row['id']);
     }
 }

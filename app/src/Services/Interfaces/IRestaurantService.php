@@ -1,15 +1,9 @@
-<?php 
-
+<?php
 namespace App\Services\Interfaces;
 
-use App\Models\RestaurantModel;
-
-interface IRestaurantService {
-
-    public function getAllRestaurants(): array;
-    public function getRestaurantById(int $id): ?RestaurantModel;
-    public function createRestaurant(RestaurantModel $restaurant): bool;
-    public function updateRestaurant(RestaurantModel $restaurant): bool;
-    public function deleteRestaurant(int $id): bool;
-
+interface IPasswordResetService
+{
+    public function requestReset(string $email): array;
+    public function validateToken(string $rawToken): array;
+    public function resetPassword(string $rawToken, string $password, string $confirm): array;
 }

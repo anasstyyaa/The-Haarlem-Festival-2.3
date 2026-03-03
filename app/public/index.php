@@ -2,9 +2,8 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 error_reporting(E_ALL);
-ini_set('display_errors', '0'); // hide from browser
-ini_set('log_errors', '1');     // log instead
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 session_start();
 
 
@@ -48,13 +47,21 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
 
      
-     
-   
-    $r->addRoute('GET',  '/forgetPassword', ['App\Controllers\AuthController', 'ShowForgetPassword']);
-$r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'SendResetLink']);
+     //password reset
+   $r->addRoute('GET','/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);
+   $r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
 
-$r->addRoute('GET',  '/resetPassword',  ['App\Controllers\AuthController', 'ShowResetPassword']);
-$r->addRoute('POST', '/resetPassword',  ['App\Controllers\AuthController', 'ResetPassword']);
+   // Password Reset
+   $r->addRoute('GET',  '/resetPassword', ['App\Controllers\AuthController', 'showResetForm']);
+   $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
+
+
+
+
+  
+
+//$r->addRoute('GET',  '/resetPassword',  ['App\Controllers\AuthController', 'ShowResetPassword']);
+//$r->addRoute('POST', '/resetPassword',  ['App\Controllers\AuthController', 'ResetPassword']);
 
 
 

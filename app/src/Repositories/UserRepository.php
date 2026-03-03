@@ -87,10 +87,10 @@ class UserRepository extends Repository implements IUserRepository
         $row['FullName'] ?? '',
         $row['PhoneNumber'] ?? '',
         $row['Role'] ?? '',
-        $row['Created_At'] ?? '', 
-        $row['Updated_At'] ?? null,
+        $row['Created_at'] ?? '', 
+        $row['Updated_at'] ?? null,
         $row['ProfilePicture'] ?? null,
-        $row['Deleted_At'] ?? null
+        $row['Deleted_at'] ?? null
         );
     }
 
@@ -116,6 +116,29 @@ class UserRepository extends Repository implements IUserRepository
         
         return array_map(fn($row) => $this->mapToModel($row), $results);
     }
+
+    public function updatePasswordHash(int $userId, string $passwordHash): void
+{
+    $pdo = \App\Config\Config::getPDO(); // or use $this->pdo if you have it
+
+    $stmt = $pdo->prepare("
+        UPDATE users
+        SET password_hash = :ph
+        WHERE id = :id
+    ");
+
+    $stmt->execute([
+        'ph' => $passwordHash,
+        'id' => $userId,
+    ]);
+}
+public function updatePassword(int $userId, string $hash): bool
+{
+    $sql = "UPDATE dbo.Users SET Password = :pwd WHERE Id = :id";
+    $stmt = $this->connection->prepare($sql);
+    return $stmt->execute([':pwd' => $hash, ':id' => $userId]);
+}
+
 
 }
 

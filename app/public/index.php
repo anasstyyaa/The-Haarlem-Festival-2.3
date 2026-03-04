@@ -51,6 +51,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
+    $r->addRoute('GET', '/history', ['App\Controllers\HistoryController', 'index']);
+
 
 
 });

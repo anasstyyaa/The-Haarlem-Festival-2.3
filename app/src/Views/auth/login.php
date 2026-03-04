@@ -17,10 +17,6 @@ require __DIR__ . '/../partials/header.php';
   </form>
 
   <a class="auth-link" href="/register">Create account</a>
-
-    <a class="auth-link" href="/forgetPassword">Forgot Password</a>
-
-
 </div>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

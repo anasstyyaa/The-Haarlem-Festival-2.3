@@ -15,6 +15,18 @@ function isActive($url) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/assets/css/main.css"> 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+    <script>
+    tinymce.init({
+        selector: '.wysiwyg-editor',
+        plugins: 'lists link image table code help wordcount',
+        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | removeformat | help',    
+        height: 400,
+        menubar: false
+    });
+    </script>
+
 </head>
 
 <body class="admin-page"> 

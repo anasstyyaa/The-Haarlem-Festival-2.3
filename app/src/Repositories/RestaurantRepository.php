@@ -23,21 +23,23 @@ class RestaurantRepository extends Repository implements IRestaurantRepository{
     }
 
     public function create(RestaurantModel $restaurant): bool {
-        $sql = "INSERT INTO Restaurants (name, description, location, cuisine, image_url) 
-                VALUES (:name, :description, :location, :cuisine, :image_url)";
+        $sql = "INSERT INTO Restaurants (name, description, location, cuisine, image_url, long_description, chef_id) 
+                VALUES (:name, :description, :location, :cuisine, :image_url, :long_description, :chef_id)";
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'name' => $restaurant->getName(),
             'description' => $restaurant->getDescription(),
             'location' => $restaurant->getLocation(),
             'cuisine' => $restaurant->getCuisine(),
-            'image_url' => $restaurant->getImageUrl()
+            'image_url' => $restaurant->getImageUrl(),
+            'long_description' => $restaurant->getLongDescription(),
+            'chef_id' => $restaurant->getChefId()
         ]);
     }
 
     public function update(RestaurantModel $restaurant): bool {
         $sql = "UPDATE Restaurants SET name = :name, description = :description, 
-                location = :location, cuisine = :cuisine, image_url = :image_url 
+                location = :location, cuisine = :cuisine, image_url = :image_url, long_description = :long_description, chef_id = :chef_id
                 WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
@@ -46,7 +48,9 @@ class RestaurantRepository extends Repository implements IRestaurantRepository{
             'description' => $restaurant->getDescription(),
             'location' => $restaurant->getLocation(),
             'cuisine' => $restaurant->getCuisine(),
-            'image_url' => $restaurant->getImageUrl()
+            'image_url' => $restaurant->getImageUrl(),
+            'long_description' => $restaurant->getLongDescription(),
+            'chef_id' => $restaurant->getChefId()
         ]);
     }
 

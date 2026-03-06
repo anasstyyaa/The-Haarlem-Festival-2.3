@@ -34,14 +34,22 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/users/restore', ['App\Controllers\UserController', 'restore']);
 
     // Admin Restaurant Management
-    $r->addRoute('GET', '/admin/yummy', ['App\Controllers\YummyController', 'adminIndex']);
-    $r->addRoute('GET', '/admin/yummy/create', ['App\Controllers\YummyController', 'showCreateForm']);
-    $r->addRoute('POST', '/admin/yummy/create', ['App\Controllers\YummyController', 'store']);
-    $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\YummyController', 'showEditForm']);
-    $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\YummyController', 'update']);
-    $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\YummyController', 'delete']);
-    
-    
+    $r->addRoute('GET', '/admin/yummy', ['App\Controllers\RestaurantController', 'adminIndex']);
+    $r->addRoute('GET', '/admin/yummy/create', ['App\Controllers\RestaurantController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/yummy/create', ['App\Controllers\RestaurantController', 'store']);
+    $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'update']);
+    $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\RestaurantController', 'delete']);
+    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
+
+    // Admin Chef Management
+    $r->addRoute('GET',  '/admin/chefs/create', ['App\Controllers\ChefController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/chefs/create', ['App\Controllers\ChefController', 'store']);
+    $r->addRoute('GET',  '/admin/chefs/edit/{id:\d+}', ['App\Controllers\ChefController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/chefs/edit/{id:\d+}', ['App\Controllers\ChefController', 'update']);
+    $r->addRoute('GET',  '/admin/chefs/delete/{id:\d+}', ['App\Controllers\ChefController', 'delete']);
+
+
     $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
     $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
 
@@ -50,7 +58,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
       $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
 
     // Yummy / Restaurant Routes
-    $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
+    $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
 
 
 });
@@ -88,12 +96,20 @@ switch ($routeInfo[0]) {
             $authService = new \App\Services\AuthService($repository);
             $controller = new $class($service, $authService);
 
-        } elseif ($class === 'App\Controllers\YummyController') {
+        } elseif ($class === 'App\Controllers\RestaurantController') {
             $repository = new \App\Repositories\RestaurantRepository();
             $service = new \App\Services\RestaurantService($repository);
-            $controller = new $class($service);
-        } 
-        else {
+
+            $chefRepo = new \App\Repositories\ChefRepository();
+            $chefService = new \App\Services\ChefService($chefRepo);
+            $controller = new $class($service, $chefService);
+
+        } elseif ($class === 'App\Controllers\ChefController') {
+            $chefRepo = new \App\Repositories\ChefRepository();
+            $chefService = new \App\Services\ChefService($chefRepo);
+            $controller = new $class($chefService);
+
+        } else {
             $controller = new $class();
         }
 

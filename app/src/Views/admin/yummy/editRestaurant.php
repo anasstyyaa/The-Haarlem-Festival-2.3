@@ -48,6 +48,16 @@
                         <textarea name="description" class="form-control" rows="4"><?= htmlspecialchars($restaurant->getDescription() ?? '') ?></textarea>
                     </div>
 
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Detailed Page Content (WYSIWYG)</label>
+                            <textarea name="long_description" class="form-control wysiwyg-editor" rows="12">
+                                <?= $restaurant->getLongDescription() ?>
+                            </textarea>
+                            <div class="form-text">This content will be displayed on the restaurant's dedicated detail page.</div>
+                        </div>
+                    </div>
+
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label fw-bold">Restaurant Image</label>
@@ -61,6 +71,20 @@
                             <input type="file" name="image_file" class="form-control" accept="image/*">
                             <div class="form-text">Choose a file to replace the current image.</div>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Assign Executive Chef</label>
+                        <select name="chef_id" class="form-select">
+                            <option value="">-- No Chef Assigned --</option>
+                            <?php foreach ($chefs as $chef): ?>
+                                <option value="<?= $chef->getId() ?>" 
+                                    <?= ($restaurant->getChefId() == $chef->getId()) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($chef->getName()) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">Choose a chef from the "Manage Chefs" list above.</div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">

@@ -285,4 +285,27 @@ body.admin-page #sidebar .nav-item {
   .form-grid {
     grid-template-columns: 1fr;
   }
+
 }
+
+
+
+/* WYSIWYG Editor Styles */
+
+.restaurant-detail-content h1, 
+.restaurant-detail-content h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.restaurant-detail-content p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.cms-wysiwyg-preview img {
+    max-width: 200px; /* small preview size */
+    height: auto;
+}
+

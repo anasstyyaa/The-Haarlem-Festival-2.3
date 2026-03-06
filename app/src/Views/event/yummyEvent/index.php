@@ -68,6 +68,10 @@ require __DIR__ . '/../../partials/header.php';
                                 <a href="/yummy/reservation/<?= $restaurant->getId() ?>" class="btn btn-dark w-100">
                                     Book a Table
                                 </a>
+
+                                <a href="/yummy/restaurant/<?= $restaurant->getId() ?>" class="btn btn-dark w-100">
+                                    View Restaurant 
+                                </a>
                             </div>
                         </div>
                     </div>

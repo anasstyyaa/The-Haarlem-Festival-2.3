@@ -290,6 +290,37 @@ body.admin-page #sidebar .nav-item {
 
 
 
+.section1 {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 20px;
+  align-items: center;
+  background-color: #FEDBCE;
+}
+
+.section1 img {
+  grid-row: 1 / span 2; 
+  width: 400px;
+  height: auto;
+}
+
+.section1 p {
+  margin: 40px;
+}
+
+.section1 p:first-of-type {
+  font-size: 40px;
+  font-weight: bold;
+   color: #290D00;
+}
+
+.section1 p:last-of-type {
+  margin-top: -70px;
+  color: #290D00;
+}
+
+
+
 /* WYSIWYG Editor Styles */
 
 .restaurant-detail-content h1, 

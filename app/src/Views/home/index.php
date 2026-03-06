@@ -1,5 +1,5 @@
 <?php require __DIR__ . '/../partials/header.php'; ?>
-
+<div class="container">
 <h1>Welcome to Haarlem Festival</h1>
 <p>Discover events across Jazz, Dance, Yummy, History and Kids.</p>
 

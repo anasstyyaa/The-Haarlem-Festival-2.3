@@ -2,6 +2,7 @@
 $bodyClass = 'yummy-page'; 
 require __DIR__ . '/../../partials/header.php';
 ?>
+<div class="container">
 
 <section class="yummy-hero mb-5">
     <div class="row">

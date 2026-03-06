@@ -34,13 +34,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/users/restore', ['App\Controllers\UserController', 'restore']);
 
     // Admin Restaurant Management
-
-    $r->addRoute('GET', '/admin/yummy', ['App\Controllers\YummyController', 'adminIndex']);
-    $r->addRoute('GET', '/admin/yummy/create', ['App\Controllers\YummyController', 'showCreateForm']);
-    $r->addRoute('POST', '/admin/yummy/create', ['App\Controllers\YummyController', 'store']);
-    $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\YummyController', 'showEditForm']);
-    $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\YummyController', 'update']);
-    $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\YummyController', 'delete']);
+    $r->addRoute('GET', '/admin/yummy', ['App\Controllers\RestaurantController', 'adminIndex']);
+    $r->addRoute('GET', '/admin/yummy/create', ['App\Controllers\RestaurantController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/yummy/create', ['App\Controllers\RestaurantController', 'store']);
+    $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'update']);
+    $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\RestaurantController', 'delete']);
     $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
     
     // Admin Jazz Artist Management

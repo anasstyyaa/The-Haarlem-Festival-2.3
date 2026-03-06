@@ -112,8 +112,10 @@ switch ($routeInfo[0]) {
 
         } elseif ($class === 'App\Controllers\RestaurantController') {
             $repository = new \App\Repositories\RestaurantRepository();
+            $chefRepo = new \App\Repositories\ChefRepository();
             $service = new \App\Services\RestaurantService($repository);
-            $controller = new $class($service);
+            $chefService = new \App\Services\ChefService($chefRepo);
+            $controller = new $class($service, $chefService);
 
         } elseif ($class === 'App\Controllers\JazzController'){
             $repository = new \App\Repositories\ArtistRepository();

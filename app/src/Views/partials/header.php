@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +16,12 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <body class="<?= isset($bodyClass) ? htmlspecialchars($bodyClass) : '' ?>">
 
+
+
 <header class="main-header">
+
+<link rel="stylesheet" href="/assets/css/dance.css">
+
   <div class="logo">Haarlem Festival</div>
 
   <nav class="nav-links">

@@ -10,7 +10,7 @@ use App\Services\Mailer;
 final class AuthController
 {
    private AuthService $auth;
-    private PasswordResetService $passwordReset;
+   private PasswordResetService $passwordReset;
 
   public function __construct()
 {
@@ -297,4 +297,32 @@ final class AuthController
             ]);
         }
     }
+}
+
+final class AuthController
+{
+    private IAuthService $auth;
+    private IPasswordResetService $passwordReset;
+
+    public function __construct(IAuthService $auth, IPasswordResetService $passwordReset)
+    {
+        $this->auth = $auth;
+        $this->passwordReset = $passwordReset;
+    }
+
+
+ public function sendResetLink(): string
+ {
+   $email = $_POST['email'];
+
+   $this->passwordReset->sendResetLink($email);
+
+   echo "Password reset link sent";
+
+ }
+
+
+
+
+
 }

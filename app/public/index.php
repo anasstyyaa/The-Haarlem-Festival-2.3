@@ -55,13 +55,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
    $r->addRoute('GET',  '/resetPassword', ['App\Controllers\AuthController', 'showResetForm']);
    $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
 
-
-
-
-  
-
-//$r->addRoute('GET',  '/resetPassword',  ['App\Controllers\AuthController', 'ShowResetPassword']);
-//$r->addRoute('POST', '/resetPassword',  ['App\Controllers\AuthController', 'ResetPassword']);
+   $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
 
 
 

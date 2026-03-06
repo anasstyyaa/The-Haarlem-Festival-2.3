@@ -2,13 +2,16 @@
 namespace App\Controllers;
 
 use App\Services\Interfaces\IRestaurantService;
+use App\Services\Interfaces\IChefService;
 use App\Models\RestaurantModel;
 
-class YummyController {
+class RestaurantController {
     private IRestaurantService $service;
+    private IChefService $chefService;
 
-    public function __construct(IRestaurantService $service) {
+    public function __construct(IRestaurantService $service, IChefService $chefService) {
         $this->service = $service;
+        $this->chefService = $chefService;
     }
 
     public function index() {
@@ -23,10 +26,12 @@ class YummyController {
         }
 
         $restaurants = $this->service->getAllRestaurants();
+        $chefs = $this->chefService->getAllChefs();
         include __DIR__ . '/../Views/admin/yummy/index.php';
     }
 
     public function showCreateForm() {
+        $chefs = $this->chefService->getAllChefs();
         include __DIR__ . '/../Views/admin/yummy/createRestaurant.php';
     }
 
@@ -34,12 +39,15 @@ class YummyController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fileName = $this->handleImageUpload('image_file', 'restaurant');
             
+            $chefId = !empty($_POST['chef_id']) ? (int)$_POST['chef_id'] : null;
+
             $restaurant = new RestaurantModel();
             $restaurant->setName(trim($_POST['name'] ?? ''));
             $restaurant->setDescription(trim($_POST['description'] ?? ''));
             $restaurant->setLocation(trim($_POST['location'] ?? ''));
             $restaurant->setCuisine(trim($_POST['cuisine'] ?? ''));
-            
+            $restaurant->setLongDescription($_POST['long_description'] ?? '');
+            $restaurant->setChefId($chefId);
             if ($fileName) {
                 $restaurant->setImageUrl('/assets/uploads/restaurants/' . $fileName);
             }
@@ -49,12 +57,15 @@ class YummyController {
                 exit;
             }
         }
+
+        $chefs = $this->chefService->getAllChefs();
         include __DIR__ . '/../Views/admin/yummy/create.php';
     }
 
     public function showEditForm($vars) {
         $id = (int)$vars['id'];
         $restaurant = $this->service->getRestaurantById($id);
+        $chefs = $this->chefService->getAllChefs();
 
         if (!$restaurant) {
             header('Location: /admin/yummy?error=notfound');
@@ -68,6 +79,8 @@ class YummyController {
         $id = (int)$vars['id'];
         $restaurant = $this->service->getRestaurantById($id);
 
+        $chefId = !empty($_POST['chef_id']) ? (int)$_POST['chef_id'] : null;
+
         if (!$restaurant) {
             header('Location: /admin/yummy');
             exit;
@@ -78,6 +91,8 @@ class YummyController {
             $restaurant->setDescription(trim($_POST['description']));
             $restaurant->setLocation(trim($_POST['location']));
             $restaurant->setCuisine(trim($_POST['cuisine']));
+            $restaurant->setLongDescription($_POST['long_description'] ?? '');
+            $restaurant->setChefId($chefId);
 
             $newImage = $this->handleImageUpload('image_file', 'restaurant');
             if ($newImage) {
@@ -97,6 +112,19 @@ class YummyController {
         $this->service->deleteRestaurant($id);
         header('Location: /admin/yummy?status=deleted');
         exit;
+    }
+
+    public function showDetails($vars) {
+        $id = (int)$vars['id'];
+        $restaurant = $this->service->getRestaurantById($id);
+
+        if (!$restaurant) {
+            http_response_code(404);
+            echo "Restaurant not found.";
+            return;
+        }
+
+        include __DIR__ . '/../Views/event/yummyEvent/restaurant.php';
     }
 
     private function handleImageUpload(string $inputName, string $prefix): ?string

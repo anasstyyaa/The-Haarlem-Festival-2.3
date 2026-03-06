@@ -12,6 +12,8 @@ class RestaurantModel {
     private string $created_at;
     private ?string $updated_at;
     private ?string $deleted_at;
+    private ?string $long_description;
+    private ?int $chef_id; 
 
 
     public function getId(): int {
@@ -38,6 +40,14 @@ class RestaurantModel {
         return $this->image_url;
     }
 
+    public function getLongDescription(): ?string {
+        return $this->long_description;
+    }
+
+    public function getChefId(): ?int {
+        return $this->chef_id;
+    }
+
     public function getCreatedAt(): string {
         return $this->created_at;
     }
@@ -49,6 +59,7 @@ class RestaurantModel {
     public function getDeletedAt(): ?string {
         return $this->deleted_at;
     }
+
 
 
 
@@ -70,5 +81,13 @@ class RestaurantModel {
 
     public function setImageUrl(string $image_url): void {
         $this->image_url = $image_url;
+    }
+
+    public function setLongDescription(?string $long_description): void {
+        $this->long_description = $long_description;
+    }
+
+    public function setChefId(?int $chef_id): void {
+        $this->chef_id = $chef_id;
     }
 }

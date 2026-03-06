@@ -35,7 +35,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Full Description</label>
-                        <textarea name="description" class="form-control" rows="5" placeholder="Full artist description for the detail page..."></textarea>
+                        <textarea name="description" class="form-control wysiwyg-editor" rows="5" placeholder="Full artist description for the detail page..."></textarea>
                     </div>
 
                     <div class="row mb-3">

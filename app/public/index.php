@@ -41,6 +41,17 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\YummyController', 'update']);
     $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\YummyController', 'delete']);
     
+    // Admin Jazz Artist Management
+    $r->addRoute('GET', '/admin/jazz', ['App\Controllers\JazzController', 'adminIndex']);
+    $r->addRoute('GET', '/admin/jazz/create', ['App\Controllers\JazzController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/jazz/create', ['App\Controllers\JazzController', 'store']);
+    $r->addRoute('GET', '/admin/jazz/edit/{id:\d+}', ['App\Controllers\JazzController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/jazz/edit/{id:\d+}', ['App\Controllers\JazzController', 'update']);
+    $r->addRoute('GET', '/admin/jazz/delete/{id:\d+}', ['App\Controllers\JazzController', 'delete']);
+
+    // Public Jazz routes
+    $r->addRoute('GET', '/jazz', ['App\Controllers\JazzController', 'index']);
+    $r->addRoute('GET', '/jazz/{id:\d+}', ['App\Controllers\JazzController', 'detail']);
     
     $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
     $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
@@ -92,7 +103,12 @@ switch ($routeInfo[0]) {
             $repository = new \App\Repositories\RestaurantRepository();
             $service = new \App\Services\RestaurantService($repository);
             $controller = new $class($service);
-        } 
+
+        } elseif ($class === 'App\Controllers\JazzController'){
+            $repository = new \App\Repositories\ArtistRepository();
+            $service = new \App\Services\ArtistService($repository);
+            $controller = new $class($service);
+        }
         else {
             $controller = new $class();
         }

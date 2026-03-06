@@ -16,5 +16,4 @@ interface IUserRepository
     public function adminGetAll(): array;
     //public function findByUserName (string $userName): ?array; 
     
-    
 }

@@ -12,5 +12,4 @@ interface IAuthService
     public function createUser(UserModel $user): bool;
     public function getUserByEmail(string $email): ?array;
     public function logout(): void;
-    
 }

@@ -2,33 +2,16 @@
 namespace App\Controllers;
 
 use App\Repositories\UserRepository;
-use App\Repositories\PasswordResetRepository;
 use App\Services\AuthService;
-use App\Services\PasswordResetService;
-use App\Services\Mailer;
 
-final class AuthController
+class AuthController
 {
-   private AuthService $auth;
-   private PasswordResetService $passwordReset;
+    private AuthService $auth;
 
-  public function __construct()
-{
-    $users  = new UserRepository();
-    $resets = new PasswordResetRepository();
-    $mailer = new Mailer();   
-
-    $this->auth = new AuthService($users);
-
-    $appUrl = getenv('APP_URL') ?: 'http://localhost';
-
-    $this->passwordReset = new PasswordResetService(
-        $users,
-        $resets,
-        $mailer,      
-        $appUrl
-    );
-}
+    public function __construct()
+    {
+        $this->auth = new AuthService(new UserRepository());
+    }
 
     //helper to render a view with variables like $error
     private function render(string $view, array $data = []): string
@@ -208,121 +191,4 @@ final class AuthController
         header('Location: /');
         exit;
     }
-
-
-// GET forgetPassword
-    public function showForgetPassword(): string
-    {
-        return $this->render('auth/forgetPassword');
-    }
-
-    // POST forgetPassword
-    public function sendResetLink(): string
-    {
-        $email = trim((string)($_POST['email'] ?? ''));
-
-        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            http_response_code(422);
-            return $this->render('auth/forgetPassword', [
-                'error' => 'Enter a valid email address.'
-            ]);
-        }
-
-        try {
-            $this->passwordReset->sendResetLink($email);
-        } catch (\Throwable $e) {
-           
-        }
-
-        return $this->render('auth/forgetPassword', [
-            'success' => 'A password reset link has been sent.'
-        ]);
-    }
-
-    // GET /resetPassword?token=...
-    public function showResetForm(): string
-    {
-        $token = trim((string)($_GET['token'] ?? ''));
-
-        if ($token === '') {
-            http_response_code(400);
-            return $this->render('auth/resetPassword', [
-                'error' => 'Invalid reset link.'
-            ]);
-        }
-
-        return $this->render('auth/resetPassword', [
-            'token' => $token
-        ]);
-    }
-
-    // POST resetPassword
-    public function resetPassword(): string
-    {
-        $token    = trim((string)($_POST['token'] ?? ''));
-        $password = (string)($_POST['password'] ?? '');
-        $confirm  = (string)($_POST['password_confirm'] ?? '');
-
-        $errors = [];
-
-        if ($token === '') {
-            $errors['token'] = 'Invalid reset token.';
-        }
-        if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $password)) {
-            $errors['password'] = 'Password must be at least 8 characters, contain at least one letter and one number.';
-        }
-        if ($password !== $confirm) {
-            $errors['password_confirm'] = 'Passwords do not match.';
-        }
-
-        if (!empty($errors)) {
-            http_response_code(422);
-            return $this->render('auth/resetPassword', [
-                'errors' => $errors,
-                'token' => $token
-            ]);
-        }
-
-        try {
-            $this->passwordReset->resetPasswordByToken($token, $password);
-
-            return $this->render('auth/resetPassword', [
-                'success' => 'Password updated. You can now log in.'
-            ]);
-        } catch (\Throwable $e) {
-            http_response_code(400);
-            return $this->render('auth/resetPassword', [
-                'error' => $e->getMessage(),
-                'token' => $token
-            ]);
-        }
-    }
-}
-
-final class AuthController
-{
-    private IAuthService $auth;
-    private IPasswordResetService $passwordReset;
-
-    public function __construct(IAuthService $auth, IPasswordResetService $passwordReset)
-    {
-        $this->auth = $auth;
-        $this->passwordReset = $passwordReset;
-    }
-
-
- public function sendResetLink(): string
- {
-   $email = $_POST['email'];
-
-   $this->passwordReset->sendResetLink($email);
-
-   echo "Password reset link sent";
-
- }
-
-
-
-
-
 }

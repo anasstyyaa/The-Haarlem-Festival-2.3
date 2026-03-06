@@ -1,18 +1,24 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-session_start();
+error_reporting(E_ALL);
+
+// ini_set('display_errors', '0'); // hide from browser
+// ini_set('log_errors', '1');     // log instead
+
 
 
 use FastRoute\RouteCollector;
+use App\Models\Enums\EventTypeEnum;
 use function FastRoute\simpleDispatcher;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     //$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);
- $r->addRoute('GET', '/', ['App\Controllers\HomeController', 'index']);
+    $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
 
     $r->addRoute('GET',  '/login', ['App\Controllers\AuthController', 'showLoginForm']);
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
@@ -28,14 +34,36 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/users/restore', ['App\Controllers\UserController', 'restore']);
 
     // Admin Restaurant Management
-    $r->addRoute('GET', '/admin/yummy', ['App\Controllers\YummyController', 'adminIndex']);
-    $r->addRoute('GET', '/admin/yummy/create', ['App\Controllers\YummyController', 'showCreateForm']);
-    $r->addRoute('POST', '/admin/yummy/create', ['App\Controllers\YummyController', 'store']);
-    $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\YummyController', 'showEditForm']);
-    $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\YummyController', 'update']);
-    $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\YummyController', 'delete']);
+    $r->addRoute('GET', '/admin/yummy', ['App\Controllers\RestaurantController', 'adminIndex']);
+    $r->addRoute('GET', '/admin/yummy/create', ['App\Controllers\RestaurantController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/yummy/create', ['App\Controllers\RestaurantController', 'store']);
+    $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'update']);
+    $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\RestaurantController', 'delete']);
+    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
     
+    // Admin Jazz Artist Management
+    $r->addRoute('GET', '/admin/jazz', ['App\Controllers\JazzController', 'adminIndex']);
+    $r->addRoute('GET', '/admin/jazz/create', ['App\Controllers\JazzController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/jazz/create', ['App\Controllers\JazzController', 'store']);
+    $r->addRoute('GET', '/admin/jazz/edit/{id:\d+}', ['App\Controllers\JazzController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/jazz/edit/{id:\d+}', ['App\Controllers\JazzController', 'update']);
+    $r->addRoute('GET', '/admin/jazz/delete/{id:\d+}', ['App\Controllers\JazzController', 'delete']);
+
+    // Public Jazz routes
+    $r->addRoute('GET', '/jazz', ['App\Controllers\JazzController', 'index']);
+    $r->addRoute('GET', '/jazz/{id:\d+}', ['App\Controllers\JazzController', 'detail']);
     
+
+    // Admin Chef Management
+    $r->addRoute('GET',  '/admin/chefs/create', ['App\Controllers\ChefController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/chefs/create', ['App\Controllers\ChefController', 'store']);
+    $r->addRoute('GET',  '/admin/chefs/edit/{id:\d+}', ['App\Controllers\ChefController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/chefs/edit/{id:\d+}', ['App\Controllers\ChefController', 'update']);
+    $r->addRoute('GET',  '/admin/chefs/delete/{id:\d+}', ['App\Controllers\ChefController', 'delete']);
+
+
+
     $r->addRoute('GET',  '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
     $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
 
@@ -44,22 +72,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
       $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
 
     // Yummy / Restaurant Routes
-    $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
-
-     
-     //password reset
-   $r->addRoute('GET','/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);
-   $r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
-
-   // Password Reset
-   $r->addRoute('GET',  '/resetPassword', ['App\Controllers\AuthController', 'showResetForm']);
-   $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
-
-   $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
-
-
-
-
+    $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
 
 
 });
@@ -97,15 +110,28 @@ switch ($routeInfo[0]) {
             $authService = new \App\Services\AuthService($repository);
             $controller = new $class($service, $authService);
 
-        } elseif ($class === 'App\Controllers\YummyController') {
+        } elseif ($class === 'App\Controllers\RestaurantController') {
             $repository = new \App\Repositories\RestaurantRepository();
+            $chefRepo = new \App\Repositories\ChefRepository();
             $service = new \App\Services\RestaurantService($repository);
+            $chefService = new \App\Services\ChefService($chefRepo);
+            $controller = new $class($service, $chefService);
+
+        } elseif ($class === 'App\Controllers\JazzController'){
+            $repository = new \App\Repositories\ArtistRepository();
+            $service = new \App\Services\ArtistService($repository);
             $controller = new $class($service);
-        } 
-        else {
+        }
+         elseif ($class === 'App\Controllers\ChefController') {
+            $chefRepo = new \App\Repositories\ChefRepository();
+            $chefService = new \App\Services\ChefService($chefRepo);
+            $controller = new $class($chefService);
+
+        } else {
+
             $controller = new $class();
         }
 
-        echo $controller->$method();
+        echo $controller->$method($vars);
         break;
 }

@@ -285,5 +285,58 @@ body.admin-page #sidebar .nav-item {
   .form-grid {
     grid-template-columns: 1fr;
   }
+
+}
+
+
+
+.section1 {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 20px;
+  align-items: center;
+  background-color: #FEDBCE;
+}
+
+.section1 img {
+  grid-row: 1 / span 2; 
+  width: 400px;
+  height: auto;
+}
+
+.section1 p {
+  margin: 40px;
+}
+
+.section1 p:first-of-type {
+  font-size: 40px;
+  font-weight: bold;
+   color: #290D00;
+}
+
+.section1 p:last-of-type {
+  margin-top: -70px;
+  color: #290D00;
+}
+
+
+
+/* WYSIWYG Editor Styles */
+
+.restaurant-detail-content h1, 
+.restaurant-detail-content h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.restaurant-detail-content p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.cms-wysiwyg-preview img {
+    max-width: 200px; /* small preview size */
+    height: auto;
 }
 

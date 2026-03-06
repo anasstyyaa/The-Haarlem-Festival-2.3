@@ -57,4 +57,4 @@ if (session_status() === PHP_SESSION_NONE) {
   </div>
 </header>
 
-<div class="container">
+

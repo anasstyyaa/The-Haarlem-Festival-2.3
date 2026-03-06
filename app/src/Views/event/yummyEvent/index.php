@@ -2,6 +2,7 @@
 $bodyClass = 'yummy-page'; 
 require __DIR__ . '/../../partials/header.php';
 ?>
+<div class="container">
 
 <section class="yummy-hero mb-5">
     <div class="row">
@@ -67,6 +68,10 @@ require __DIR__ . '/../../partials/header.php';
                             <div class="mt-auto">
                                 <a href="/yummy/reservation/<?= $restaurant->getId() ?>" class="btn btn-dark w-100">
                                     Book a Table
+                                </a>
+
+                                <a href="/yummy/restaurant/<?= $restaurant->getId() ?>" class="btn btn-dark w-100">
+                                    View Restaurant 
                                 </a>
                             </div>
                         </div>

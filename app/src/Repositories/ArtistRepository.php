@@ -12,7 +12,7 @@ class ArtistRepository extends Repository implements IArtistRepository{
     //This method returns artists 
     public function getAllActive(): array
     {
-        $stmt = $this->connection->prepare("SELECT * FROM Artist WHERE deleted_at IS NULL ORDER BY ArtistName");
+        $stmt = $this->connection->prepare("SELECT * FROM Artist WHERE deleted_at IS NULL ORDER BY ArtistID ASC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, ArtistModel::class);
     }
@@ -59,7 +59,7 @@ class ArtistRepository extends Repository implements IArtistRepository{
 
         return $stmt->execute([
             'ArtistName'  => $artist->getName(),
-            'shortDescription' => $artist->getShortDescription(),
+            'ShortDescription' => $artist->getShortDescription(),
             'Description'  => $artist->getDescription(),
             'ImageURL'   => $artist->getImageUrl()
         ]);

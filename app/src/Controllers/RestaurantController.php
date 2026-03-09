@@ -124,7 +124,26 @@ class RestaurantController {
             return;
         }
 
+        $chef = null;
+        if ($restaurant->getChefId()) {
+            $chef = $this->chefService->getChefById($restaurant->getChefId());
+        }
+
         include __DIR__ . '/../Views/event/yummyEvent/restaurant.php';
+    }
+
+    // Reservation handling
+
+    public function showReservationForm($vars) {
+        $restaurantId = (int)$vars['id'];
+        $restaurant = $this->service->getRestaurantById($restaurantId);
+
+        if (!$restaurant) {
+            header('Location: /yummy');
+            exit;
+        }
+
+        include __DIR__ . '/../Views/event/yummyEvent/reservation.php';
     }
 
     private function handleImageUpload(string $inputName, string $prefix): ?string

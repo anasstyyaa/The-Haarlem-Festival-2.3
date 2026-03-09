@@ -1,10 +1,10 @@
 <?php 
 
-namespace App\Repositories;
+namespace App\Repositories\Yummy;
 
 use App\Framework\Repository;
-use App\Models\YummyEventModel;
-use App\Repositories\Interfaces\IYummyEventRepository;
+use App\Models\Yummy\YummyEventModel;
+use App\Repositories\Interfaces\Yummy\IYummyEventRepository;
 use PDO;
 
 class YummyEventRepository extends Repository implements IYummyEventRepository {

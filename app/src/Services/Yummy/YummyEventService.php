@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\YummyEventModel;
-use App\Repositories\Interfaces\IYummyEventRepository;
-use App\Services\Interfaces\IYummyEventService;
+use App\Models\Yummy\YummyEventModel;
+use App\Repositories\Interfaces\Yummy\IYummyEventRepository;
+use App\Services\Interfaces\Yummy\IYummyEventService;
 
 class YummyEventService implements IYummyEventService {
 

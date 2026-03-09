@@ -40,7 +40,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'showEditForm']);
     $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'update']);
     $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\RestaurantController', 'delete']);
-    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
+    $r->addRoute('POST', '/admin/yummy/sessions/add', ['App\Controllers\RestaurantController', 'addSessions']);
+    $r->addRoute('POST', '/admin/yummy/sessions/delete', ['App\Controllers\RestaurantController', 'deleteSession']);
+    $r->addRoute('POST', '/admin/yummy/sessions/update', ['App\Controllers\RestaurantController', 'updateSession']);
+    
     
     // Admin Jazz Artist Management
     $r->addRoute('GET', '/admin/jazz', ['App\Controllers\JazzController', 'adminIndex']);
@@ -73,7 +76,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
+    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
 
+    // Yummy / Reservation 
 
 });
 
@@ -111,11 +116,13 @@ switch ($routeInfo[0]) {
             $controller = new $class($service, $authService);
 
         } elseif ($class === 'App\Controllers\RestaurantController') {
-            $repository = new \App\Repositories\RestaurantRepository();
-            $chefRepo = new \App\Repositories\ChefRepository();
-            $service = new \App\Services\RestaurantService($repository);
-            $chefService = new \App\Services\ChefService($chefRepo);
-            $controller = new $class($service, $chefService);
+            $repository = new \App\Repositories\Yummy\RestaurantRepository();
+            $chefRepo = new \App\Repositories\Yummy\ChefRepository();
+            $sessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
+            $service = new \App\Services\Yummy\RestaurantService($repository);
+            $chefService = new \App\Services\Yummy\ChefService($chefRepo);
+            $sessionService = new \App\Services\Yummy\RestaurantSessionService($sessionRepo, $repository);
+            $controller = new $class($service, $chefService, $sessionService);
 
         } elseif ($class === 'App\Controllers\JazzController'){
             $repository = new \App\Repositories\ArtistRepository();
@@ -123,8 +130,8 @@ switch ($routeInfo[0]) {
             $controller = new $class($service);
         }
          elseif ($class === 'App\Controllers\ChefController') {
-            $chefRepo = new \App\Repositories\ChefRepository();
-            $chefService = new \App\Services\ChefService($chefRepo);
+            $chefRepo = new \App\Repositories\Yummy\ChefRepository();
+            $chefService = new \App\Services\Yummy\ChefService($chefRepo);
             $controller = new $class($chefService);
 
         } else {

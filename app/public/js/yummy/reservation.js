@@ -1,0 +1,56 @@
+// public/js/yummy-reservation.js
+
+function initReservationForm(sessionsByDate) {
+    const dateSelect = document.getElementById('dateSelect');
+    const section = document.getElementById('timeSlotSection');
+    const buttonContainer = document.getElementById('timeSlotButtons');
+    const sessionInput = document.getElementById('selectedSessionId');
+
+    if (!dateSelect) return;
+
+    dateSelect.addEventListener('change', function() {
+        const selectedDate = this.value;
+        
+        buttonContainer.innerHTML = '';
+        sessionInput.value = '';
+        section.classList.add('d-none');
+
+        if (selectedDate && sessionsByDate[selectedDate]) {
+            section.classList.remove('d-none');
+            
+            sessionsByDate[selectedDate].forEach(session => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-dark flex-grow-1 py-2';
+                
+                const timeStr = session.startTime ? session.startTime.substring(0, 5) : "00:00";
+                const slots = session.availableSlots ?? 0;
+
+                btn.innerHTML = `
+                    <strong>${timeStr}</strong><br>
+                    <small>${slots} left</small>
+                `;
+                
+                if (slots <= 0) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'btn-light');
+                    btn.classList.remove('btn-outline-dark');
+                }
+
+                btn.onclick = function() {
+                    document.querySelectorAll('#timeSlotButtons .btn').forEach(b => {
+                        b.classList.remove('btn-dark');
+                        b.classList.add('btn-outline-dark');
+                    });
+
+                    this.classList.remove('btn-outline-dark');
+                    this.classList.add('btn-dark');
+                    
+                    sessionInput.value = session.id;
+                };
+
+                buttonContainer.appendChild(btn);
+            });
+        }
+    });
+}

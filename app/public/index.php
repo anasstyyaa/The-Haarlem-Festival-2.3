@@ -68,8 +68,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST',  '/register', ['App\Controllers\AuthController', 'register']);
 
     $r->addRoute('POST',  '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
-     $r->addRoute('GET',  '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
-      $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
+    $r->addRoute('GET',  '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
+    $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
+    $r->addRoute('GET',  '/admin/kidsPage', ['App\Controllers\KidsEventController', 'adminIndex']);
+    $r->addRoute('GET',  '/admin/elements/edit/{id:\d+}', ['App\Controllers\PageElementController', 'showEditForm']);
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);

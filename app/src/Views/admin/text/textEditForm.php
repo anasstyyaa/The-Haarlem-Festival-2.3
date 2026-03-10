@@ -2,9 +2,8 @@
 use App\Models\TextModel;
 /** @var TextModel $text */
 ?>
-<?php
-include_once 'partials/header.php';
-?>
+<?php require __DIR__ . '/../../partials/adminHeader.php'; ?>
+
 
 <form action="/admin/text/edit/<?= $text->getId() ?>" method="POST" enctype="multipart/form-data">
 <textarea name="long_description" class="form-control wysiwyg-editor" rows="12">

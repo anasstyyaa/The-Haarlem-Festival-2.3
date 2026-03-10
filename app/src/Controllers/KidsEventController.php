@@ -50,5 +50,20 @@ private KidsEventService $service;
     $vmKids = new KidsEventViewModel($kidsEvents);
    require __DIR__ . '/../Views/event/kidsEvent.php';
 }
+ public function adminIndex(): void
+{
+      $elements = $this->pageRepo->getByPageName("kids");
+
+        $vm = new PageElementViewModel(
+            $this->textRepo,
+            $this->imageRepo
+        );
+
+        $vm->build($elements);
+    $kidsEvents = $this->service->getAll();
+    $vmKids = new KidsEventViewModel($kidsEvents);
+   require __DIR__ . '/../Views/admin/kids/index.php';
+}
+
 
 }

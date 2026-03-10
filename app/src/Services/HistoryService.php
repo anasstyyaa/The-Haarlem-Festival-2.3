@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\Interfaces\IHistoryEventRepository;
 use App\Repositories\Interfaces\IHistoryVenueRepository;
 use App\Services\Interfaces\IHistoryService;
+use App\Models\HistoryEventModel;
 
 class HistoryService implements IHistoryService
 {
@@ -19,45 +20,19 @@ class HistoryService implements IHistoryService
         $this->historyVenueRepo = $historyVenueRepo;
     }
 
+    // Returns all history tour sessions
+    // Used by the History page to populate the day/time/language selector
     public function getAllSessions(): array
     {
         return $this->historyEventRepo->getAll();
     }
 
-    public function getSelectedEventId(?int $eventIdFromQuery = null): ?int
-    {
-        $sessions = $this->getAllSessions();
-        if (empty($sessions)) {
-            return null;
-        }
-
-        if ($eventIdFromQuery !== null) {
-            foreach ($sessions as $s) {
-                if ((int)$s['eventId'] === (int)$eventIdFromQuery) {
-                    return (int)$eventIdFromQuery;
-                }
-            }
-        }
-
-        return (int)$sessions[0]['eventId'];
-    }
-
-    public function getSessionByEventId(int $eventId): ?array
+    
+    public function getSessionByEventId(int $eventId): ?HistoryEventModel
     {
         return $this->historyEventRepo->getByEventId($eventId);
     }
 
-    public function getStopsByEventId(int $eventId): array
-    {
-        return $this->historyVenueRepo->getStopsByEventId($eventId);
-    }
+    
 
-    public function getAllVenues(): array
-    {
-        return $this->historyVenueRepo->getAll();
-    }
-    public function getEventIdBySlot(string $slotDate, string $startTime, string $language): ?int
-{
-    return $this->historyEventRepo->getEventIdBySlot($slotDate, $startTime, $language);
-}
 }

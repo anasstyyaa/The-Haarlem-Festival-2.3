@@ -5,19 +5,20 @@ namespace App\Controllers;
 use App\Repositories\HistoryEventRepository;
 use App\Repositories\HistoryVenueRepository;
 use App\Services\HistoryService;
-
-use App\Repositories\PageElementRepository;
-use App\Repositories\TextRepository;
-use App\Repositories\ImageRepository;
-use App\ViewModels\PageElementViewModel;
+use App\Services\PersonalProgramService;
+// use App\Repositories\PageElementRepository;
+// use App\Repositories\TextRepository;
+// use App\Repositories\ImageRepository;
+// use App\ViewModels\PageElementViewModel;
 
 class HistoryController
 {
     private HistoryService $service;
+    private PersonalProgramService $programService;
 
-    private PageElementRepository $pageRepo;
-    private TextRepository $textRepo;
-    private ImageRepository $imageRepo;
+    // private PageElementRepository $pageRepo;
+    // private TextRepository $textRepo;
+    // private ImageRepository $imageRepo;
 
     public function __construct()
     {
@@ -26,55 +27,60 @@ class HistoryController
             new HistoryVenueRepository()
         );
 
-        $this->pageRepo  = new PageElementRepository();
-        $this->textRepo  = new TextRepository();
-        $this->imageRepo = new ImageRepository();
+        $this->programService = new PersonalProgramService();
+
+        // Not needed right now because didnt implement editable cms content yet
+        // $this->pageRepo = new PageElementRepository();
+        // $this->textRepo = new TextRepository();
+        // $this->imageRepo = new ImageRepository();
     }
 
- public function index(): void
-{
-    $elements = $this->pageRepo->getByPageName("history");
-
-    $pageVm = new PageElementViewModel(
-        $this->textRepo,
-        $this->imageRepo
-    );
-    $pageVm->build($elements);
-
-    // schedule
-    $sessions = $this->service->getAllSessions();
-
-    // group by day,time, languages
-    $byDay = [];
-    foreach ($sessions as $s) {
-        $day  = $s['slotDate'];                 
-        $time = substr($s['startTime'], 0, 5); 
-        $lang = $s['language'];
-
-        $byDay[$day][$time][] = $lang;
+    public function index(): void
+    {
+       
+        $sessions = $this->service->getAllSessions();
+        include __DIR__ . '/../Views/event/historyEvent/index.php';
     }
 
-    // selections from the query parameters
-    $selectedDay  = $_GET['day'] ?? null;
-    $selectedTime = $_GET['time'] ?? null;
-    $selectedLang = $_GET['lang'] ?? null;
-
-    // load selected event/stops only when all 3 are chosen
-    $selectedEventId = null;
-    $selectedSession = null;
-    $stops = [];
-
-    if ($selectedDay && $selectedTime && $selectedLang) {
-        $selectedEventId = $this->service->getEventIdBySlot($selectedDay, $selectedTime, $selectedLang);
-
-        if ($selectedEventId) {
-            $selectedSession = $this->service->getSessionByEventId($selectedEventId);
-            $stops = $this->service->getStopsByEventId($selectedEventId);
+    public function book(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /history');
+            exit;
         }
+
+        // Get form values
+        $eventId = (int)($_POST['eventId'] ?? 0);
+        $individualCount = (int)($_POST['individualCount'] ?? 0);
+        $familyCount = (int)($_POST['familyCount'] ?? 0);
+
+        // Convert tickets into total number of people, family ticket = 4 people.
+        $numberOfPeople = $individualCount + ($familyCount * 4);
+
+        if ($eventId <= 0 || $numberOfPeople <= 0) {  //to prevent empty or invalid form submissions
+            header('Location: /history');
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'] ?? ($_SESSION['user']['id'] ?? null);
+        $this->programService->addTicketToProgram(
+            $eventId,
+            $numberOfPeople,
+            $userId
+        );
+        header('Location: /history');
+        exit;
     }
 
-    $venues = $this->service->getAllVenues();
+    /* detail page
+   
+    public function show($vars): void
+    {
+        $eventId = (int)$vars['id'];
+        $session = $this->service->getSessionByEventId($eventId);
+        $stops = $this->service->getStopsByEventId($eventId);
 
-    require __DIR__ . '/../Views/event/historyEvent/index.php';
-}
+        include __DIR__ . '/../Views/event/historyEvent/show.php';
+    }
+    */
 }

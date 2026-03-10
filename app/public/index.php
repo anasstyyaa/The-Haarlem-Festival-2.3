@@ -40,7 +40,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'showEditForm']);
     $r->addRoute('POST', '/admin/yummy/edit/{id:\d+}', ['App\Controllers\RestaurantController', 'update']);
     $r->addRoute('GET', '/admin/yummy/delete/{id:\d+}', ['App\Controllers\RestaurantController', 'delete']);
-    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
+    $r->addRoute('POST', '/admin/yummy/sessions/add', ['App\Controllers\RestaurantController', 'addSessions']);
+    $r->addRoute('POST', '/admin/yummy/sessions/delete', ['App\Controllers\RestaurantController', 'deleteSession']);
+    $r->addRoute('POST', '/admin/yummy/sessions/update', ['App\Controllers\RestaurantController', 'updateSession']);
+    
     
     // Admin Jazz Artist Management
     $r->addRoute('GET', '/admin/jazz', ['App\Controllers\JazzController', 'adminIndex']);
@@ -49,6 +52,13 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/admin/jazz/edit/{id:\d+}', ['App\Controllers\JazzController', 'showEditForm']);
     $r->addRoute('POST', '/admin/jazz/edit/{id:\d+}', ['App\Controllers\JazzController', 'update']);
     $r->addRoute('GET', '/admin/jazz/delete/{id:\d+}', ['App\Controllers\JazzController', 'delete']);
+
+    // Admin Jazz Event Management
+    $r->addRoute('GET', '/admin/jazz/events/create', ['App\Controllers\JazzController', 'showCreateEventForm']);
+    $r->addRoute('POST', '/admin/jazz/events/create', ['App\Controllers\JazzController', 'storeEvent']);
+    $r->addRoute('GET', '/admin/jazz/events/edit/{id:\d+}', ['App\Controllers\JazzController', 'showEditEventForm']);
+    $r->addRoute('POST', '/admin/jazz/events/edit/{id:\d+}', ['App\Controllers\JazzController', 'updateEvent']);
+    $r->addRoute('GET', '/admin/jazz/events/delete/{id:\d+}', ['App\Controllers\JazzController', 'deleteEvent']);
 
     // Public Jazz routes
     $r->addRoute('GET', '/jazz', ['App\Controllers\JazzController', 'index']);
@@ -75,7 +85,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
+    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
 
+    // Yummy / Reservation 
 
 });
 
@@ -113,20 +125,24 @@ switch ($routeInfo[0]) {
             $controller = new $class($service, $authService);
 
         } elseif ($class === 'App\Controllers\RestaurantController') {
-            $repository = new \App\Repositories\RestaurantRepository();
-            $chefRepo = new \App\Repositories\ChefRepository();
-            $service = new \App\Services\RestaurantService($repository);
-            $chefService = new \App\Services\ChefService($chefRepo);
-            $controller = new $class($service, $chefService);
+            $repository = new \App\Repositories\Yummy\RestaurantRepository();
+            $chefRepo = new \App\Repositories\Yummy\ChefRepository();
+            $sessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
+            $service = new \App\Services\Yummy\RestaurantService($repository);
+            $chefService = new \App\Services\Yummy\ChefService($chefRepo);
+            $sessionService = new \App\Services\Yummy\RestaurantSessionService($sessionRepo, $repository);
+            $controller = new $class($service, $chefService, $sessionService);
 
         } elseif ($class === 'App\Controllers\JazzController'){
-            $repository = new \App\Repositories\ArtistRepository();
-            $service = new \App\Services\ArtistService($repository);
-            $controller = new $class($service);
+            $artistRepository = new \App\Repositories\ArtistRepository();
+            $artistService = new \App\Services\ArtistService($artistRepository);
+            $jazzEventRepository = new \App\Repositories\JazzEventRepository();
+            $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
+            $controller = new $class($artistService, $jazzEventService);
         }
          elseif ($class === 'App\Controllers\ChefController') {
-            $chefRepo = new \App\Repositories\ChefRepository();
-            $chefService = new \App\Services\ChefService($chefRepo);
+            $chefRepo = new \App\Repositories\Yummy\ChefRepository();
+            $chefService = new \App\Services\Yummy\ChefService($chefRepo);
             $controller = new $class($chefService);
 
         } else {

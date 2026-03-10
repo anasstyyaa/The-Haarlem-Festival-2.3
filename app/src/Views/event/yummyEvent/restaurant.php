@@ -67,14 +67,13 @@ require __DIR__ . '/../../partials/header.php';
                 </div>
             <?php endif; ?>
 
-            <div class="text-center py-4">
-                <h3 class="mb-3">Ready to experience <?= htmlspecialchars($restaurant->getName()) ?>?</h3>
-                <a href="/yummy/reservation/<?= $restaurant->getId() ?>" class="btn btn-primary btn-lg px-5 shadow">
-                    Book a Table Now
-                </a>
+            <div class="col-lg-8">
+                <?php include __DIR__ . '/partials/_reservationForm.php'; ?>
             </div>
         </div>
     </div>
 </div>
+
+
 
 <?php require __DIR__ . '/../../partials/footer.php'; ?>

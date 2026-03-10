@@ -1,8 +1,8 @@
 <?php 
 
-namespace App\Repositories\Interfaces;
+namespace App\Repositories\Interfaces\Yummy;
 
-use App\Models\YummyEventModel;
+use App\Models\Yummy\YummyEventModel;
 
 interface IYummyEventRepository {
 

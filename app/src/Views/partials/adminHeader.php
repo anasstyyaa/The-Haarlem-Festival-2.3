@@ -17,15 +17,7 @@ function isActive($url) {
     <link rel="stylesheet" href="/assets/css/main.css"> 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
-    <script>
-    tinymce.init({
-        selector: '.wysiwyg-editor',
-        plugins: 'lists link image table code help wordcount',
-        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | removeformat | help',    
-        height: 400,
-        menubar: false
-    });
-    </script>
+    <script src="/js/wysiwyg.js"></script>
 
 </head>
 

@@ -2,8 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Services\Interfaces\IChefService;
-use App\Models\ChefModel;
+use App\Services\Interfaces\Yummy\IChefService;
+use App\Models\Yummy\ChefModel;
 
 class ChefController {
 

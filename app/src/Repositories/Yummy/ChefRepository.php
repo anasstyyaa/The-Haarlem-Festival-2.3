@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Yummy;
 
 use App\Framework\Repository;
-use App\Repositories\Interfaces\IChefRepository;
-use App\Models\ChefModel;
+use App\Repositories\Interfaces\Yummy\IChefRepository;
+use App\Models\Yummy\ChefModel;
 use PDO;
 
 class ChefRepository extends Repository implements IChefRepository {

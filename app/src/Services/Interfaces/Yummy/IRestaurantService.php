@@ -1,8 +1,8 @@
 <?php 
 
-namespace App\Services\Interfaces;
+namespace App\Services\Interfaces\Yummy;
 
-use App\Models\RestaurantModel;
+use App\Models\Yummy\RestaurantModel;
 
 interface IRestaurantService {
 

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\HistoryVenueModel;
 use App\Repositories\Interfaces\IHistoryEventRepository;
 use App\Repositories\Interfaces\IHistoryVenueRepository;
 use App\Services\Interfaces\IHistoryService;
@@ -27,12 +28,33 @@ class HistoryService implements IHistoryService
         return $this->historyEventRepo->getAll();
     }
 
-    
+
     public function getSessionByEventId(int $eventId): ?HistoryEventModel
     {
         return $this->historyEventRepo->getByEventId($eventId);
     }
+    public function getAllVenues(): array
+    {
+        return $this->historyVenueRepo->getAll();
+    }
 
-    
+    public function getVenueById(int $venueId): ?HistoryVenueModel
+    {
+        return $this->historyVenueRepo->getById($venueId);
+    }
 
+    public function createVenue(HistoryVenueModel $venue): bool
+    {
+        return $this->historyVenueRepo->create($venue);
+    }
+
+    public function updateVenue(HistoryVenueModel $venue): bool
+    {
+        return $this->historyVenueRepo->update($venue);
+    }
+
+    public function deleteVenue(int $venueId): bool
+    {
+        return $this->historyVenueRepo->delete($venueId);
+    }
 }

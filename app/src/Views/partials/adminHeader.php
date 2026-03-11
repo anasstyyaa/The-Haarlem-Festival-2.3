@@ -17,15 +17,7 @@ function isActive($url) {
     <link rel="stylesheet" href="/assets/css/main.css"> 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
-    <script>
-    tinymce.init({
-        selector: '.wysiwyg-editor',
-        plugins: 'lists link image table code help wordcount',
-        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | removeformat | help',    
-        height: 400,
-        menubar: false
-    });
-    </script>
+    <script src="/js/wysiwyg.js"></script>
 
 </head>
 
@@ -65,6 +57,11 @@ function isActive($url) {
                 <li class="nav-item">
                     <a href="/admin/yummy" class="nav-link <?= isActive('/admin/yummy') ?>">
                         <i class="bi bi-cup-hot me-2"></i> Yummy
+                    </a>
+                </li>
+                 <li class="nav-item">
+                    <a href="/admin/kidsPage" class="nav-link <?= isActive('/admin/kidsPage') ?>">
+                        <i class="bi bi-cup-hot me-2"></i> Kids Page
                     </a>
                 </li>
             </ul>

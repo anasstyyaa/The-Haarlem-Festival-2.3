@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Yummy;
 
-use App\Models\RestaurantModel;
-use App\Repositories\Interfaces\IRestaurantRepository;
-use App\Services\Interfaces\IRestaurantService;
+use App\Models\Yummy\RestaurantModel;
+use App\Repositories\Interfaces\Yummy\IRestaurantRepository;
+use App\Services\Interfaces\Yummy\IRestaurantService;
 
 class RestaurantService implements IRestaurantService {
     private IRestaurantRepository $repository;

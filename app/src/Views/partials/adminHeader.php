@@ -15,6 +15,10 @@ function isActive($url) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/assets/css/main.css"> 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+    <script src="/js/wysiwyg.js"></script>
+
 </head>
 
 <body class="admin-page"> 
@@ -53,6 +57,16 @@ function isActive($url) {
                 <li class="nav-item">
                     <a href="/admin/yummy" class="nav-link <?= isActive('/admin/yummy') ?>">
                         <i class="bi bi-cup-hot me-2"></i> Yummy
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/history/venues" class="nav-link <?= isActive('/admin/history/venues') ?>">
+                        <i class="bi bi-geo-alt-fill me-2"></i> History Venues
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/kidsPage" class="nav-link <?= isActive('/admin/kidsPage') ?>">
+                        <i class="bi bi-balloon-heart me-2"></i> Kids Page
                     </a>
                 </li>
             </ul>

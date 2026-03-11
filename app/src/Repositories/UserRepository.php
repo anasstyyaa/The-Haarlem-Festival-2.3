@@ -118,6 +118,7 @@ class UserRepository extends Repository implements IUserRepository
         return array_map(fn($row) => $this->mapToModel($row), $results);
     }
     public function updateProfile(\App\Models\UserModel $user): bool
+    public function updateProfile(UserModel $user): bool
     {
         $sql = "UPDATE dbo.Users
             SET Email = :email,

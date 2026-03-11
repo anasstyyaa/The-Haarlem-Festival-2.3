@@ -1,10 +1,10 @@
 <?php 
 
-namespace App\Repositories;
+namespace App\Repositories\Yummy;
 
 use App\Framework\Repository;
-use App\Models\RestaurantModel;
-use App\Repositories\Interfaces\IRestaurantRepository;
+use App\Models\Yummy\RestaurantModel;
+use App\Repositories\Interfaces\Yummy\IRestaurantRepository;
 use PDO;
 
 class RestaurantRepository extends Repository implements IRestaurantRepository{
@@ -23,21 +23,26 @@ class RestaurantRepository extends Repository implements IRestaurantRepository{
     }
 
     public function create(RestaurantModel $restaurant): bool {
-        $sql = "INSERT INTO Restaurants (name, description, location, cuisine, image_url) 
-                VALUES (:name, :description, :location, :cuisine, :image_url)";
+        $sql = "INSERT INTO Restaurants (name, description, location, cuisine, image_url, long_description, chef_id, session_duration, reservation_fee, total_slots) 
+                VALUES (:name, :description, :location, :cuisine, :image_url, :long_description, :chef_id, :duration, :fee, :slots)";
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'name' => $restaurant->getName(),
             'description' => $restaurant->getDescription(),
             'location' => $restaurant->getLocation(),
             'cuisine' => $restaurant->getCuisine(),
-            'image_url' => $restaurant->getImageUrl()
+            'image_url' => $restaurant->getImageUrl(),
+            'long_description' => $restaurant->getLongDescription(),
+            'chef_id' => $restaurant->getChefId(),
+            'duration' => $restaurant->getSessionDuration(),
+            'fee' => $restaurant->getReservationFee(),
+            'slots' => $restaurant->getTotalSlots()
         ]);
     }
 
     public function update(RestaurantModel $restaurant): bool {
         $sql = "UPDATE Restaurants SET name = :name, description = :description, 
-                location = :location, cuisine = :cuisine, image_url = :image_url 
+                location = :location, cuisine = :cuisine, image_url = :image_url, long_description = :long_description, chef_id = :chef_id, session_duration = :duration, reservation_fee = :fee, total_slots = :slots
                 WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
@@ -46,7 +51,12 @@ class RestaurantRepository extends Repository implements IRestaurantRepository{
             'description' => $restaurant->getDescription(),
             'location' => $restaurant->getLocation(),
             'cuisine' => $restaurant->getCuisine(),
-            'image_url' => $restaurant->getImageUrl()
+            'image_url' => $restaurant->getImageUrl(),
+            'long_description' => $restaurant->getLongDescription(),
+            'chef_id' => $restaurant->getChefId(), 
+            'duration' => $restaurant->getSessionDuration(),
+            'fee' => $restaurant->getReservationFee(),
+            'slots' => $restaurant->getTotalSlots()
         ]);
     }
 

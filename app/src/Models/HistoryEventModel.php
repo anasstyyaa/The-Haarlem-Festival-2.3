@@ -5,7 +5,7 @@ namespace App\Models;
 class HistoryEventModel
 {
     private int $eventId;
-    private int $historyEventId;
+    private int $historyEventId;  //will use when editing history events 
     private string $slotDate;
     private string $startTime;
     private string $language;

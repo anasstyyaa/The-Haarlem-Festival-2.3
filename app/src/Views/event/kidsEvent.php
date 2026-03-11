@@ -29,7 +29,7 @@ use App\ViewModels\PageElementViewModel;
 <body>
     <?php foreach ($vm->getSections() as $section => $elements): ?>
     
-    <div class="section <?= htmlspecialchars($section) ?>">
+    <div class="section<?= htmlspecialchars($section) ?>">
         
         <?php foreach ($elements as $element): ?>
             <?= $element->render(); ?>
@@ -72,5 +72,6 @@ use App\ViewModels\PageElementViewModel;
             <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
 </body>
 </html>

@@ -5,7 +5,7 @@
     <a href="/admin/yummy/create" class="btn btn-primary">Add New Restaurant</a>
 </div>
 
-<div class="card shadow-sm border-0">
+<div class="card shadow-sm border-0 mb-5">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
@@ -26,9 +26,7 @@
                     <?php foreach ($restaurants as $restaurant): ?>
                         <tr>
                             <td class="ps-3"><?= $restaurant->getId() ?></td>
-                            <td>
-                                <strong><?= htmlspecialchars($restaurant->getName()) ?></strong>
-                            </td>
+                            <td><strong><?= htmlspecialchars($restaurant->getName()) ?></strong></td>
                             <td>
                                 <span class="badge bg-info text-dark">
                                     <?= htmlspecialchars($restaurant->getCuisine()) ?>
@@ -39,15 +37,95 @@
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modal-<?= $restaurant->getId() ?>">
+                                        <i class="bi bi-search"></i> View Detailed Page
+                                    </button>
+
                                     <a href="/admin/yummy/edit/<?= $restaurant->getId() ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
                                     
                                     <a href="/admin/yummy/delete/<?= $restaurant->getId() ?>" 
-                                       class="btn btn-sm btn-outline-danger" 
-                                       onclick="return confirm('Are you sure you want to delete this restaurant?')">
+                                    class="btn btn-sm btn-outline-danger" 
+                                    onclick="return confirm('Are you sure you want to delete this restaurant?')">
                                         <i class="bi bi-trash"></i> Delete
                                     </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <div class="modal fade" id="modal-<?= $restaurant->getId() ?>" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-light">
+                                        <h5 class="modal-title">Content Preview: <?= htmlspecialchars($restaurant->getName()) ?></h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body" style="max-height: 500px; overflow-y: auto;">                     
+                                        <div>
+                                            <label class="fw-bold text-muted small text-uppercase">Detailed Page Content</label>
+                                            <div class="p-3 border rounded bg-white">
+                                                <?= $restaurant->getLongDescription() ?: '<span class="text-muted">No detailed content.</span>' ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <a href="/admin/yummy/edit/<?= $restaurant->getId() ?>" class="btn btn-primary">Edit This Content</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<hr class="my-5 opacity-25">
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <h2><i class="bi bi-person-badge me-2"></i>Manage Chefs</h2>
+    <a href="/admin/chefs/create" class="btn btn-primary">Add New Chef</a>
+</div>
+
+<div class="card shadow-sm border-0 mb-5">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th class="ps-3">ID</th>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Experience</th>
+                    <th>Description</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($chefs)): ?>
+                    <tr><td colspan="6" class="text-center py-4 text-muted">No chefs found in database.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($chefs as $chef): ?>
+                        <tr>
+                            <td class="ps-3"><?= $chef->getId() ?></td>
+                            <td>
+                                <?php if($chef->getImageUrl()): ?>
+                                    <img src="<?= $chef->getImageUrl() ?>" alt="Chef" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                <?php else: ?>
+                                    <div class="bg-secondary rounded-circle d-inline-block" style="width: 40px; height: 40px;"></div>
+                                <?php endif; ?>
+                            </td>
+                            <td><strong><?= htmlspecialchars($chef->getName()) ?></strong></td>
+                            <td><?= $chef->getExperienceYears() ?> years</td>
+                            <td><small class="text-truncate d-inline-block" style="max-width: 250px;"><?= strip_tags($chef->getDescription()) ?></small></td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="/admin/chefs/edit/<?= $chef->getId() ?>" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
+                                    <a href="/admin/chefs/delete/<?= $chef->getId() ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete chef?')"><i class="bi bi-trash"></i> Delete</a>
                                 </div>
                             </td>
                         </tr>

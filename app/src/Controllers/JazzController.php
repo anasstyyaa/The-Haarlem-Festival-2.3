@@ -19,10 +19,11 @@ class JazzController
 
     public function index()
     {
+        //getting the selected day-> default "all" 
         $selectedDay = $_GET['day'] ?? 'all';
         $artists = $this->artistService->getAllArtists();
 
-        $lineup = [];
+        $lineup = [];  //lineup array to hold artists and their events for the selected day
 
         foreach ($artists as $artist) {
             $events = $this->artistService->getJazzEventsForArtist($artist->getId());
@@ -31,10 +32,10 @@ class JazzController
                 continue;
             }
 
-            $filteredEvents = [];
+            $filteredEvents = [];  //filter events based on selected day
 
             foreach ($events as $event) {
-                $eventDay = strtolower(date('D', strtotime($event['StartDateTime'])));
+                $eventDay = strtolower(date('D', strtotime($event['StartDateTime'])));   //get the day of the week for the event (e.g., "thu", "fri", etc.)
 
                 if (
                     $selectedDay === 'all' ||
@@ -45,17 +46,17 @@ class JazzController
                 ) {
                     $filteredEvents[] = $event;
                 }
+            }
+            //prevent showing artists without events for the selected day
+            if (!empty($filteredEvents)) {
+                $lineup[] = [
+                    'artist' => $artist,
+                    'events' => $filteredEvents
+                ];
+            }
         }
 
-        if (!empty($filteredEvents)) {
-            $lineup[] = [
-                'artist' => $artist,
-                'events' => $filteredEvents
-            ];
-        }
-    }
-
-    include __DIR__ . '/../Views/event/jazz/index.php';
+        include __DIR__ . '/../Views/event/jazz/index.php';
     }
 
     public function detail($vars)
@@ -145,7 +146,7 @@ class JazzController
                 exit;
             }
         }
-
+        //need the artists to show in the dropdown when creating an event. (If it were inside the POST block, Then opening the page normally would give: "Undefined variable: artists", because the view needs artists!)
         $artists = $this->artistService->getAllArtists();
         include __DIR__ . '/../Views/admin/jazz/createEvent.php';
     }
@@ -165,11 +166,6 @@ class JazzController
 
     public function showEditEventForm($vars)
     {
-        if (!isset($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
-
         $id = (int)$vars['id'];
         $event = $this->jazzEventService->getJazzEventById($id);
 

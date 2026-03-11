@@ -37,18 +37,19 @@ if (session_status() === PHP_SESSION_NONE) {
   <div class="nav-icons">
     <span>🔍</span>
     <span>🌐</span>
-    <a href="/personal-program" class="icon-link" title="Personal program">👤</a>
+
+    <a href="/personalProgram" class="icon-link" title="Personal Program">🎟️</a>
+
+    <a href="/profile" class="icon-link" title="Profile">👤</a>
 
     <?php if (!isset($_SESSION['user'])): ?>
-      <a href="/login" class="login-btn">Login</a>
-    <?php endif; ?>
-    <?php if (isset($_SESSION['user'])): ?>
-      <a href="/logout" class="login-btn">Logout</a>
+        <a href="/login" class="login-btn">Login</a>
     <?php endif; ?>
 
-    
-    
-  </div>
+    <?php if (isset($_SESSION['user'])): ?>
+        <a href="/logout" class="login-btn">Logout</a>
+    <?php endif; ?>
+</div>
 </header>
 
 

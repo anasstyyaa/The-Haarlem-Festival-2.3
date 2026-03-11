@@ -82,6 +82,14 @@ class EventRepository extends Repository
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return (int)$row['id'];
+    if ($row) {
+        return (int)$row['id'];
+    }
+
+    $tempEvent = new EventModel(0, EventTypeEnum::from($eventType), $subEventId); // id = 0 because the create method will assign the new ID after insertion
+
+    $this->create($tempEvent);
+
+    return (int)$this->connection->lastInsertId();
     }
 }

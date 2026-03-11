@@ -17,7 +17,7 @@ class PersonalProgramService
         $this->userRepository = new UserRepository();
     }
 
-    public function addTicketToProgram(int $eventId, int $numberOfPeople, ?int $userId): void {
+    public function addTicketToProgram(int $eventId, int $numberOfPeople, ?int $userId, ?int $programItemId = null): void {
 
     $event = $this->eventRepository->getById($eventId);
 
@@ -27,6 +27,10 @@ class PersonalProgramService
     }
 
     $ticket = new TicketModel(0, $event, $user, $numberOfPeople);
+
+    if ($programItemId !== null) {
+        $ticket->setProgramItemId($programItemId);
+    }
 
     $program = $_SESSION['program'] ?? new PersonalProgram();
     $program->addTicket($ticket);

@@ -24,13 +24,21 @@ class TicketController
     $numberOfPeople = $_POST['number_of_people'];
     $eventType = $_POST['event_type'];
     $userId = $_SESSION['user_id'] ?? null;
+    $programItemId = $_POST['program_item_id'] ?? null;
     
     $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
+
+    if ($eventId === 0) {
+        $_SESSION['error'] = "Configuration Error: No Event found for this restaurant (Type: $eventType, ID: $subEventId).";
+        header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
+        exit;
+    }
 
     $this->programService->addTicketToProgram(
         $eventId,
         $numberOfPeople,
-        $userId
+        $userId,
+        $programItemId
     );
 //     var_dump($_SESSION['program']);
 // exit;

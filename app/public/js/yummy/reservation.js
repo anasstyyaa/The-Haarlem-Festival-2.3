@@ -1,5 +1,3 @@
-// public/js/yummy-reservation.js
-
 function initReservationForm(sessionsByDate) {
     const dateSelect = document.getElementById('dateSelect');
     const section = document.getElementById('timeSlotSection');
@@ -28,7 +26,7 @@ function initReservationForm(sessionsByDate) {
 
                 btn.innerHTML = `
                     <strong>${timeStr}</strong><br>
-                    <small>${slots} left</small>
+                    <small class="slot-text">${slots} left</small>
                 `;
                 
                 if (slots <= 0) {
@@ -41,10 +39,15 @@ function initReservationForm(sessionsByDate) {
                     document.querySelectorAll('#timeSlotButtons .btn').forEach(b => {
                         b.classList.remove('btn-dark');
                         b.classList.add('btn-outline-dark');
+                        const st = b.querySelector('.slot-text');
+                        if(st) st.classList.replace('text-white-50', 'text-muted');
                     });
 
                     this.classList.remove('btn-outline-dark');
                     this.classList.add('btn-dark');
+                    
+                    const selectedText = this.querySelector('.slot-text');
+                    if(selectedText) selectedText.classList.replace('text-muted', 'text-white-50');
                     
                     sessionInput.value = session.id;
                 };

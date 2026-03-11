@@ -19,8 +19,43 @@ class JazzController
 
     public function index()
     {
+        $selectedDay = $_GET['day'] ?? 'all';
         $artists = $this->artistService->getAllArtists();
-        include __DIR__ . '/../Views/event/jazz/index.php';
+
+        $lineup = [];
+
+        foreach ($artists as $artist) {
+            $events = $this->artistService->getJazzEventsForArtist($artist->getId());
+
+            if (empty($events)) {
+                continue;
+            }
+
+            $filteredEvents = [];
+
+            foreach ($events as $event) {
+                $eventDay = strtolower(date('D', strtotime($event['StartDateTime'])));
+
+                if (
+                    $selectedDay === 'all' ||
+                    ($selectedDay === 'thu' && $eventDay === 'thu') ||
+                    ($selectedDay === 'fri' && $eventDay === 'fri') ||
+                    ($selectedDay === 'sat' && $eventDay === 'sat') ||
+                    ($selectedDay === 'sun' && $eventDay === 'sun')
+                ) {
+                    $filteredEvents[] = $event;
+                }
+        }
+
+        if (!empty($filteredEvents)) {
+            $lineup[] = [
+                'artist' => $artist,
+                'events' => $filteredEvents
+            ];
+        }
+    }
+
+    include __DIR__ . '/../Views/event/jazz/index.php';
     }
 
     public function detail($vars)

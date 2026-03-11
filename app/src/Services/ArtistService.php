@@ -43,4 +43,9 @@ class ArtistService implements IArtistService
     {
         return $this->repository->delete($id);
     }
+
+    public function getJazzLineup(): array
+    {
+        return $this->repository->getJazzLineup();
+    }
 }

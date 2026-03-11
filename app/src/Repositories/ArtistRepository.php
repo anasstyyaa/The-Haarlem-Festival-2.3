@@ -92,5 +92,32 @@ class ArtistRepository extends Repository implements IArtistRepository{
         return $stmt->execute(['id' => $id]);
     }
 
+    public function getJazzLineup(): array
+    {
+        $sql = "
+            SELECT
+                a.ArtistID,
+                a.ArtistName,
+                a.ShortDescription,
+                a.ImageURL,
+                je.StartDateTime,
+                je.EndDateTime,
+                je.Price,
+                v.VenueName,
+                v.HallName
+            FROM Artist a
+            JOIN JazzEvent je ON je.ArtistID = a.ArtistID
+            JOIN JazzVenue v ON v.JazzVenueID = je.JazzVenueID
+            WHERE a.deleted_at IS NULL
+            AND je.deleted_at IS NULL
+            ORDER BY je.StartDateTime ASC, a.ArtistName ASC
+        ";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
 }

@@ -17,4 +17,6 @@ interface IArtistService
 
     public function deleteArtist(int $id): bool;
     
+    public function getJazzLineup(): array;
+    
 }

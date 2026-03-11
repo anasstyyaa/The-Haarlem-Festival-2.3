@@ -17,4 +17,5 @@ interface IArtistRepository
     public function update(int $id, ArtistModel $artist): bool;
 
     public function delete(int $id): bool;
+    public function getJazzLineup(): array; 
 }

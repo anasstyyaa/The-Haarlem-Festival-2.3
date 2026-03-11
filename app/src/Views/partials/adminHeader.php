@@ -59,9 +59,14 @@ function isActive($url) {
                         <i class="bi bi-cup-hot me-2"></i> Yummy
                     </a>
                 </li>
-                 <li class="nav-item">
+                <li class="nav-item">
+                    <a href="/admin/history/venues" class="nav-link <?= isActive('/admin/history/venues') ?>">
+                        <i class="bi bi-geo-alt-fill me-2"></i> History Venues
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="/admin/kidsPage" class="nav-link <?= isActive('/admin/kidsPage') ?>">
-                        <i class="bi bi-cup-hot me-2"></i> Kids Page
+                        <i class="bi bi-balloon-heart me-2"></i> Kids Page
                     </a>
                 </li>
             </ul>

@@ -18,7 +18,7 @@
 </div>
 
 <div class="section" id="selectedSessionContainer" style="display:none;">
-    <h2>Selected Session</h2>
+    <h2>Selected Tour</h2>
     <div style="border:1px solid #ccc; padding:10px; width:fit-content;">
         <strong>Date:</strong> <span id="selectedDate"></span><br>
         <strong>Time:</strong> <span id="selectedTime"></span><br>

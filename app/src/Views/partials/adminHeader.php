@@ -61,7 +61,7 @@ function isActive($url) {
                 </li>
                 <li class="nav-item">
                     <a href="/admin/history/venues" class="nav-link <?= isActive('/admin/history/venues') ?>">
-                        <i class="bi bi-geo-alt-fill me-2"></i> History Venues
+                        <i class="bi bi-geo-alt-fill me-2"></i> History
                     </a>
                 </li>
                 <li class="nav-item">

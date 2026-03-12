@@ -16,5 +16,6 @@ interface IUserRepository
     public function adminGetAll(): array;
     //public function findByUserName (string $userName): ?array; 
     public function updateProfile(UserModel $user): bool;
+    public function getAllFiltered(string $search = '', string $role = '', string $sort = ''): array;
     
 }

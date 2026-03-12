@@ -117,6 +117,7 @@ class UserRepository extends Repository implements IUserRepository
 
         return array_map(fn($row) => $this->mapToModel($row), $results);
     }
+
     public function updateProfile(\App\Models\UserModel $user): bool
     {
         $sql = "UPDATE dbo.Users
@@ -140,5 +141,43 @@ class UserRepository extends Repository implements IUserRepository
             'password' => $user->getPassword(),
             'profilePicture' => $user->getProfilePicture()
         ]);
+    }
+
+    public function getAllFiltered(string $search = '', string $role = '', string $sort = ''): array
+    {
+        $query = "SELECT * FROM [Users] WHERE 1=1";
+        $params = [];
+
+        if (!empty($search)) {
+            // Use unique placeholders for each column
+            $query .= " AND (FullName LIKE :search1 OR Email LIKE :search2 OR UserName LIKE :search3)";
+            $params['search1'] = "%$search%";
+            $params['search2'] = "%$search%";
+            $params['search3'] = "%$search%";
+        }
+
+        if (!empty($role)) {
+            $query .= " AND Role = :role";
+            $params['role'] = $role;
+        }
+
+        // Apply Sorting (Using the correct DB column names)
+        switch ($sort) {
+            case 'name_asc': 
+                $query .= " ORDER BY FullName ASC"; 
+                break;
+            case 'created_at_asc': 
+                $query .= " ORDER BY Created_At ASC"; 
+                break;
+            default: 
+                $query .= " ORDER BY Created_At DESC"; 
+                break;
+        }
+
+        $stmt = $this->connection->prepare($query);
+        $stmt->execute($params); 
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($row) => $this->mapToModel($row), $results);
     }
 }

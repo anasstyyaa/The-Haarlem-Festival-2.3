@@ -25,8 +25,12 @@ class UserController
             echo 'Forbidden';
             exit;
         }
+        $search = $_GET['search'] ?? '';
+        $role = $_GET['role'] ?? '';
+        $sort = $_GET['sort'] ?? 'created_at_desc';
 
-        $users = $this->userService->adminGetAll();
+        $users = $this->userService->getFilteredUsers($search, $role, $sort);
+
         require_once __DIR__ . '/../Views/admin/users/index.php';
     }
 

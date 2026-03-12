@@ -210,3 +210,4 @@
 
     renderAll();
 </script>
+<?php include __DIR__ . '/../../partials/flashMessage.php'; ?>

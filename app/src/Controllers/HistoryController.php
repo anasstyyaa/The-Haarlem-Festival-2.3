@@ -77,6 +77,7 @@ class HistoryController
             $numberOfPeople,
             $userId
         );
+        $_SESSION['flash_success'] = "Your booking for $numberOfPeople people has been successfully added to your Personal Program.";
         header('Location: /history');
         exit;
     }

@@ -13,4 +13,6 @@ interface IUserService
     public function deleteUser(int $id): bool;
     public function restoreUser(int $id): bool;
     public function adminGetAll(): array;
+    public function updateOwnProfile(UserModel $user): bool;
+    public function getFilteredUsers(string $search = '', string $role = '', string $sort = ''): array;
 }

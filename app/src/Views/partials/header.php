@@ -11,6 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/assets/css/main.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body class="<?= isset($bodyClass) ? htmlspecialchars($bodyClass) : '' ?>">
@@ -37,18 +38,19 @@ if (session_status() === PHP_SESSION_NONE) {
   <div class="nav-icons">
     <span>🔍</span>
     <span>🌐</span>
-    <a href="/personal-program" class="icon-link" title="Personal program">👤</a>
+
+    <a href="/personalProgram" class="icon-link" title="Personal Program">🎟️</a>
+
+    <a href="/profile" class="icon-link" title="Profile">👤</a>
 
     <?php if (!isset($_SESSION['user'])): ?>
-      <a href="/login" class="login-btn">Login</a>
-    <?php endif; ?>
-    <?php if (isset($_SESSION['user'])): ?>
-      <a href="/logout" class="login-btn">Logout</a>
+        <a href="/login" class="login-btn">Login</a>
     <?php endif; ?>
 
-    
-    
-  </div>
+    <?php if (isset($_SESSION['user'])): ?>
+        <a href="/logout" class="login-btn">Logout</a>
+    <?php endif; ?>
+</div>
 </header>
 
 

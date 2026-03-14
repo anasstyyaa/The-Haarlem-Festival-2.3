@@ -42,6 +42,8 @@ class TicketController
     );
 //     var_dump($_SESSION['program']);
 // exit;
+    $_SESSION['flash_success'] = "Your booking for $numberOfPeople people has been successfully added to your Personal Program.";
+
     header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
 exit;
 }

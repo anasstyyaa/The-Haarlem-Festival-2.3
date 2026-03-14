@@ -37,4 +37,15 @@ class PageElementRepository extends Repository
             (int)$row['position'],
         );
     }
+    public function getById(int $id): ?PageElementModel
+    {
+        $sql = "SELECT * FROM pageElement WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute(['id' => $id]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? $this->mapToModel($row) : null;
+    }
 }

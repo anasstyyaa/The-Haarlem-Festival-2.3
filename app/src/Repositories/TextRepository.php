@@ -6,7 +6,7 @@ use App\Framework\Repository;
 use App\Models\TextModel;
 use PDO;
 
-class TextRepository extends Repository
+class TextRepository extends Repository 
 {
     public function getById(int $id): ?TextModel
     {
@@ -26,5 +26,12 @@ class TextRepository extends Repository
             (int)$row['id'],
             $row['content'] ?? ''
         );
+    }
+    public function saveTextChanges($id, $newText){
+        $sql = "UPDATE text SET content = :content WHERE id = :id";
+        return $this->connection->prepare($sql)->execute([
+            'id'   => $id,
+            'content' => $newText
+        ]);
     }
 }

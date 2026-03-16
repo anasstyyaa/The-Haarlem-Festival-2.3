@@ -3,19 +3,44 @@ namespace App\Controllers;
 
 use App\Services\PersonalProgramService;
 use App\Repositories\EventRepository;
+use App\Models\PersonalProgram;
+
+use App\Services\Yummy\RestaurantService;
+use App\Repositories\Yummy\RestaurantRepository;
 
 class TicketController
 {
     private PersonalProgramService $programService;
     private EventRepository $eventRepo;
+    private RestaurantService $restaurantService;
 
     public function __construct()
     {
         $this->programService = new PersonalProgramService();
         $this->eventRepo = new EventRepository();
+        $this->restaurantService = new RestaurantService(new RestaurantRepository());
+
     }
-    public function index():void{
-          require __DIR__ . '/../Views/personalProgram/personalProgram.php';
+
+    public function index(): void {
+        $program = $_SESSION['program'] ?? new PersonalProgram();
+        $tickets = $program->getTickets();
+
+        foreach ($tickets as $ticket) {
+            $event = $ticket->getEvent();
+            $subId = $event->getSubEventId();
+
+            // strcasecmp for case-insensitive comparison
+            if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
+                $restaurant = $this->restaurantService->getRestaurantById($subId);
+                
+                if ($restaurant) {
+                    $event->setDetails($restaurant); 
+                }
+            }
+        }
+
+        require __DIR__ . '/../Views/personalProgram/personalProgram.php';
     }
 
    public function addTicket(): void

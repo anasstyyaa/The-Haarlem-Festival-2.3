@@ -9,12 +9,15 @@ class EventModel
     private int $id;
     private EventTypeEnum $eventType;
     private int $subEventId;
+    private $details = null;
 
-    public function __construct(int $id, EventTypeEnum $eventType, int $subEventId)
+
+    public function __construct(int $id, EventTypeEnum $eventType, int $subEventId, $details = null)
     {
         $this->id = $id;
         $this->eventType = $eventType;
         $this->subEventId = $subEventId;
+        $this->details = $details;
     }
 
     public function getId(): int
@@ -30,5 +33,13 @@ class EventModel
     public function getSubEventId(): int
     {
         return $this->subEventId;
+    }
+
+    public function setDetails($details) {
+        $this->details = $details;
+    }
+
+    public function getDetails() {
+        return $this->details;
     }
 }

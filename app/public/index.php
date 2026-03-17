@@ -71,11 +71,16 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/register', ['App\Controllers\AuthController', 'showRegisterForm']);
     $r->addRoute('POST', '/register', ['App\Controllers\AuthController', 'register']);
 
-    $r->addRoute('POST', '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
-    $r->addRoute('GET', '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
-    $r->addRoute('GET', '/personalProgram', ['App\Controllers\TicketController', 'index']);
-    $r->addRoute('GET', '/admin/kidsPage', ['App\Controllers\KidsEventController', 'adminIndex']);
-    $r->addRoute('GET', '/admin/elements/edit/{id:\d+}', ['App\Controllers\PageElementController', 'showEditForm']);
+
+    // Ticket and Personal Program + Kids Event routes
+    $r->addRoute('POST',  '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
+    $r->addRoute('GET',  '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
+    $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
+    $r->addRoute('GET',  '/admin/kidsPage', ['App\Controllers\KidsEventController', 'adminIndex']);
+    $r->addRoute('GET',  '/admin/elements/edit/{id:\d+}', ['App\Controllers\PageElementController', 'showEditForm']);
+    $r->addRoute('POST',  '/admin/elements/edit/{id:\d+}', ['App\Controllers\PageElementController', 'saveTextChanges']);
+    $r->addRoute('GET',  '/admin/elements/editImg/{id:\d+}', ['App\Controllers\PageElementController', 'showImgEditForm']);
+    $r->addRoute('POST',  '/admin/elements/editImg/{id:\d+}', ['App\Controllers\PageElementController', 'saveImgChanges']);
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
@@ -84,7 +89,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // User Profile Routes
     $r->addRoute('GET',  '/profile',       ['App\Controllers\UserController', 'profile']);
     $r->addRoute('GET',  '/profile/edit',  ['App\Controllers\UserController', 'editProfile']);
-    $r->addRoute('POST', '/profile/edit',  ['App\Controllers\UserController', 'editProfile']); // same method handles POST like your admin edit()
+    $r->addRoute('POST', '/profile/edit',  ['App\Controllers\UserController', 'editProfile']); // same method handles POST like admin edit()
     $r->addRoute('POST', '/profile/delete',['App\Controllers\UserController', 'deleteSelf']);
     // History routes
     $r->addRoute('GET', '/history', ['App\Controllers\HistoryController', 'index']);
@@ -96,7 +101,6 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
-    // Yummy / Reservation
 });
 
 /**

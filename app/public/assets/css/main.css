@@ -761,3 +761,29 @@ body.admin-page #sidebar .nav-item {
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
+/* Personal Program Specific Styles */
+.program-container {
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+.table-event-icon {
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+.ticket-row:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+.btn-remove {
+    color: #dc3545;
+    background: none;
+    border: 1px solid #dc3545;
+    transition: all 0.2s;
+}
+
+.btn-remove:hover {
+    background-color: #dc3545;
+    color: white;
+}

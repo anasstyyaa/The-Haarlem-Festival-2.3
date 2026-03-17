@@ -1,6 +1,8 @@
 <?php 
 use App\ViewModels\KidsEventViewModel;
 use App\ViewModels\PageElementViewModel;
+use App\Models\TextModel;
+use App\Models\ImageModel;
 /** @var KidsEventViewModel $vmKids */
 /** @var PageElementViewModel $vm */
 ?>
@@ -96,10 +98,14 @@ th {
 
 <td>
 <div class="actions">
-
+<?php if($element instanceof TextModel){ ?>
  <a href="/admin/elements/edit/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
+                                    <?php } elseif($element instanceof ImageModel){?>
+                                   <a href="/admin/elements/editImg/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a> <?php } ?>
 
 <form method="POST" action="/admin/elements/delete"
 onsubmit="return confirm('Delete this element?')">

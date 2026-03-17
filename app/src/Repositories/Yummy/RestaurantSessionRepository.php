@@ -108,8 +108,9 @@ class RestaurantSessionRepository extends Repository implements IRestaurantSessi
     public function beginTransaction() { $this->connection->beginTransaction(); }
     public function commit() { $this->connection->commit(); }
     public function rollBack() { $this->connection->rollBack(); }
+    
     public function saveSingleSession(RestaurantSessionModel $session) {
-        $query = "INSERT INTO restaurant_sessions (restaurant_id, session_date, start_time, available_slots) 
+        $query = "INSERT INTO RestaurantSessions (restaurant_id, [date], startTime, available_slots) 
                 VALUES (?, ?, ?, ?)";
         $stmt = $this->connection->prepare($query);
         $stmt->execute([

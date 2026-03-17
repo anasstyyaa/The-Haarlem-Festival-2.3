@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Services;
-
 use App\Models\HistoryVenueModel;
 use App\Repositories\Interfaces\IHistoryEventRepository;
 use App\Repositories\Interfaces\IHistoryVenueRepository;

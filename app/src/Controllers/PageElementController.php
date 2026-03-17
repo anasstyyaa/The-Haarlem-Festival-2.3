@@ -4,29 +4,24 @@ namespace App\Controllers;
 
 use App\Repositories\PageElementRepository;
 use App\Repositories\TextRepository;
+use App\Repositories\ImageRepository;
 use App\Models\PageElementModel;
 use App\Models\TextModel;
+use App\Models\ImageModel;
 
 class PageElementController
 {
-   // private PageElementRepository $service;
-    private TextRepository $service;
+    private PageElementRepository $service;
+    private TextRepository $textService;
+     private ImageRepository $imgService;
 
     public function __construct()
     {
-        $this->service = new TextRepository();
+        $this->service = new PageElementRepository();
+         $this->textService = new TextRepository();
+          $this->imgService = new ImageRepository();
     }
 
-    // public function index(): void
-    // {
-    //     $elements = $this->service->getAllElements();
-    //     include __DIR__ . '/../Views/admin/pageElements/index.php';
-    // }
-
-    // public function showCreateForm(): void
-    // {
-    //     include __DIR__ . '/../Views/admin/pageElements/createElement.php';
-    // }
 
     // public function store(): void
     // {
@@ -45,16 +40,33 @@ class PageElementController
 
     public function showEditForm(array $vars): void
     {
+        // $id = (int)$vars['id'];
+        // $pageElement = $this->service->getById($id);
+        // if($pageElement->getType()=='text'){
+        //  $text = $this->textService->getById($pageElement->getId());
+        //   include __DIR__ . '/../Views/admin/text/textEditForm.php';
+        // }elseif($pageElement->getType()=='image'){
+        // $img = $this->imgService->getById($pageElement->getId());
+        // include __DIR__ . '/../Views/admin/img/imgEditForm.php';
+        // }
+         $id = (int)$vars['id'];
+       
+         $text = $this->textService->getById($id);
+          include __DIR__ . '/../Views/admin/text/textEditForm.php';
+    }
+     public function showImgEditForm(array $vars): void
+    {
         $id = (int)$vars['id'];
-
-        $text = $this->service->getById($id);
-
-        if (!$text) {
-            header('Location: /admin/page-elements');
-            exit;
-        }
-
-        include __DIR__ . '/../Views/admin/text/textEditForm.php';
+        $img = $this->imgService->getById($id);
+        include __DIR__ . '/../Views/admin/img/imgEditForm.php';
+        
+    }
+    public function saveTextChanges(array $vars):void
+    {
+       $id = (int)$vars['id'];
+       $newText = $_POST['newText'];
+       $this->textService->saveTextChanges($id, $newText);
+      header('Location: /admin/kidsPage');
     }
 
     // public function update(array $vars): void
@@ -79,15 +91,15 @@ class PageElementController
     //     exit;
     // }
 
-    // public function delete(array $vars): void
-    // {
-    //     $id = (int)$vars['id'];
+    public function delete(array $vars): void
+    {
+        $id = (int)$vars['id'];
 
-    //     if ($this->service->deleteElement($id)) {
-    //         header('Location: /admin/page-elements');
-    //         exit;
-    //     }
+        if ($this->service->deleteElement($id)) {
+            header('Location: /admin/page-elements');
+            exit;
+        }
 
-    //     echo "Error deleting element.";
-    // }
+        echo "Error deleting element.";
+    }
 }

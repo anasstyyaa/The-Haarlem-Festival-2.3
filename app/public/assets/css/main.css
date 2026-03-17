@@ -487,8 +487,9 @@ body.admin-page #sidebar .nav-item {
 
 .lineup-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
+    align-items: stretch;
 }
 
 .artist-card {
@@ -498,8 +499,8 @@ body.admin-page #sidebar .nav-item {
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    height: 100%;
 }
 
 .artist-image img {
@@ -513,33 +514,31 @@ body.admin-page #sidebar .nav-item {
 
 .artist-image{
   width: 100%;
+  margin-bottom: 16px;
 }
 
 .artist-info {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-}
-
-.artist-info a {
-    margin-top: auto;
+    gap: 8px;
 }
 
 .artist-info h3 {
     font-size: 1.4rem;
-    margin-bottom: 8px;
+    margin: 0px;
     color: white;
 }
 
 .artist-description {
-    margin-bottom: 10px;
+    margin: 0 0 10px 0; 
     line-height: 1.4;
     font-size: 0.95rem;
     color: white;
 }
 
 .artist-events {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     color: white;
     font-size: 0.9rem;
     opacity: 0.9;
@@ -568,6 +567,31 @@ body.admin-page #sidebar .nav-item {
     border-radius: 20px;
     padding: 6px 18px;
     display: inline-block;
+}
+
+.filter-btn {
+    background: #3a0d00;
+    color: white;
+    border: 2px solid #f5c5ba;
+    border-radius: 50px;
+    padding: 8px 16px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.filter-btn.active {
+    background: #f5c5ba;
+    color: #3a0d00;
+}
+
+.filter-btn:hover {
+    background: #f5c5ba;
+    color: #3a0d00;
+    transition: 0.3s ease;
+}
+
+.hidden-card {
+    display: none !important;
 }
 
 /* PAGE CONTAINER */

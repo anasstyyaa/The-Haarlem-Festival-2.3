@@ -19,44 +19,33 @@ class JazzController
 
     public function index()
     {
-        //getting the selected day-> default "all" 
-        $selectedDay = $_GET['day'] ?? 'all';
         $artists = $this->artistService->getAllArtists();
-
-        $lineup = [];  //lineup array to hold artists and their events for the selected day
+        $lineup = [];
 
         foreach ($artists as $artist) {
             $events = $this->artistService->getJazzEventsForArtist($artist->getId());
 
-            if (empty($events)) {
-                continue;
-            }
-
-            $filteredEvents = [];  //filter events based on selected day
-
-            foreach ($events as $event) {
-                $eventDay = strtolower(date('D', strtotime($event['StartDateTime'])));   //get the day of the week for the event (e.g., "thu", "fri", etc.)
-
-                if (
-                    $selectedDay === 'all' ||
-                    ($selectedDay === 'thu' && $eventDay === 'thu') ||
-                    ($selectedDay === 'fri' && $eventDay === 'fri') ||
-                    ($selectedDay === 'sat' && $eventDay === 'sat') ||
-                    ($selectedDay === 'sun' && $eventDay === 'sun')
-                ) {
-                    $filteredEvents[] = $event;
-                }
-            }
-            //prevent showing artists without events for the selected day
-            if (!empty($filteredEvents)) {
+            if (!empty($events)) {
                 $lineup[] = [
                     'artist' => $artist,
-                    'events' => $filteredEvents
+                    'events' => $events
                 ];
             }
         }
 
         include __DIR__ . '/../Views/event/jazz/index.php';
+    }
+
+    public function adminIndex()
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $artists = $this->artistService->getAllArtists();
+        $events = $this->jazzEventService->getAllJazzEvents();
+        include __DIR__ . '/../Views/admin/jazz/index.php';
     }
 
     public function detail($vars)
@@ -72,18 +61,6 @@ class JazzController
 
         $events = $this->artistService->getJazzEventsForArtist($id);
         include __DIR__ . '/../Views/event/jazz/detail.php';
-    }
-
-    public function adminIndex()
-    {
-        if (!isset($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
-
-        $artists = $this->artistService->getAllArtists();
-        $events = $this->jazzEventService->getAllJazzEvents();
-        include __DIR__ . '/../Views/admin/jazz/index.php';
     }
 
     public function showCreateForm()

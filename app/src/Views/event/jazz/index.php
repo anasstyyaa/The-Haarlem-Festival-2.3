@@ -43,32 +43,31 @@
     </div>
 
     <div class="lineup-filters">
-        <a href="/jazz?day=all" class="<?= $selectedDay === 'all' ? 'active' : '' ?>">All</a>
-        <a href="/jazz?day=thu" class="<?= $selectedDay === 'thu' ? 'active' : '' ?>">Thu 23</a>
-        <a href="/jazz?day=fri" class="<?= $selectedDay === 'fri' ? 'active' : '' ?>">Fri 24</a>
-        <a href="/jazz?day=sat" class="<?= $selectedDay === 'sat' ? 'active' : '' ?>">Sat 25</a>
-        <a href="/jazz?day=sun" class="<?= $selectedDay === 'sun' ? 'active' : '' ?>">Sun 26</a>
+        <button class="filter-btn active" data-day="all">All</button>
+        <button class="filter-btn" data-day="thu">Thu 23</button>
+        <button class="filter-btn" data-day="fri">Fri 24</button>
+        <button class="filter-btn" data-day="sat">Sat 25</button>
+        <button class="filter-btn" data-day="sun">Sun 26</button>
     </div>
 
     <div class="lineup-grid">
         <?php if (empty($lineup)): ?>
-            <p>No artists found for this day.</p>
+            <p>No artists found.</p>
         <?php else: ?>
             <?php foreach ($lineup as $item): ?>
                 <?php
                     $artist = $item['artist'];
                     $events = $item['events'];
 
-                    $lowestPrice = null;
+                    $days = [];
                     foreach ($events as $event) {
-                        $price = (float)$event['Price'];
-                        if ($lowestPrice === null || $price < $lowestPrice) {
-                            $lowestPrice = $price;
-                        }
+                        $days[] = strtolower(date('D', strtotime($event['StartDateTime'])));
                     }
+                    $days = array_unique($days);
+                    $dataDays = implode(' ', $days);
                 ?>
 
-                <div class="artist-card">
+                <div class="artist-card" data-days="<?= htmlspecialchars($dataDays) ?>">
                     <div class="artist-image">
                         <?php if ($artist->getImageUrl()): ?>
                             <img src="<?= htmlspecialchars($artist->getImageUrl()) ?>" alt="<?= htmlspecialchars($artist->getName()) ?>">
@@ -109,3 +108,4 @@
 </section>
 
 <?php require __DIR__ . '/../../partials/footer.php'; ?>
+<script src="/js/jazzFilter.js"></script>

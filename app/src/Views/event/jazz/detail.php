@@ -41,27 +41,27 @@
                         <div class="jazz-ticket-card">
                             <div class="jazz-ticket-left">
                                 <div class="jazz-ticket-date">
-                                    <?= date('D d.m.Y', strtotime($event['StartDateTime'])) ?>
+                                    <?= date('D d.m.Y', strtotime($event->getStartDateTime())) ?>
                                 </div>
 
                                 <div class="jazz-ticket-time">
-                                    <?= date('H:i', strtotime($event['StartDateTime'])) ?>
+                                    <?= date('H:i', strtotime($event->getStartDateTime())) ?>
                                     -
-                                    <?= date('H:i', strtotime($event['EndDateTime'])) ?>
+                                    <?= date('H:i', strtotime($event->getEndDateTime())) ?>
                                 </div>
 
                                 <div class="jazz-ticket-venue">
-                                    <?= htmlspecialchars($event['VenueName']) ?>
-                                    <?= !empty($event['HallName']) ? ', ' . htmlspecialchars($event['HallName']) : '' ?>
+                                    <?= htmlspecialchars($event->getVenueName() ?? '') ?>
+                                    <?= !empty($event->getHallName()) ? ', ' . htmlspecialchars($event->getHallName()) : '' ?>
                                 </div>
                             </div>
 
                             <div class="jazz-ticket-right">
                                 <div class="jazz-ticket-price">
-                                    <?php if ((float)$event['Price'] == 0.0): ?>
+                                    <?php if ((float)$event->getPrice() == 0.0): ?>
                                         Free
                                     <?php else: ?>
-                                        €<?= number_format((float)$event['Price'], 2) ?>
+                                        €<?= number_format((float)$event->getPrice(), 2) ?>
                                     <?php endif; ?>
                                 </div>
 

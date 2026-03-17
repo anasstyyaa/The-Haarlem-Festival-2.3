@@ -24,10 +24,6 @@ class ArtistService implements IArtistService
     {
         return $this->repository->getById($id);
     }
-    public function getJazzEventsForArtist(int $artistId): array
-    {
-        return $this->repository->getJazzEventsForArtist($artistId);
-    }
 
     public function createArtist(ArtistModel $artist): bool
     {

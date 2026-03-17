@@ -23,7 +23,10 @@ class JazzController
         $lineup = [];
 
         foreach ($artists as $artist) {
-            $events = $this->artistService->getJazzEventsForArtist($artist->getId());
+            $events = $this->jazzEventService->getEventsForArtist(
+                $artist->getId(),
+                \App\Models\Enums\EventTypeEnum::JazzEvent
+            );
 
             if (!empty($events)) {
                 $lineup[] = [
@@ -59,7 +62,10 @@ class JazzController
             return;
         }
 
-        $events = $this->artistService->getJazzEventsForArtist($id);
+        $events = $this->jazzEventService->getEventsForArtist(
+            $id,
+            \App\Models\Enums\EventTypeEnum::JazzEvent
+        );
         include __DIR__ . '/../Views/event/jazz/detail.php';
     }
 

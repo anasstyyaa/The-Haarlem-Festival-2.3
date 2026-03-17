@@ -61,7 +61,7 @@
 
                     $days = [];
                     foreach ($events as $event) {
-                        $days[] = strtolower(date('D', strtotime($event['StartDateTime'])));
+                        $days[] = strtolower(date('D', strtotime($event->getStartDateTime())));
                     }
                     $days = array_unique($days);
                     $dataDays = implode(' ', $days);
@@ -87,11 +87,11 @@
                             <?php foreach ($events as $event): ?>
                                 <div class="event-line">
                                     <span>
-                                        <?= date('D d M', strtotime($event['StartDateTime'])) ?>
+                                        <?= date('D d M', strtotime($event->getStartDateTime())) ?>
                                     </span>
                                     ·
                                     <span>
-                                        <?= date('H:i', strtotime($event['StartDateTime'])) ?>-<?= date('H:i', strtotime($event['EndDateTime'])) ?>
+                                        <?= date('H:i', strtotime($event->getStartDateTime())) ?>-<?= date('H:i', strtotime($event->getEndDateTime())) ?>
                                     </span>
                                 </div>
                             <?php endforeach; ?>

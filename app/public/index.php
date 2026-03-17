@@ -74,6 +74,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     // Ticket and Personal Program + Kids Event routes
     $r->addRoute('POST',  '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
+    $r->addRoute('POST', '/removeTicket', ['App\Controllers\TicketController', 'removeTicket']);
     $r->addRoute('GET',  '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
     $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
     $r->addRoute('GET',  '/admin/kidsPage', ['App\Controllers\KidsEventController', 'adminIndex']);

@@ -13,14 +13,14 @@ class PersonalProgram
     }
 
     public function addTicket(TicketModel $ticket): void
-{
-    $ticket->setProgramItemId(count($this->tickets) + 1);
-    $this->tickets[] = $ticket;
-}
+    {
+        $ticket->setProgramItemId(count($this->tickets) + 1);
+        $this->tickets[] = $ticket;
+    }
     public function removeTicket(int $ticketId): void
     {
         foreach ($this->tickets as $index => $ticket) {
-            if ($ticket->getId() === $ticketId) {
+            if ($ticket->getProgramItemId() === $ticketId) {
                 unset($this->tickets[$index]);
             }
         }

@@ -1,5 +1,22 @@
 <?php require __DIR__ . '/../../partials/header.php'; ?>
 
+<?php if (!empty($_SESSION['flash_success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow" role="alert" style="z-index: 9999; min-width: 300px;">
+        <?= htmlspecialchars($_SESSION['flash_success']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['flash_success']); ?>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow" role="alert" style="z-index: 9999; min-width: 300px;">
+        <?= htmlspecialchars($_SESSION['error']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
+
 <section class="jazz-detail-page">
     <div class="jazz-detail-container">
 
@@ -65,9 +82,31 @@
                                     <?php endif; ?>
                                 </div>
 
-                                <button class="jazz-ticket-button" type="button">
-                                    Get Ticket
-                                </button>
+                                <form method="POST" action="/addTicket" class="jazz-ticket-form">
+                                    <input type="hidden" name="event_id" value="<?= htmlspecialchars($event->getJazzEventID()) ?>">
+                                    <input type="hidden" name="event_type" value="jazz">
+
+                                    <div class="ticket-quantity-wrapper">
+                                        <div class="ticket-quantity-controls">
+                                            <button type="button" class="qty-btn" onclick="changeQty('qty-<?= $event->getJazzEventID() ?>', -1)">−</button>
+                                            <input 
+                                                id="qty-<?= $event->getJazzEventID() ?>"
+                                                class="ticket-quantity-input"
+                                                type="number"
+                                                name="number_of_people"
+                                                value="1"
+                                                min="1"
+                                                max="20"
+                                                required
+                                            >
+                                            <button type="button" class="qty-btn" onclick="changeQty('qty-<?= $event->getJazzEventID() ?>', 1)">+</button>
+                                        </div>
+                                    </div>
+
+                                    <button class="jazz-ticket-button" type="submit">
+                                        Add to Personal Program
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -79,3 +118,5 @@
 </section>
 
 <?php require __DIR__ . '/../../partials/footer.php'; ?>
+<script src="/js/ticketCounter.js"></script>
+<script src="/js/flashMessage.js"></script>

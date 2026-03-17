@@ -40,8 +40,12 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                                 $event = $ticket->getEvent();
                                 $details = $event->getDetails(); 
                                 
-                                $title = ($details) ? $details->getName() : "Event " . $event->getSubEventId();
-                                $image = ($details && method_exists($details, 'getImageUrl')) ? $details->getImageUrl() : "/assets/img/placeholder.jpg";
+                                $title = ($details && method_exists($details, 'getName')) 
+                                ? $details->getName() 
+                                : "Event " . $event->getSubEventId();
+                                $image = ($details && method_exists($details, 'getImageUrl') && $details->getImageUrl())
+                                ? $details->getImageUrl()
+                                : "/assets/images/placeholder.jpg";
                                 $location = ($details && method_exists($details, 'getLocation')) ? $details->getLocation() : "Haarlem";
                                                    
                                 $guestCount = $ticket->getNumberOfPeople();
@@ -64,7 +68,7 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <form method="POST" action="/removeTicket" onsubmit="return confirm('Remove this reservation?');">
+                                    <form method="POST" action="/removeTicket" onsubmit="return confirm('Remove this item from your Personal Program?');">
                                         <input type="hidden" name="ticket_id" value="<?= $ticket->getProgramItemId() ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border-1">                                           
                                             Delete 

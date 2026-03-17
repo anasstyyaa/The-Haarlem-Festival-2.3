@@ -768,6 +768,66 @@ body.admin-page #sidebar .nav-item {
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
+.jazz-ticket-form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+}
+
+.ticket-quantity-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+
+.ticket-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ticket-quantity-input {
+  width: 60px;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+/* Chrome, Safari, Edge */
+.ticket-quantity-input::-webkit-outer-spin-button,
+.ticket-quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.ticket-quantity-input {
+  -moz-appearance: textfield;
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Personal Program Specific Styles */
 .program-container {
     max-width: 900px;

@@ -163,6 +163,13 @@ body.auth-page .auth-card button:hover {
   text-decoration: underline;
 }
 
+.password-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #656161;
+}
+
 /* --- Admin Management Styles --- */
 
 body.admin-page {

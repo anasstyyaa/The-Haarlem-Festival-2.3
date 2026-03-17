@@ -131,6 +131,19 @@ switch ($routeInfo[0]) {
         [$class, $method] = $routeInfo[1];
         $vars = $routeInfo[2];
 
+        // Protect all /admin routes
+        if (str_starts_with($uri, '/admin')) {
+            if (empty($_SESSION['user'])) {
+                header('Location: /login');
+                exit;
+            }
+
+            if (($_SESSION['user']['role'] ?? '') !== 'Admin') {
+                header('Location: /');
+                exit;
+            }
+        }
+
         if ($class === 'App\Controllers\UserController') {
             $repository = new \App\Repositories\UserRepository();
             $service = new \App\Services\UserService($repository);

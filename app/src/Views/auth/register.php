@@ -43,6 +43,10 @@ require __DIR__ . '/../partials/header.php';
             <label for="password">Password</label>
             <input id="password" type="password" name="password"
                   placeholder="Password" required>
+                  <small class="password-hint">
+                    . Password must be at least 8 characters <br> 
+                    . Include 1 uppercase letter and 1 special character
+                  </small>
           </div>
 
           <div class="form-group">

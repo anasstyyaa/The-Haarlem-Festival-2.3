@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Framework\Repository;
@@ -12,7 +13,7 @@ class UserRepository extends Repository implements IUserRepository
     {
         $stmt = $this->connection->query("SELECT * FROM users WHERE deleted_at IS NULL");
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         return array_map(fn($row) => $this->mapToModel($row), $results);
     }
 
@@ -29,11 +30,11 @@ class UserRepository extends Repository implements IUserRepository
     {
         $sql = "INSERT INTO dbo.Users (Email, Password, UserName, FullName, PhoneNumber, Role, Created_At,     ProfilePicture) 
         VALUES (:email, :password, :userName, :fullName, :phoneNumber, :role, :created_at, :profilePicture)";
-        
+
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'email'          => $user->getEmail(),
-            'password'       => $user->getPassword(),  
+            'password'       => $user->getPassword(),
             'userName'       => $user->getUserName(),
             'fullName'       => $user->getFullName(),
             'phoneNumber'    => $user->getPhoneNumber(),
@@ -50,7 +51,7 @@ class UserRepository extends Repository implements IUserRepository
                 phoneNumber = :phoneNumber, role = :role, updated_at = GETDATE(), 
                 profilePicture = :pic 
                 WHERE id = :id";
-        
+
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'email'       => $user->getEmail(),
@@ -80,17 +81,17 @@ class UserRepository extends Repository implements IUserRepository
     private function mapToModel(array $row): UserModel
     {
         return new UserModel(
-        (int)($row['Id'] ?? 0),
-        $row['Email'] ?? '',
-        $row['Password'] ?? '',
-        $row['UserName'] ?? '',
-        $row['FullName'] ?? '',
-        $row['PhoneNumber'] ?? '',
-        $row['Role'] ?? '',
-        $row['Created_at'] ?? '', 
-        $row['Updated_at'] ?? null,
-        $row['ProfilePicture'] ?? null,
-        $row['Deleted_at'] ?? null
+            (int)($row['Id'] ?? 0),
+            $row['Email'] ?? '',
+            $row['Password'] ?? '',
+            $row['UserName'] ?? '',
+            $row['FullName'] ?? '',
+            $row['PhoneNumber'] ?? '',
+            $row['Role'] ?? '',
+            $row['Created_At'] ?? '',
+            $row['Updated_At'] ?? null,
+            $row['ProfilePicture'] ?? null,
+            $row['Deleted_At'] ?? null
         );
     }
 
@@ -127,42 +128,70 @@ public function findByEmail(string $email): ?array
     {
         $stmt = $this->connection->query("SELECT * FROM users");
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         return array_map(fn($row) => $this->mapToModel($row), $results);
     }
 
-   /// public function updatePasswordHash(int $userId, string $passwordHash): void
-//{
-  //  $pdo = \App\Config\Config::getPDO(); // or use $this->pdo if you have it
+    public function updateProfile(\App\Models\UserModel $user): bool
+    {
+        $sql = "UPDATE dbo.Users
+            SET Email = :email,
+                UserName = :userName,
+                FullName = :fullName,
+                PhoneNumber = :phoneNumber,
+                Password = :password,
+                ProfilePicture = :profilePicture,
+                Updated_At = GETDATE()
+            WHERE Id = :id AND Deleted_At IS NULL";
 
-   // $stmt = $pdo->prepare("
-       // UPDATE users
-        //SET password_hash = :ph
-       // WHERE id = :id
-    //");
+        $stmt = $this->connection->prepare($sql);
 
-   // $stmt->execute([
-       // 'ph' => $passwordHash,
-        //'id' => $userId,
-    //]);
-//}
-public function updatePassword(int $userId, string $hashedPassword): bool
-{
-    $stmt = $this->connection->prepare("
-        UPDATE users
-        SET password = :password,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = :id
-          AND deleted_at IS NULL
-    ");
+        return $stmt->execute([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'userName' => $user->getUserName(),
+            'fullName' => $user->getFullName(),
+            'phoneNumber' => $user->getPhoneNumber(),
+            'password' => $user->getPassword(),
+            'profilePicture' => $user->getProfilePicture()
+        ]);
+    }
 
-    return $stmt->execute([
-        'password' => $hashedPassword,
-        'id' => $userId
-    ]);
+    public function getAllFiltered(string $search = '', string $role = '', string $sort = ''): array
+    {
+        $query = "SELECT * FROM [Users] WHERE 1=1";
+        $params = [];
+
+        if (!empty($search)) {
+            // Use unique placeholders for each column
+            $query .= " AND (FullName LIKE :search1 OR Email LIKE :search2 OR UserName LIKE :search3)";
+            $params['search1'] = "%$search%";
+            $params['search2'] = "%$search%";
+            $params['search3'] = "%$search%";
+        }
+
+        if (!empty($role)) {
+            $query .= " AND Role = :role";
+            $params['role'] = $role;
+        }
+
+        // Apply Sorting (Using the correct DB column names)
+        switch ($sort) {
+            case 'name_asc': 
+                $query .= " ORDER BY FullName ASC"; 
+                break;
+            case 'created_at_asc': 
+                $query .= " ORDER BY Created_At ASC"; 
+                break;
+            default: 
+                $query .= " ORDER BY Created_At DESC"; 
+                break;
+        }
+
+        $stmt = $this->connection->prepare($query);
+        $stmt->execute($params); 
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($row) => $this->mapToModel($row), $results);
+    }
 }
-
-
-}
-
-

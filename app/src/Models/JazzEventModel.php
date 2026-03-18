@@ -13,6 +13,7 @@ class JazzEventModel{
     private ?string $updated_at;
     private string $created_at;
 
+
     public function getId(): int {
         return $this->JazzEventID;
     }

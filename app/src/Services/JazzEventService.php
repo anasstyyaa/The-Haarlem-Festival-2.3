@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\JazzEventModel;
 use App\Repositories\Interfaces\IJazzEventRepository;
 use App\Services\Interfaces\IJazzEventService;
+use App\Models\Enums\EventTypeEnum;
 
 class JazzEventService implements IJazzEventService
 {
@@ -23,6 +24,11 @@ class JazzEventService implements IJazzEventService
     public function getJazzEventById(int $id): ?JazzEventModel
     {
         return $this->repository->getById($id);
+    }
+
+    public function getEventsForArtist(int $artistId, EventTypeEnum $eventType): array
+    {
+        return $this->repository->getEventsForArtist($artistId, $eventType);
     }
 
     public function createJazzEvent(JazzEventModel $event): bool

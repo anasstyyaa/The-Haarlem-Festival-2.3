@@ -50,4 +50,13 @@ class UserService implements IUserService
     {
         return $this->userRepository->adminGetAll();
     }
+    public function updateOwnProfile(UserModel $user): bool
+    {
+        return $this->userRepository->updateProfile($user);
+    }
+
+    public function getFilteredUsers(string $search = '', string $role = '', string $sort = ''): array
+    {
+        return $this->userRepository->getAllFiltered($search, $role, $sort);
+    }
 }

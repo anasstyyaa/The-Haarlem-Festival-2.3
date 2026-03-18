@@ -73,7 +73,20 @@ class AuthController
             return $this->render('auth/register', ['error' => 'Invalid email format!']);
         }
 
-        // 3) Uniqueness checks
+        // 3) Password validation
+        if (strlen($password) < 8) {
+            return $this->render('auth/register', ['error' => 'Password must be at least 8 characters long!']);
+        }
+
+        if (!preg_match('/[A-Z]/', $password)) {
+            return $this->render('auth/register', ['error' => 'Password must contain at least one uppercase letter!']);
+        }
+
+        if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+            return $this->render('auth/register', ['error' => 'Password must contain at least one special character!']);
+        }
+
+        // 4) Uniqueness checks
         if ($this->auth->emailExists($email)) {
             return $this->render('auth/register', ['error' => 'Email already exists!']);
         }

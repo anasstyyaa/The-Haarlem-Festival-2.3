@@ -20,7 +20,35 @@ class JazzController
     public function index()
     {
         $artists = $this->artistService->getAllArtists();
+        $lineup = [];
+
+        foreach ($artists as $artist) {
+            $events = $this->jazzEventService->getEventsForArtist(
+                $artist->getId(),
+                \App\Models\Enums\EventTypeEnum::JazzEvent
+            );
+
+            if (!empty($events)) {
+                $lineup[] = [
+                    'artist' => $artist,
+                    'events' => $events
+                ];
+            }
+        }
+
         include __DIR__ . '/../Views/event/jazz/index.php';
+    }
+
+    public function adminIndex()
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $artists = $this->artistService->getAllArtists();
+        $events = $this->jazzEventService->getAllJazzEvents();
+        include __DIR__ . '/../Views/admin/jazz/index.php';
     }
 
     public function detail($vars)
@@ -34,20 +62,11 @@ class JazzController
             return;
         }
 
-        $events = $this->artistService->getJazzEventsForArtist($id);
+        $events = $this->jazzEventService->getEventsForArtist(
+            $id,
+            \App\Models\Enums\EventTypeEnum::JazzEvent
+        );
         include __DIR__ . '/../Views/event/jazz/detail.php';
-    }
-
-    public function adminIndex()
-    {
-        if (!isset($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
-
-        $artists = $this->artistService->getAllArtists();
-        $events = $this->jazzEventService->getAllJazzEvents();
-        include __DIR__ . '/../Views/admin/jazz/index.php';
     }
 
     public function showCreateForm()
@@ -110,7 +129,7 @@ class JazzController
                 exit;
             }
         }
-
+        //need the artists to show in the dropdown when creating an event. (If it were inside the POST block, Then opening the page normally would give: "Undefined variable: artists", because the view needs artists!)
         $artists = $this->artistService->getAllArtists();
         include __DIR__ . '/../Views/admin/jazz/createEvent.php';
     }
@@ -130,11 +149,6 @@ class JazzController
 
     public function showEditEventForm($vars)
     {
-        if (!isset($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
-
         $id = (int)$vars['id'];
         $event = $this->jazzEventService->getJazzEventById($id);
 

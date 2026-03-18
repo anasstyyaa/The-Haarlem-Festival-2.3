@@ -24,10 +24,6 @@ class ArtistService implements IArtistService
     {
         return $this->repository->getById($id);
     }
-    public function getJazzEventsForArtist(int $artistId): array
-    {
-        return $this->repository->getJazzEventsForArtist($artistId);
-    }
 
     public function createArtist(ArtistModel $artist): bool
     {
@@ -42,5 +38,10 @@ class ArtistService implements IArtistService
     public function deleteArtist(int $id): bool
     {
         return $this->repository->delete($id);
+    }
+
+    public function getJazzLineup(): array
+    {
+        return $this->repository->getJazzLineup();
     }
 }

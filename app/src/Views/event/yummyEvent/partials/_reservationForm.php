@@ -3,9 +3,11 @@
         <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Book a Table</h5>
     </div>
     <div class="card-body p-4">
-        <form action="/yummy/reserve" method="POST" id="reservationForm">
-            <input type="hidden" name="restaurant_id" value="<?= $restaurant->getId() ?>">
-            
+        <form action="/addTicket" method="POST" id="reservationForm">
+            <input type="hidden" name="event_id" value="<?= $restaurant->getId() ?>">
+            <input type="hidden" name="event_type" value="reservation">
+            <input type="hidden" name="program_item_id" id="selectedSessionId" required>
+
             <div class="mb-4">
                 <label class="form-label fw-bold small text-uppercase text-muted">1. Select Date</label>
                 <select id="dateSelect" name="reservation_date" class="form-select border-2" required>
@@ -20,14 +22,13 @@
                 <label class="form-label fw-bold small text-uppercase text-muted">2. Select Time</label>
                 <div id="timeSlotButtons" class="d-flex flex-wrap gap-2">
                     </div>
-                <input type="hidden" name="session_id" id="selectedSessionId" required>
-            </div>
+                </div>
 
             <div class="mb-4">
                 <label class="form-label fw-bold small text-uppercase text-muted">3. Party Size</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white"><i class="bi bi-people"></i></span>
-                    <input type="number" name="guest_count" class="form-control" min="1" max="10" value="2" required>
+                    <input type="number" name="number_of_people" class="form-control" min="1" max="10" value="2" required>
                 </div>
             </div>
 

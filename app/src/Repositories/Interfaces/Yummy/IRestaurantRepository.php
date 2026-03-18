@@ -1,8 +1,8 @@
 <?php 
 
-namespace App\Repositories\Interfaces;
+namespace App\Repositories\Interfaces\Yummy;
 
-use App\Models\RestaurantModel;
+use App\Models\Yummy\RestaurantModel;
 
 interface IRestaurantRepository {
 

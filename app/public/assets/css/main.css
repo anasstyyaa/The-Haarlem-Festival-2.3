@@ -163,6 +163,36 @@ body.auth-page .auth-card button:hover {
   text-decoration: underline;
 }
 
+/* Success message - Haarlem Festival theme */
+.success-box {
+    background: linear-gradient(135deg, #f5e6d3, #e6c9a8);
+    border: 1px solid #a47148;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.success-box h2 {
+    color: #6b3e26;
+    margin-bottom: 10px;
+}
+
+.success-box p {
+    color: #3e2a1f;
+    margin: 5px 0;
+}
+
+.small-text {
+    font-size: 14px;
+    color: #7a5c4d;
+}
+
+.text-center {
+    text-align: center;
+}
+
 /* --- Admin Management Styles --- */
 
 body.admin-page {

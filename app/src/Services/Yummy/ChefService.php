@@ -1,10 +1,10 @@
 <?php 
 
-namespace App\Services;
+namespace App\Services\Yummy;
 
-use App\Models\ChefModel;
-use App\Repositories\Interfaces\IChefRepository;
-use App\Services\Interfaces\IChefService;
+use App\Models\Yummy\ChefModel;
+use App\Repositories\Interfaces\Yummy\IChefRepository;
+use App\Services\Interfaces\Yummy\IChefService;
 
 class ChefService implements IChefService {
 

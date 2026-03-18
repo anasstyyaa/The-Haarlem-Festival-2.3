@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories\Interfaces; 
+namespace App\Repositories\Interfaces\Yummy; 
 
-use App\Models\ChefModel;
+use App\Models\Yummy\ChefModel;
 
 interface IChefRepository {
 

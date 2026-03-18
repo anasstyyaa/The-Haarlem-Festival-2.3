@@ -37,7 +37,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Full Description</label>
-                        <textarea name="description" class="form-control" rows="5"><?= htmlspecialchars($artist->getDescription() ?? '') ?></textarea>
+                        <textarea name="description" class="form-control wysiwyg-editor" rows="5"><?= htmlspecialchars($artist->getDescription() ?? '') ?></textarea>
                     </div>
 
                     <div class="row mb-3">

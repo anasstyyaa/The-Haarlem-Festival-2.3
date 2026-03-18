@@ -40,7 +40,7 @@
                                     <button type="button" class="btn btn-sm btn-outline-info" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#modal-<?= $restaurant->getId() ?>">
-                                        <i class="bi bi-search"></i> View Content
+                                        <i class="bi bi-search"></i> View Detailed Page
                                     </button>
 
                                     <a href="/admin/yummy/edit/<?= $restaurant->getId() ?>" class="btn btn-sm btn-outline-primary">

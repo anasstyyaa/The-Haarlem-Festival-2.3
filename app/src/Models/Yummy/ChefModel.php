@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Models;
+namespace App\Models\Yummy;
 
 class ChefModel {
     private int $id;

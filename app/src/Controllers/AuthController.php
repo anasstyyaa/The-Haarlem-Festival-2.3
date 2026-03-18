@@ -2,16 +2,36 @@
 namespace App\Controllers;
 
 use App\Repositories\UserRepository;
+use App\Repositories\PasswordResetRepository;
 use App\Services\AuthService;
+use App\Services\PasswordResetService;
+use App\Services\Mailer;
+use App\Services\Interfaces\IPasswordResetService;
 
 class AuthController
 {
     private AuthService $auth;
+    private IPasswordResetService $passwordReset;
 
     public function __construct()
     {
-        $this->auth = new AuthService(new UserRepository());
+        $userRepository = new UserRepository();
+        $passwordResetRepository = new PasswordResetRepository();
+        $mailer = new Mailer();
+
+        $appUrl = getenv('APP_URL') ?: 'http://localhost';
+
+        $this->auth = new AuthService($userRepository);
+
+        $this->passwordReset = new PasswordResetService(
+            $userRepository,
+            $passwordResetRepository,
+            $mailer,
+            $appUrl
+        );
     }
+
+
 
     //helper to render a view with variables like $error
     private function render(string $view, array $data = []): string
@@ -191,4 +211,84 @@ class AuthController
         header('Location: /');
         exit;
     }
+
+
+// GET forgetPassword
+
+   public function showForgetPassword(): string
+{
+    return $this->render('auth/forgetPassword');
 }
+
+// Post email by the user
+public function sendResetLink(): string
+{
+    try {
+        $email = trim($_POST['email'] ?? '');
+
+        if ($email === '') {
+            return $this->render('auth/forgetPassword', [
+                'error' => 'Please enter your email address',
+                'email' => ''
+            ]);
+        }
+
+        $this->passwordReset->sendResetLink($email);
+
+        return $this->render('auth/forgetPassword', [
+            'success' => 'A password reset link has been sent to your email address.',
+            'email' => $email
+        ]);
+
+    } catch (\Exception $e) {
+        return $this->render('auth/forgetPassword', [
+            'error' => 'Something went wrong while sending the reset link.',
+            'email' => trim($_POST['email'] ?? '')
+        ]);
+    }
+}
+
+//Display the reset password page so that user can fill in the new pass
+public function showResetPassword(): string
+{
+    $token = $_GET['token'] ?? '';
+
+    return $this->render('auth/resetPassword', [
+        'token' => $token
+    ]);
+}
+
+ //submitted by the user to reset password
+public function resetPassword(): string
+{
+    try {
+        $token = $_POST['token'] ?? '';
+        $newPassword = $_POST['password'] ?? '';
+        $confirmPassword = $_POST['password_confirm'] ?? '';
+
+        // Check passwords match
+        if ($newPassword !== $confirmPassword) {
+            return $this->render('auth/resetPassword', [
+                'error' => 'Passwords do not match.',
+                'token' => $token
+            ]);
+        }
+
+        // Call service
+        $this->passwordReset->resetPassword($token, $newPassword);
+
+        //  Redirect to login page after success
+        header('Location: /login');
+        exit;
+
+    } catch (\Exception $e) {
+        return $this->render('auth/resetPassword', [
+            'error' => $e->getMessage(),
+            'token' => $token
+        ]);
+    }
+}
+
+
+}
+

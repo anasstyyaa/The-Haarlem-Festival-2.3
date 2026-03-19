@@ -106,6 +106,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
+    // Checkout routes
+    $r->addRoute('POST', '/checkout', ['App\Controllers\TicketController', 'checkout']);
+    $r->addRoute('GET', '/payment-success', ['App\Controllers\TicketController', 'paymentSuccess']);
 });
 
 /**
@@ -172,6 +175,10 @@ switch ($routeInfo[0]) {
             $chefRepo = new \App\Repositories\Yummy\ChefRepository();
             $chefService = new \App\Services\Yummy\ChefService($chefRepo);
             $controller = new $class($chefService);
+        } elseif ($class === 'App\Controllers\TicketController') {
+            $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
+            $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
+            $controller = new $class($restaurantService);
         } else {
             $controller = new $class();
         }

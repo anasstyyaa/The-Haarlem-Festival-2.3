@@ -73,6 +73,29 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
 
     }
 
+    //this method is for showing the correct location info in the personal program when the event is a jazz event. 
+    public function getVenueInfoByJazzEventId(int $jazzEventId): ?array
+    {
+        $sql = "
+            SELECT
+                v.VenueName,
+                v.HallName
+            FROM JazzEvent je
+            JOIN JazzVenue v ON v.JazzVenueID = je.JazzVenueID
+            WHERE je.JazzEventID = :jazzEventId
+            AND je.deleted_at IS NULL
+        ";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute([
+            'jazzEventId' => $jazzEventId
+        ]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ?: null;
+    }
+
     //creating a new jazz event and linking it to the general Event table using a wrapper method.
     public function create(JazzEventModel $event): bool
     {

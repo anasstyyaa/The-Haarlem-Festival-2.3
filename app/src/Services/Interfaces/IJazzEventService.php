@@ -11,6 +11,8 @@ interface IJazzEventService
     public function getJazzEventById(int $id): ?JazzEventModel;
 
     public function getEventsForArtist(int $artistId, EventTypeEnum $eventType): array;
+    
+    public function getVenueInfoByJazzEventId(int $jazzEventId): ?array;
 
     public function createJazzEvent(JazzEventModel $event): bool;
 

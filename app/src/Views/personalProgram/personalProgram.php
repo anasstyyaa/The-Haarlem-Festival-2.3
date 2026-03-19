@@ -34,7 +34,7 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                             <th>Date</th>
                             <th>Time</th>
                             <th>Language</th>
-                            <th class="text-center">Guests</th>]
+                            <th class="text-center">Guests</th>
                             <th class="text-center">Price</th>
                             <th class="text-end pe-4">Action</th>
                         </tr>

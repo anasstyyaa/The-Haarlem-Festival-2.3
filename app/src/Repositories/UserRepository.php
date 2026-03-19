@@ -132,6 +132,24 @@ public function findByEmail(string $email): ?array
         return array_map(fn($row) => $this->mapToModel($row), $results);
     }
 
+
+public function updatePassword(int $userId, string $hashedPassword): bool
+{
+    $stmt = $this->connection->prepare("
+        UPDATE users
+        SET password = :password,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = :id
+          AND deleted_at IS NULL
+    ");
+
+    return $stmt->execute([
+        'password' => $hashedPassword,
+        'id' => $userId
+    ]);
+}
+
+
     public function updateProfile(\App\Models\UserModel $user): bool
     {
         $sql = "UPDATE dbo.Users

@@ -17,7 +17,7 @@ require __DIR__ . '/../partials/header.php';
     <h2>✅ Email Sent!</h2>
     <p><?= htmlspecialchars($success) ?></p>
     <p class="small-text">
-      Please check your inbox (and spam folder just in case).
+      Please check your inbox and spam folder.
     </p>
   </div>
 <?php endif; ?>

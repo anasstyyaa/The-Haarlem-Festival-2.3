@@ -249,7 +249,7 @@ public function sendResetLink(): string
         $this->passwordReset->sendResetLink($email);
 
         return $this->render('auth/forgetPassword', [
-            'success' => 'A password reset link has been sent to your email address.',
+            'success' => 'A password reset link has been sent address if provided email exists.',
             'email' => $email
         ]);
 

@@ -80,9 +80,11 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
         </div>
         
         <div class="mt-4 text-end">
-            <a href="/checkout" class="btn btn-success btn-m px-5 shadow-sm fw-bold">
-                Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
-            </a>
+            <form action="/checkout" method="POST">
+                <button type="submit" class="btn btn-success btn-m px-5 shadow-sm fw-bold">
+                    Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </form>
         </div>
     <?php endif; ?>
 </div>

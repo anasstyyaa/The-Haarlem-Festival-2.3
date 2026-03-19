@@ -1,4 +1,5 @@
 <?php
+
 /** @var App\Models\PersonalProgram $program */
 $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
 ?>
@@ -30,76 +31,99 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                         <tr>
                             <th class="ps-4">Event</th>
                             <th>Location</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Language</th>
                             <th class="text-center">Guests</th>
                             <th class="text-end pe-4">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($program->getTickets() as $index => $ticket): ?>
-                            <?php 
-                                $event = $ticket->getEvent();
-                                $details = $event->getDetails();
-                                $title = "Event " . $event->getSubEventId();
-                                $image = "/assets/img/placeholder.jpg";
-                                $location = "Haarlem";
+                            <?php
+                            $event = $ticket->getEvent();
+                            $details = $event->getDetails();
 
-                                if (is_array($details) && isset($details['artist'])) {
-                                    $artist = $details['artist'] ?? null;
-                                    $venueInfo = $details['venueInfo'] ?? null;
+                            $title = "Event " . $event->getSubEventId();
+                            $image = "/assets/images/placeholder.jpg";
+                            $location = "Haarlem";
 
-                                    if ($artist && method_exists($artist, 'getName')) {
-                                        $title = $artist->getName();
-                                    }
+                            $date = '';
+                            $startTime = '';
+                            $language = '';
 
-                                    if ($artist && method_exists($artist, 'getImageUrl') && $artist->getImageUrl()) {
-                                        $image = $artist->getImageUrl();
-                                    }
+                            if (is_array($details) && isset($details['artist'])) {
+                                $artist = $details['artist'] ?? null;
+                                $venueInfo = $details['venueInfo'] ?? null;
 
-                                    if (!empty($venueInfo['VenueName'])) {
-                                        $location = $venueInfo['VenueName'];
+                                if ($artist && method_exists($artist, 'getName')) {
+                                    $title = $artist->getName();
+                                }
 
-                                        if (!empty($venueInfo['HallName'])) {
-                                            $location .= ', ' . $venueInfo['HallName'];
-                                        }
-                                    }
-                                } elseif ($details) {
-                                    if (method_exists($details, 'getName')) {
-                                        $title = $details->getName();
-                                    }
+                                if ($artist && method_exists($artist, 'getImageUrl') && $artist->getImageUrl()) {
+                                    $image = $artist->getImageUrl();
+                                }
 
-                                    if (method_exists($details, 'getImageUrl') && $details->getImageUrl()) {
-                                        $image = $details->getImageUrl();
-                                    }
+                                if (!empty($venueInfo['VenueName'])) {
+                                    $location = $venueInfo['VenueName'];
 
-                                    if (method_exists($details, 'getLocation') && $details->getLocation()) {
-                                        $location = $details->getLocation();
+                                    if (!empty($venueInfo['HallName'])) {
+                                        $location .= ', ' . $venueInfo['HallName'];
                                     }
                                 }
-                                                   
-                                $guestCount = $ticket->getNumberOfPeople();
+                            } elseif ($details) {
+                                if (method_exists($details, 'getName')) {
+                                    $title = $details->getName();
+                                }
+
+                                if (method_exists($details, 'getImageUrl') && $details->getImageUrl()) {
+                                    $image = $details->getImageUrl();
+                                }
+
+                                if (method_exists($details, 'getLocation') && $details->getLocation()) {
+                                    $location = $details->getLocation();
+                                }
+
+                                if (method_exists($details, 'getSlotDate') && $details->getSlotDate()) {
+                                    $date = date('Y-m-d', strtotime($details->getSlotDate()));
+                                }
+
+                                if (method_exists($details, 'getStartTime') && $details->getStartTime()) {
+                                    $startTime = date('H:i', strtotime($details->getStartTime()));
+                                }
+
+                                if (method_exists($details, 'getLanguage') && $details->getLanguage()) {
+                                    $language = $details->getLanguage();
+                                }
+                            }
+
+                            $guestCount = $ticket->getNumberOfPeople();
                             ?>
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="<?= $image ?>" class="rounded me-3" style="width:60px; height:60px; object-fit:cover;">
+                                        <img src="<?= htmlspecialchars($image) ?>" class="rounded me-3" style="width:60px; height:60px; object-fit:cover;">
                                         <div>
                                             <div class="fw-bold"><?= htmlspecialchars($title) ?></div>
-                                            <small class="text-muted text-uppercase"><?= $event->getEventType()->name ?></small>
+                                            <small class="text-muted text-uppercase"><?= htmlspecialchars($event->getEventType()->name) ?></small>
                                         </div>
                                     </div>
                                 </td>
                                 <td><?= htmlspecialchars($location) ?></td>
+                                <td><?= htmlspecialchars($date) ?></td>
+                                <td><?= htmlspecialchars($startTime) ?></td>
+                                <td><?= htmlspecialchars($language) ?></td>
                                 <td class="text-center">
                                     <span class="badge rounded-pill bg-light text-dark border px-3">
                                         <i class="bi bi-people-fill me-1"></i>
-                                        <?= htmlspecialchars($guestCount) ?>
+                                        <?= htmlspecialchars((string)$guestCount) ?>
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <form method="POST" action="/removeTicket" onsubmit="return confirm('Remove this item from your Personal Program?');">
                                         <input type="hidden" name="ticket_id" value="<?= $ticket->getProgramItemId() ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-1">                                           
-                                            Delete 
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-1">
+                                            Delete
                                             <i class="bi bi-trash3"></i>
                                         </button>
                                     </form>
@@ -110,7 +134,7 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                 </table>
             </div>
         </div>
-        
+
         <div class="mt-4 text-end">
             <form action="/checkout" method="POST">
                 <button type="submit" class="btn btn-success btn-m px-5 shadow-sm fw-bold">

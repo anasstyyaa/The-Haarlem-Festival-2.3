@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Controllers;
 
 use App\Services\PersonalProgramService;
@@ -13,6 +14,11 @@ use App\Repositories\ArtistRepository;
 use App\Services\JazzEventService;
 use App\Repositories\JazzEventRepository;
 
+use App\Services\HistoryService;
+use App\Repositories\HistoryEventRepository;
+use App\Repositories\HistoryVenueRepository;
+use App\Models\HistoryVenueModel;
+
 class TicketController
 {
     private PersonalProgramService $programService;
@@ -20,6 +26,8 @@ class TicketController
     private RestaurantService $restaurantService;
     private ArtistService $artistService;
     private JazzEventService $jazzEventService;
+    private HistoryService $historyService;
+    private HistoryVenueRepository $historyVenueRepository;
 
     public function __construct()
     {
@@ -29,9 +37,16 @@ class TicketController
         $this->artistService = new ArtistService(new ArtistRepository());
         $this->jazzEventService = new JazzEventService(new JazzEventRepository());
 
+        $this->historyService = new HistoryService(
+            new HistoryEventRepository(),
+            new HistoryVenueRepository()
+        );
+
+        $this->historyVenueRepository = new HistoryVenueRepository();
     }
 
-    public function index(): void {
+    public function index(): void
+    {
         $program = $_SESSION['program'] ?? new PersonalProgram();
         $tickets = $program->getTickets();
 
@@ -39,28 +54,47 @@ class TicketController
             $event = $ticket->getEvent();
             $subId = $event->getSubEventId();
 
-            // strcasecmp for case-insensitive comparison
             if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
                 $restaurant = $this->restaurantService->getRestaurantById($subId);
-                
+
                 if ($restaurant) {
-                    $event->setDetails($restaurant); 
+                    $event->setDetails($restaurant);
                 }
             }
 
-            if (strcasecmp($event->getEventType()->value, 'jazz') === 0) {
+            if (strcasecmp($event->getEventType()->name, 'JazzEvent') === 0) {
                 $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
 
                 if ($jazzEvent) {
                     $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-                    $venueInfo = $this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId());
 
                     if ($artist) {
-                        $event->setDetails([
-                            'artist' => $artist,
-                            'venueInfo' => $venueInfo
-                        ]);
+                        $event->setDetails($artist);
                     }
+                }
+            }
+
+            if (strcasecmp($event->getEventType()->name, 'tour') === 0) {
+                $historyEvent = $this->historyService->getSessionByEventId($event->getId());
+
+                if ($historyEvent) {
+                    $stops = $this->historyVenueRepository->getStopsByEventId($event->getId());
+
+                    if (!empty($stops)) {
+                        $firstStop = $stops[0];
+
+                        $venue = new HistoryVenueModel(
+                            (int)($firstStop['venueId'] ?? 0),
+                            $firstStop['venueName'] ?? '',
+                            $firstStop['details'] ?? null,
+                            $firstStop['location'] ?? null,
+                            isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null
+                        );
+
+                        $historyEvent->setVenue($venue);
+                    }
+
+                    $event->setDetails($historyEvent);
                 }
             }
         }
@@ -68,18 +102,18 @@ class TicketController
         require __DIR__ . '/../Views/personalProgram/personalProgram.php';
     }
 
-   public function addTicket(): void
+    public function addTicket(): void
     {
         $subEventId = $_POST['event_id'];
         $numberOfPeople = $_POST['number_of_people'];
         $eventType = $_POST['event_type'];
         $userId = $_SESSION['user']['id'] ?? null;
         $programItemId = $_POST['program_item_id'] ?? null;
-        
+
         $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
 
         if ($eventId === 0) {
-            $_SESSION['error'] = "Configuration Error: No Event found! (Type: $eventType, ID: $subEventId).";
+            $_SESSION['error'] = "Configuration Error: No Event found for this restaurant (Type: $eventType, ID: $subEventId).";
             header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
             exit;
         }
@@ -90,80 +124,11 @@ class TicketController
             $userId,
             $programItemId
         );
-    //     var_dump($_SESSION['program']);
-    // exit;
+
         $_SESSION['flash_success'] = "Your booking for $numberOfPeople people has been successfully added to your Personal Program.";
 
         header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
-    exit;
-    }
-
-
-
-    // checkoout process 
-
-    public function checkout(): void
-    {
-        // Stripe Secret Key (a test key from stripe.com)
-        $apiKey = getenv('STRIPE_SECRET_KEY');
-        
-        $program = $_SESSION['program'] ?? null;
-        if (!$program || count($program->getTickets()) === 0) {
-            header("Location: /personalProgram");
-            exit;
-        }
-
-        // Preparing the data for Stripe
-        $data = [
-            'success_url' => 'http://localhost/payment-success',
-            'cancel_url' => 'http://localhost/personalProgram',
-            'mode' => 'payment',
-            'payment_method_types[0]' => 'card',
-            'payment_method_types[1]' => 'ideal',
-        ];
-
-        $i = 0;
-        foreach ($program->getTickets() as $ticket) {
-            $event = $ticket->getEvent();
-            $details = $event->getDetails();
-            $name = $details ? $details->getName() : "Festival Ticket";
-
-            // Stripe needs the price in Cents (1000 = €10.00)
-            $data["line_items[$i][price_data][currency]"] = 'eur';
-            $data["line_items[$i][price_data][unit_amount]"] = 1000; 
-            $data["line_items[$i][price_data][product_data][name]"] = $name;
-            $data["line_items[$i][quantity]"] = $ticket->getNumberOfPeople();
-            $i++;
-        }
-
-        // Sends the request to Stripe via cURL
-        $ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERPWD, $apiKey . ':'); 
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-        
-        $response = json_decode(curl_exec($ch), true);
-        curl_close($ch);
-
-        // Redirects to the Stripe payment page
-        if (isset($response['url'])) {
-            header("Location: " . $response['url']);
-            exit;
-        } else {
-            // If there is an error (e.g. invalid key), show it
-            echo "<h1>Stripe Error</h1>";
-            echo "<pre>" . print_r($response, true) . "</pre>";
-            exit;
-        }
-    }
-
-    public function paymentSuccess(): void
-    {
-        unset($_SESSION['program']);
-
-        $_SESSION['flash_success'] = "Thank you! Your payment was successful.";
-
-        require __DIR__ . '/../Views/payment/success.php'; 
+        exit;
     }
 
     public function removeTicket(): void
@@ -185,5 +150,4 @@ class TicketController
         header('Location: /personalProgram');
         exit;
     }
-
 }

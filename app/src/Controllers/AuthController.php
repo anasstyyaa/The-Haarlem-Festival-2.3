@@ -3,6 +3,10 @@ namespace App\Controllers;
 
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
+use App\Repositories\PageElementRepository;
+use App\Repositories\TextRepository;
+use App\Repositories\ImageRepository;
+use App\ViewModels\PageElementViewModel;
 
 class AuthController
 {

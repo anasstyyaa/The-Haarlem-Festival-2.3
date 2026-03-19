@@ -1,19 +1,22 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-session_start();
+error_reporting(E_ALL);
 
-
+// ini_set('display_errors', '0'); // hide from browser
+// ini_set('log_errors', '1');     // log instead
 
 use FastRoute\RouteCollector;
+use App\Models\Enums\EventTypeEnum;
 use function FastRoute\simpleDispatcher;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     //$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);
- $r->addRoute('GET', '/', ['App\Controllers\HomeController', 'index']);
+    $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
 
     $r->addRoute('GET', '/login', ['App\Controllers\AuthController', 'showLoginForm']);
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
@@ -88,19 +91,6 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
     $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
 
-     
-     //password reset
-   $r->addRoute('GET', '/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);
-$r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
-
-$r->addRoute('GET', '/resetPassword', ['App\Controllers\AuthController', 'showResetPassword']);
-$r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
-
-   $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
-
-
-
-
     // User Profile Routes
     $r->addRoute('GET',  '/profile',       ['App\Controllers\UserController', 'profile']);
     $r->addRoute('GET',  '/profile/edit',  ['App\Controllers\UserController', 'editProfile']);
@@ -119,6 +109,14 @@ $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'reset
     // Checkout routes
     $r->addRoute('POST', '/checkout', ['App\Controllers\TicketController', 'checkout']);
     $r->addRoute('GET', '/payment-success', ['App\Controllers\TicketController', 'paymentSuccess']);
+
+         
+     //password reset
+    $r->addRoute('GET', '/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);
+    $r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
+    $r->addRoute('GET', '/resetPassword', ['App\Controllers\AuthController', 'showResetPassword']);
+    $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
+    $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
 });
 
 /**
@@ -188,18 +186,18 @@ switch ($routeInfo[0]) {
         } elseif ($class === 'App\Controllers\TicketController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
-            $historyEventRepo = new \App\Repositories\HistoryEventRepository();
-            $historyVenueRepo = new \App\Repositories\HistoryVenueRepository();
-            $historyService = new \App\Services\HistoryService($historyEventRepo, $historyVenueRepo);
-            $artistRepository = new \App\Repositories\ArtistRepository();
-            $artistService = new \App\Services\ArtistService($artistRepository);
-            $jazzEventRepository = new \App\Repositories\JazzEventRepository();
-            $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
-            $controller = new $class($restaurantService, $historyService, $artistService, $jazzEventService );
+            // $artistRepository = new \App\Repositories\ArtistRepository();
+            // $artistService = new \App\Services\ArtistService($artistRepository);
+            // $jazzEventRepository = new \App\Repositories\JazzEventRepository();
+            // $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
+            // $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
+            // $historyEventRepository = new \App\Repositories\HistoryEventRepository();
+            // $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
+            $controller = new $class($restaurantService, $artistService, $jazzEventService, $historyService);
         } else {
             $controller = new $class();
         }
 
-        echo $controller->$method();
+        echo $controller->$method($vars);
         break;
 }

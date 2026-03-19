@@ -4,8 +4,9 @@ namespace App\Services;
 
 use App\Models\UserModel; 
 use App\Repositories\UserRepository;
+use App\Services\Interfaces\IAuthService; 
 
-class AuthService
+class AuthService implements IAuthService
 {
     public function __construct(private UserRepository $userRepository) 
     {

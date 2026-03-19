@@ -55,6 +55,12 @@ th {
     text-align:center;
     margin-top:40px;
 }
+td img {
+    max-width: 150px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
 </style>
 
 </head>
@@ -135,7 +141,11 @@ onsubmit="return confirm('Delete this element?')">
 
 
 <h2 style="text-align:center;">Kids Events</h2>
-
+<div class="edit-btn">
+   <a href="/admin/kids-events/create" class="edit-btn">
+    Add Kids Event
+</a>
+</div>
 <table>
 <thead>
 <tr>
@@ -160,10 +170,9 @@ onsubmit="return confirm('Delete this element?')">
 <td>
 <div class="actions">
 
-<form method="GET" action="/admin/kids-events/edit">
-<input type="hidden" name="id" value="<?= $event->getId() ?>">
-<button class="edit-btn">Edit</button>
-</form>
+<a href="/admin/kids-events/edit/<?= $event->getId() ?>"  class="edit-btn">
+Edit
+</a>
 
 <form method="POST" action="/admin/kids-events/delete"
 onsubmit="return confirm('Delete this event?')">

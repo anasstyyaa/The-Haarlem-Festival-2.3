@@ -8,17 +8,26 @@ use App\Models\PersonalProgram;
 use App\Services\Yummy\RestaurantService;
 use App\Repositories\Yummy\RestaurantRepository;
 
+use App\Services\ArtistService;
+use App\Repositories\ArtistRepository;
+use App\Services\JazzEventService;
+use App\Repositories\JazzEventRepository;
+
 class TicketController
 {
     private PersonalProgramService $programService;
     private EventRepository $eventRepo;
     private RestaurantService $restaurantService;
+    private ArtistService $artistService;
+    private JazzEventService $jazzEventService;
 
     public function __construct()
     {
         $this->programService = new PersonalProgramService();
         $this->eventRepo = new EventRepository();
         $this->restaurantService = new RestaurantService(new RestaurantRepository());
+        $this->artistService = new ArtistService(new ArtistRepository());
+        $this->jazzEventService = new JazzEventService(new JazzEventRepository());
 
     }
 
@@ -36,6 +45,18 @@ class TicketController
                 
                 if ($restaurant) {
                     $event->setDetails($restaurant); 
+                }
+            }
+
+            if (strcasecmp($event->getEventType()->name, 'JazzEvent') === 0) {
+                $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
+
+                if ($jazzEvent) {
+                    $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
+
+                    if ($artist) {
+                        $event->setDetails($artist);
+                    }
                 }
             }
         }
@@ -138,6 +159,26 @@ class TicketController
         $_SESSION['flash_success'] = "Thank you! Your payment was successful.";
 
         require __DIR__ . '/../Views/payment/success.php'; 
+    }
+
+    public function removeTicket(): void
+    {
+        $ticketId = (int)($_POST['ticket_id'] ?? 0);
+
+        if ($ticketId <= 0) {
+            $_SESSION['error'] = "Invalid item selected.";
+            header('Location: /personalProgram');
+            exit;
+        }
+
+        $program = $_SESSION['program'] ?? new PersonalProgram();
+        $program->removeTicket($ticketId);
+
+        $_SESSION['program'] = $program;
+        $_SESSION['flash_success'] = "Item removed from your Personal Program.";
+
+        header('Location: /personalProgram');
+        exit;
     }
 
 }

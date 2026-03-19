@@ -9,7 +9,6 @@ interface IArtistService
     public function getAllArtists(): array;
 
     public function getArtistById(int $id): ?ArtistModel;
-    public function getJazzEventsForArtist(int $artistId): array;
 
     public function createArtist(ArtistModel $artist): bool;
 

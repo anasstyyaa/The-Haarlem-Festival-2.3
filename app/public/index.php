@@ -74,6 +74,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
     // Ticket and Personal Program + Kids Event routes
     $r->addRoute('POST',  '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
+    $r->addRoute('POST', '/removeTicket', ['App\Controllers\TicketController', 'removeTicket']);
     $r->addRoute('GET',  '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
     $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
     $r->addRoute('GET',  '/admin/kidsPage', ['App\Controllers\KidsEventController', 'adminIndex']);
@@ -81,6 +82,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST',  '/admin/elements/edit/{id:\d+}', ['App\Controllers\PageElementController', 'saveTextChanges']);
     $r->addRoute('GET',  '/admin/elements/editImg/{id:\d+}', ['App\Controllers\PageElementController', 'showImgEditForm']);
     $r->addRoute('POST',  '/admin/elements/editImg/{id:\d+}', ['App\Controllers\PageElementController', 'saveImgChanges']);
+    $r->addRoute('GET',  '/admin/kids-events/edit/{id:\d+}', ['App\Controllers\KidsEventController', 'edit']);
+    $r->addRoute('GET',  '/admin/kids-events/create', ['App\Controllers\KidsEventController', 'create']);
+    $r->addRoute('POST',  '/admin/kids-events/save', ['App\Controllers\KidsEventController', 'save']);
+    $r->addRoute('POST', '/admin/kids-events/delete', ['App\Controllers\KidsEventController', 'delete']);
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
@@ -133,6 +138,19 @@ switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::FOUND:
         [$class, $method] = $routeInfo[1];
         $vars = $routeInfo[2];
+
+        // Protect all /admin routes
+        if (str_starts_with($uri, '/admin')) {
+            if (empty($_SESSION['user'])) {
+                header('Location: /login');
+                exit;
+            }
+
+            if (($_SESSION['user']['role'] ?? '') !== 'Admin') {
+                header('Location: /');
+                exit;
+            }
+        }
 
         if ($class === 'App\Controllers\UserController') {
             $repository = new \App\Repositories\UserRepository();

@@ -3,6 +3,7 @@
 namespace App\Repositories; 
 use App\Framework\Repository;
 use App\Models\JazzEventModel;
+use App\ViewModels\JazzEventViewModel;
 use App\Models\Enums\EventTypeEnum; 
 use App\Repositories\Interfaces\IJazzEventRepository;
 use PDO;
@@ -40,6 +41,36 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
 
         $event = $stmt->fetchObject(JazzEventModel::class);
         return $event ?: null;
+    }
+
+    public function getEventsForArtist(int $artistId, EventTypeEnum $eventType): array
+    {
+            $sql = "
+            SELECT
+            e.id AS EventID,
+            je.JazzEventID,
+            je.StartDateTime,
+            je.EndDateTime,
+            je.Price,
+            v.VenueName,
+            v.HallName
+            FROM Event e
+            JOIN JazzEvent je ON je.JazzEventID = e.subEventId
+            JOIN JazzVenue v ON v.JazzVenueID = je.JazzVenueID
+            WHERE e.eventType = :eventType
+            AND je.ArtistID = :artistId
+            AND je.deleted_at IS NULL
+            ORDER BY je.StartDateTime ASC
+        ";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute([
+            'eventType' => $eventType->value,
+            'artistId' => $artistId
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, JazzEventViewModel::class);
+
     }
 
     //creating a new jazz event and linking it to the general Event table using a wrapper method.

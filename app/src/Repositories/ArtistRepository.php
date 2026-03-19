@@ -25,32 +25,6 @@ class ArtistRepository extends Repository implements IArtistRepository{
         return $artist ?: null;
     }
 
-    //This method returns events (tickets) for a specific artist
-    public function getJazzEventsForArtist(int $artistId): array
-    {
-        $sql = "
-            SELECT
-            e.id AS EventID,
-            je.StartDateTime,
-            je.EndDateTime,
-            je.Price,
-            v.VenueName,
-            v.HallName
-            FROM Event e
-            JOIN JazzEvent je ON je.JazzEventID = e.subEventId
-            JOIN JazzVenue v ON v.JazzVenueID = je.JazzVenueID
-            WHERE e.eventType = 'jazz'
-            AND je.ArtistID = :artistId
-            AND je.deleted_at IS NULL
-            ORDER BY je.StartDateTime
-        ";
-
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute(['artistId' => $artistId]);
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
     public function create(ArtistModel $artist): bool
     {
         $sql = "INSERT INTO Artist (ArtistName, ShortDescription, Description, ImageURL)

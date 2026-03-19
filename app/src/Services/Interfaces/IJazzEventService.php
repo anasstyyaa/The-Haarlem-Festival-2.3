@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services\Interfaces;
-
+use App\Models\Enums\EventTypeEnum;
 use App\Models\JazzEventModel;
 
 interface IJazzEventService
@@ -9,6 +9,8 @@ interface IJazzEventService
     public function getAllJazzEvents(): array;
 
     public function getJazzEventById(int $id): ?JazzEventModel;
+
+    public function getEventsForArtist(int $artistId, EventTypeEnum $eventType): array;
 
     public function createJazzEvent(JazzEventModel $event): bool;
 

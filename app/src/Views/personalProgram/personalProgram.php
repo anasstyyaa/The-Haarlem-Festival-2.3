@@ -38,15 +38,43 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                         <?php foreach ($program->getTickets() as $index => $ticket): ?>
                             <?php 
                                 $event = $ticket->getEvent();
-                                $details = $event->getDetails(); 
-                                
-                                $title = ($details && method_exists($details, 'getName')) 
-                                ? $details->getName() 
-                                : "Event " . $event->getSubEventId();
-                                $image = ($details && method_exists($details, 'getImageUrl') && $details->getImageUrl())
-                                ? $details->getImageUrl()
-                                : "/assets/images/placeholder.jpg";
-                                $location = ($details && method_exists($details, 'getLocation')) ? $details->getLocation() : "Haarlem";
+                                $details = $event->getDetails();
+                                $title = "Event " . $event->getSubEventId();
+                                $image = "/assets/img/placeholder.jpg";
+                                $location = "Haarlem";
+
+                                if (is_array($details) && isset($details['artist'])) {
+                                    $artist = $details['artist'] ?? null;
+                                    $venueInfo = $details['venueInfo'] ?? null;
+
+                                    if ($artist && method_exists($artist, 'getName')) {
+                                        $title = $artist->getName();
+                                    }
+
+                                    if ($artist && method_exists($artist, 'getImageUrl') && $artist->getImageUrl()) {
+                                        $image = $artist->getImageUrl();
+                                    }
+
+                                    if (!empty($venueInfo['VenueName'])) {
+                                        $location = $venueInfo['VenueName'];
+
+                                        if (!empty($venueInfo['HallName'])) {
+                                            $location .= ', ' . $venueInfo['HallName'];
+                                        }
+                                    }
+                                } elseif ($details) {
+                                    if (method_exists($details, 'getName')) {
+                                        $title = $details->getName();
+                                    }
+
+                                    if (method_exists($details, 'getImageUrl') && $details->getImageUrl()) {
+                                        $image = $details->getImageUrl();
+                                    }
+
+                                    if (method_exists($details, 'getLocation') && $details->getLocation()) {
+                                        $location = $details->getLocation();
+                                    }
+                                }
                                                    
                                 $guestCount = $ticket->getNumberOfPeople();
                             ?>

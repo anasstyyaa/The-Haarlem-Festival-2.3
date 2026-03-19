@@ -48,14 +48,18 @@ class TicketController
                 }
             }
 
-            if (strcasecmp($event->getEventType()->name, 'JazzEvent') === 0) {
+            if (strcasecmp($event->getEventType()->value, 'jazz') === 0) {
                 $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
 
                 if ($jazzEvent) {
                     $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
+                    $venueInfo = $this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId());
 
                     if ($artist) {
-                        $event->setDetails($artist);
+                        $event->setDetails([
+                            'artist' => $artist,
+                            'venueInfo' => $venueInfo
+                        ]);
                     }
                 }
             }
@@ -69,13 +73,13 @@ class TicketController
         $subEventId = $_POST['event_id'];
         $numberOfPeople = $_POST['number_of_people'];
         $eventType = $_POST['event_type'];
-        $userId = $_SESSION['user_id'] ?? null;
+        $userId = $_SESSION['user']['id'] ?? null;
         $programItemId = $_POST['program_item_id'] ?? null;
         
         $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
 
         if ($eventId === 0) {
-            $_SESSION['error'] = "Configuration Error: No Event found for this restaurant (Type: $eventType, ID: $subEventId).";
+            $_SESSION['error'] = "Configuration Error: No Event found! (Type: $eventType, ID: $subEventId).";
             header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
             exit;
         }

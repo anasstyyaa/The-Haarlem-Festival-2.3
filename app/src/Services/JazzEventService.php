@@ -31,6 +31,11 @@ class JazzEventService implements IJazzEventService
         return $this->repository->getEventsForArtist($artistId, $eventType);
     }
 
+    public function getVenueInfoByJazzEventId(int $jazzEventId): ?array
+    {
+        return $this->repository->getVenueInfoByJazzEventId($jazzEventId);
+    }
+
     public function createJazzEvent(JazzEventModel $event): bool
     {
         return $this->repository->create($event);

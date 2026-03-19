@@ -85,7 +85,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/kids-events/delete', ['App\Controllers\KidsEventController', 'delete']);
 
     // Yummy / Restaurant Routes
-    $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
+    $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
+    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
 
      
      //password reset

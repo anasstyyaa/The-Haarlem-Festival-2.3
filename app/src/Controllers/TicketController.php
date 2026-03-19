@@ -8,6 +8,8 @@ use App\Models\PersonalProgram;
 
 use App\Services\Yummy\RestaurantService;
 use App\Repositories\Yummy\RestaurantRepository;
+use App\Repositories\Yummy\RestaurantSessionRepository;
+use App\Services\Yummy\RestaurantSessionService;
 
 use App\Services\ArtistService;
 use App\Repositories\ArtistRepository;
@@ -24,6 +26,7 @@ class TicketController
     private PersonalProgramService $programService;
     private EventRepository $eventRepo;
     private RestaurantService $restaurantService;
+    private RestaurantSessionService $restaurantSessionService;
     private ArtistService $artistService;
     private JazzEventService $jazzEventService;
     private HistoryService $historyService;
@@ -34,6 +37,7 @@ class TicketController
         $this->programService = new PersonalProgramService();
         $this->eventRepo = new EventRepository();
         $this->restaurantService = new RestaurantService(new RestaurantRepository());
+        $this->restaurantSessionService = new RestaurantSessionService(new RestaurantSessionRepository(), new RestaurantRepository());
         $this->artistService = new ArtistService(new ArtistRepository());
         $this->jazzEventService = new JazzEventService(new JazzEventRepository());
 
@@ -55,10 +59,15 @@ class TicketController
             $subId = $event->getSubEventId();
 
             if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
-                $restaurant = $this->restaurantService->getRestaurantById($subId);
-
-                if ($restaurant) {
-                    $event->setDetails($restaurant);
+                $session = $this->restaurantSessionService->getSessionById($subId);
+    
+                if ($session) {
+                    $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
+                    
+                    if ($restaurant) {
+                        $restaurant->setSessionData($session);
+                        $event->setDetails($restaurant);
+                    }
                 }
             }
 

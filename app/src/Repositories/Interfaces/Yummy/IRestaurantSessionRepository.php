@@ -6,6 +6,7 @@ use App\Models\Yummy\RestaurantSessionModel;
 
 interface IRestaurantSessionRepository {
     
+    public function getSessionById(int $id): ?RestaurantSessionModel;
     public function getSessionsByRestaurantId(int $restaurantId): array;
     public function updateCapacity(int $sessionId, int $count): bool;
     public function addSessions(RestaurantSessionModel $session): bool;

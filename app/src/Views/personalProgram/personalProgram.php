@@ -34,7 +34,8 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                             <th>Date</th>
                             <th>Time</th>
                             <th>Language</th>
-                            <th class="text-center">Guests</th>
+                            <th class="text-center">Guests</th>]
+                            <th class="text-center">Price</th>
                             <th class="text-end pe-4">Action</th>
                         </tr>
                     </thead>
@@ -84,6 +85,14 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                                     $location = $details->getLocation();
                                 }
 
+                                if ($details instanceof \App\Models\Yummy\RestaurantModel) {
+                                    $session = $details->getSessionData();
+                                    if ($session) {
+                                        $date = date('Y-m-d', strtotime($session->getDate()));
+                                        $startTime = date('H:i', strtotime($session->getStartTime()));
+                                    }
+                                }
+
                                 if (method_exists($details, 'getSlotDate') && $details->getSlotDate()) {
                                     $date = date('Y-m-d', strtotime($details->getSlotDate()));
                                 }
@@ -118,6 +127,14 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                                         <i class="bi bi-people-fill me-1"></i>
                                         <?= htmlspecialchars((string)$guestCount) ?>
                                     </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="fw-bold">€<?= number_format($ticket->getTotalPrice(), 2) ?></div>
+                                    <?php if ($ticket->getNumberOfPeople() > 1): ?>
+                                        <small class="text-muted">
+                                            €<?= number_format($ticket->getUnitPrice(), 2) ?> x <?= $ticket->getNumberOfPeople() ?>
+                                        </small>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end pe-4">
                                     <form method="POST" action="/removeTicket" onsubmit="return confirm('Remove this item from your Personal Program?');">

@@ -16,6 +16,10 @@ class RestaurantSessionService implements IRestaurantSessionService {
         $this->restaurantRepository = $restaurantRepository;
     }
 
+    public function getSessionById(int $id): ?RestaurantSessionModel {
+        return $this->repository->getSessionById($id);
+    }
+
     public function getAvailableSessions(int $restaurantId): array {
         return $this->repository->getSessionsByRestaurantId($restaurantId);
     }

@@ -25,8 +25,26 @@ class AuthController
     // GET 
     public function index(): string
     {  
-        return $this->render('/home/index') ;
+        $vm = $this->buildPageVM('home');
+
+    return $this->render('home/index', [
+        'vm' => $vm
+    ]);
     }
+    //build VM
+    private function buildPageVM(string $pageName): PageElementViewModel
+{
+    $pageRepo  = new PageElementRepository();
+    $textRepo  = new TextRepository();
+    $imageRepo = new ImageRepository();
+
+    $elements = $pageRepo->getByPageName($pageName);
+
+    $vm = new PageElementViewModel($textRepo, $imageRepo);
+    $vm->build($elements);
+
+    return $vm;
+}
 
     // GET /register
     public function showRegisterForm(): string

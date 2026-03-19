@@ -186,13 +186,13 @@ switch ($routeInfo[0]) {
         } elseif ($class === 'App\Controllers\TicketController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
-            // $artistRepository = new \App\Repositories\ArtistRepository();
-            // $artistService = new \App\Services\ArtistService($artistRepository);
-            // $jazzEventRepository = new \App\Repositories\JazzEventRepository();
-            // $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
-            // $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
-            // $historyEventRepository = new \App\Repositories\HistoryEventRepository();
-            // $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
+            $artistRepository = new \App\Repositories\ArtistRepository();
+            $artistService = new \App\Services\ArtistService($artistRepository);
+            $jazzEventRepository = new \App\Repositories\JazzEventRepository();
+            $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
+            $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
+            $historyEventRepository = new \App\Repositories\HistoryEventRepository();
+            $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
             $controller = new $class($restaurantService, $artistService, $jazzEventService, $historyService);
         } else {
             $controller = new $class();

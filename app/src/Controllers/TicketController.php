@@ -67,10 +67,12 @@ class TicketController
 
                 if ($jazzEvent) {
                     $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
+                    $venueInfo = (new JazzEventRepository())->getVenueInfoByJazzEventId($jazzEvent->getId());
 
-                    if ($artist) {
-                        $event->setDetails($artist);
-                    }
+                    $event->setDetails([
+                        'artist' => $artist,
+                        'venueInfo' => $venueInfo
+                    ]);
                 }
             }
 
@@ -130,6 +132,14 @@ class TicketController
         header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
         exit;
     }
+    public function paymentSuccess(): void
+    {
+        unset($_SESSION['program']);
+
+        $_SESSION['flash_success'] = "Thank you! Your payment was successful.";
+
+        require __DIR__ . '/../Views/payment/success.php';
+    }
 
     public function removeTicket(): void
     {
@@ -149,5 +159,68 @@ class TicketController
 
         header('Location: /personalProgram');
         exit;
+    }
+    public function checkout(): void
+    {
+        // Stripe Secret Key (a test key from stripe.com)
+        $apiKey = getenv('STRIPE_SECRET_KEY');
+
+        $program = $_SESSION['program'] ?? null;
+        if (!$program || count($program->getTickets()) === 0) {
+            header("Location: /personalProgram");
+            exit;
+        }
+
+        // Preparing the data for Stripe
+        $data = [
+            'success_url' => 'http://localhost/payment-success',
+            'cancel_url' => 'http://localhost/personalProgram',
+            'mode' => 'payment',
+            'payment_method_types[0]' => 'card'
+        ];
+
+        $i = 0;
+        foreach ($program->getTickets() as $ticket) {
+            $event = $ticket->getEvent();
+            $details = $event->getDetails();
+            $name = "Festival Ticket";
+
+            if (is_array($details) && isset($details['artist'])) {
+                $artist = $details['artist'] ?? null;
+
+                if ($artist && method_exists($artist, 'getName')) {
+                    $name = $artist->getName();
+                }
+            } elseif ($details && method_exists($details, 'getName')) {
+                $name = $details->getName();
+            }
+
+            // Stripe needs the price in Cents (1000 = €10.00)
+            $data["line_items[$i][price_data][currency]"] = 'eur';
+            $data["line_items[$i][price_data][unit_amount]"] = 1000;
+            $data["line_items[$i][price_data][product_data][name]"] = $name;
+            $data["line_items[$i][quantity]"] = $ticket->getNumberOfPeople();
+            $i++;
+        }
+
+        // Sends the request to Stripe via cURL
+        $ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $apiKey . ':');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+
+        $response = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+
+        // Redirects to the Stripe payment page
+        if (isset($response['url'])) {
+            header("Location: " . $response['url']);
+            exit;
+        } else {
+            // If there is an error (e.g. invalid key), show it
+            echo "<h1>Stripe Error</h1>";
+            echo "<pre>" . print_r($response, true) . "</pre>";
+            exit;
+        }
     }
 }

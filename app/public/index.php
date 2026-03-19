@@ -178,7 +178,14 @@ switch ($routeInfo[0]) {
         } elseif ($class === 'App\Controllers\TicketController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
-            $controller = new $class($restaurantService);
+            $historyEventRepo = new \App\Repositories\HistoryEventRepository();
+            $historyVenueRepo = new \App\Repositories\HistoryVenueRepository();
+            $historyService = new \App\Services\HistoryService($historyEventRepo, $historyVenueRepo);
+            $artistRepository = new \App\Repositories\ArtistRepository();
+            $artistService = new \App\Services\ArtistService($artistRepository);
+            $jazzEventRepository = new \App\Repositories\JazzEventRepository();
+            $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
+            $controller = new $class($restaurantService, $historyService, $artistService, $jazzEventService );
         } else {
             $controller = new $class();
         }

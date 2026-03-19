@@ -31,4 +31,11 @@ class KidsEventService
     {
         return $this->repository->getIdBySchedule($day, $startTime, $endTime);
     }
+    public function create(KidsEventModel $event): bool{
+        return $this->repository->create($event);
+    }
+    public function delete(int $id): bool
+{
+    return $this->repository->delete($id);
+}
 }

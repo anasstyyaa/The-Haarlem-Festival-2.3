@@ -114,7 +114,8 @@ class TicketController
             'success_url' => 'http://localhost/payment-success',
             'cancel_url' => 'http://localhost/personalProgram',
             'mode' => 'payment',
-            'payment_method_types[0]' => 'card'
+            'payment_method_types[0]' => 'card',
+            'payment_method_types[1]' => 'ideal',
         ];
 
         $i = 0;

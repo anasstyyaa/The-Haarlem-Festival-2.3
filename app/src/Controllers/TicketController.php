@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Controllers;
 
 use App\Services\PersonalProgramService;
@@ -13,6 +14,11 @@ use App\Repositories\ArtistRepository;
 use App\Services\JazzEventService;
 use App\Repositories\JazzEventRepository;
 
+use App\Services\HistoryService;
+use App\Repositories\HistoryEventRepository;
+use App\Repositories\HistoryVenueRepository;
+use App\Models\HistoryVenueModel;
+
 class TicketController
 {
     private PersonalProgramService $programService;
@@ -20,6 +26,8 @@ class TicketController
     private RestaurantService $restaurantService;
     private ArtistService $artistService;
     private JazzEventService $jazzEventService;
+    private HistoryService $historyService;
+    private HistoryVenueRepository $historyVenueRepository;
 
     public function __construct()
     {
@@ -29,9 +37,16 @@ class TicketController
         $this->artistService = new ArtistService(new ArtistRepository());
         $this->jazzEventService = new JazzEventService(new JazzEventRepository());
 
+        $this->historyService = new HistoryService(
+            new HistoryEventRepository(),
+            new HistoryVenueRepository()
+        );
+
+        $this->historyVenueRepository = new HistoryVenueRepository();
     }
 
-    public function index(): void {
+    public function index(): void
+    {
         $program = $_SESSION['program'] ?? new PersonalProgram();
         $tickets = $program->getTickets();
 
@@ -39,12 +54,11 @@ class TicketController
             $event = $ticket->getEvent();
             $subId = $event->getSubEventId();
 
-            // strcasecmp for case-insensitive comparison
             if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
                 $restaurant = $this->restaurantService->getRestaurantById($subId);
-                
+
                 if ($restaurant) {
-                    $event->setDetails($restaurant); 
+                    $event->setDetails($restaurant);
                 }
             }
 
@@ -59,19 +73,43 @@ class TicketController
                     }
                 }
             }
+
+            if (strcasecmp($event->getEventType()->name, 'tour') === 0) {
+                $historyEvent = $this->historyService->getSessionByEventId($event->getId());
+
+                if ($historyEvent) {
+                    $stops = $this->historyVenueRepository->getStopsByEventId($event->getId());
+
+                    if (!empty($stops)) {
+                        $firstStop = $stops[0];
+
+                        $venue = new HistoryVenueModel(
+                            (int)($firstStop['venueId'] ?? 0),
+                            $firstStop['venueName'] ?? '',
+                            $firstStop['details'] ?? null,
+                            $firstStop['location'] ?? null,
+                            isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null
+                        );
+
+                        $historyEvent->setVenue($venue);
+                    }
+
+                    $event->setDetails($historyEvent);
+                }
+            }
         }
 
         require __DIR__ . '/../Views/personalProgram/personalProgram.php';
     }
 
-   public function addTicket(): void
+    public function addTicket(): void
     {
         $subEventId = $_POST['event_id'];
         $numberOfPeople = $_POST['number_of_people'];
         $eventType = $_POST['event_type'];
         $userId = $_SESSION['user']['id'] ?? null;
         $programItemId = $_POST['program_item_id'] ?? null;
-        
+
         $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
 
         if ($eventId === 0) {
@@ -86,11 +124,10 @@ class TicketController
             $userId,
             $programItemId
         );
-        //     var_dump($_SESSION['program']);
-        // exit;
-            $_SESSION['flash_success'] = "Your booking for $numberOfPeople people has been successfully added to your Personal Program.";
 
-            header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
+        $_SESSION['flash_success'] = "Your booking for $numberOfPeople people has been successfully added to your Personal Program.";
+
+        header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
         exit;
     }
 
@@ -113,5 +150,4 @@ class TicketController
         header('Location: /personalProgram');
         exit;
     }
-
 }

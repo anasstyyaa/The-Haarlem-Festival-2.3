@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\HistoryVenueModel;
+
 class HistoryEventModel
 {
+    private ?HistoryVenueModel $venue = null;
     private int $eventId;
     private int $historyEventId;  //will use when editing history events 
     private string $slotDate;
@@ -15,7 +18,17 @@ class HistoryEventModel
     private float $priceIndividual;
     private float $priceFamily;
 
-    public function __construct(int $eventId, int $historyEventId, string $slotDate, string $startTime ,string $language , int $duration, int $minAge, int $capacity, float $priceIndividual, float $priceFamily
+    public function __construct(
+        int $eventId,
+        int $historyEventId,
+        string $slotDate,
+        string $startTime,
+        string $language,
+        int $duration,
+        int $minAge,
+        int $capacity,
+        float $priceIndividual,
+        float $priceFamily
     ) {
         $this->eventId = $eventId;
         $this->historyEventId = $historyEventId;
@@ -77,5 +90,24 @@ class HistoryEventModel
     public function getPriceFamily(): float
     {
         return $this->priceFamily;
+    }
+    public function setVenue(?HistoryVenueModel $venue): void
+    {
+        $this->venue = $venue;
+    }
+
+    public function getVenue(): ?HistoryVenueModel
+    {
+        return $this->venue;
+    }
+
+    public function getName(): string
+    {
+        return $this->venue ? $this->venue->getVenueName() : 'History Tour';
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->venue ? $this->venue->getLocation() : null;
     }
 }

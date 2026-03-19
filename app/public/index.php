@@ -79,6 +79,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST',  '/admin/elements/edit/{id:\d+}', ['App\Controllers\PageElementController', 'saveTextChanges']);
     $r->addRoute('GET',  '/admin/elements/editImg/{id:\d+}', ['App\Controllers\PageElementController', 'showImgEditForm']);
     $r->addRoute('POST',  '/admin/elements/editImg/{id:\d+}', ['App\Controllers\PageElementController', 'saveImgChanges']);
+    $r->addRoute('GET',  '/admin/kids-events/edit/{id:\d+}', ['App\Controllers\KidsEventController', 'edit']);
+    $r->addRoute('GET',  '/admin/kids-events/create', ['App\Controllers\KidsEventController', 'create']);
+    $r->addRoute('POST',  '/admin/kids-events/save', ['App\Controllers\KidsEventController', 'save']);
+    $r->addRoute('POST', '/admin/kids-events/delete', ['App\Controllers\KidsEventController', 'delete']);
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
@@ -111,6 +115,9 @@ $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'reset
     $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
+    // Checkout routes
+    $r->addRoute('POST', '/checkout', ['App\Controllers\TicketController', 'checkout']);
+    $r->addRoute('GET', '/payment-success', ['App\Controllers\TicketController', 'paymentSuccess']);
 });
 
 /**
@@ -177,6 +184,10 @@ switch ($routeInfo[0]) {
             $chefRepo = new \App\Repositories\Yummy\ChefRepository();
             $chefService = new \App\Services\Yummy\ChefService($chefRepo);
             $controller = new $class($chefService);
+        } elseif ($class === 'App\Controllers\TicketController') {
+            $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
+            $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
+            $controller = new $class($restaurantService);
         } else {
             $controller = new $class();
         }

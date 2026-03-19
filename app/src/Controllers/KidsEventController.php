@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Services\KidsEventService;
 use App\Repositories\KidsEventRepository;
 use App\ViewModels\KidsEventViewModel;
+use App\Models\KidsEventModel;
 use App\Repositories\PageElementRepository;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
@@ -64,6 +65,58 @@ private KidsEventService $service;
     $vmKids = new KidsEventViewModel($kidsEvents);
    require __DIR__ . '/../Views/admin/kids/index.php';
 }
+public function create(): void
+{
+    $event = null; 
+    require __DIR__ . '/../Views/admin/kids/kidsEventForm.php';
+}
 
+public function edit(array $vars): void
+{
+    $id = (int)$vars['id'];
+    $event = $this->service->getEventById($id);
+
+
+    require __DIR__ . '/../Views/admin/kids/kidsEventForm.php';
+}
+
+public function save(): void
+{
+    $id        = $_POST['id'] ?? null;
+    $day       = $_POST['day'] ?? '';
+    $startTime = $_POST['startTime'] ?? '';
+    $endTime   = $_POST['endTime'] ?? '';
+
+    $event = new KidsEventModel(
+        $id ? (int)$id : 0,
+        $day,
+        $startTime,
+        $endTime
+    );
+
+    if ($id) {
+        $this->service->update($event);
+    } else {
+        $this->service->create($event);
+    }
+
+    header("Location: /admin/kidsPage");
+    exit;
+}
+
+public function delete(): void
+{
+    $id = (int)($_POST['id'] ?? 0);
+
+    if ($id <= 0) {
+        echo "Invalid ID";
+        return;
+    }
+
+    $this->service->delete($id);
+
+    header("Location: /admin/kidsPage");
+    exit;
+}
 
 }

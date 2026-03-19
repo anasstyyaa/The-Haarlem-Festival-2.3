@@ -1,22 +1,19 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+session_start();
 
-// ini_set('display_errors', '0'); // hide from browser
-// ini_set('log_errors', '1');     // log instead
+
 
 use FastRoute\RouteCollector;
-use App\Models\Enums\EventTypeEnum;
 use function FastRoute\simpleDispatcher;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     //$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);
-    $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
+ $r->addRoute('GET', '/', ['App\Controllers\HomeController', 'index']);
 
     $r->addRoute('GET', '/login', ['App\Controllers\AuthController', 'showLoginForm']);
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
@@ -88,8 +85,20 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/kids-events/delete', ['App\Controllers\KidsEventController', 'delete']);
 
     // Yummy / Restaurant Routes
-    $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);
-    $r->addRoute('GET', '/yummy/restaurant/{id:\d+}', ['App\Controllers\RestaurantController', 'showDetails']);
+    $r->addRoute('GET', '/yummy', ['App\Controllers\YummyController', 'index']);
+
+     
+     //password reset
+   $r->addRoute('GET', '/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);
+$r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
+
+$r->addRoute('GET', '/resetPassword', ['App\Controllers\AuthController', 'showResetPassword']);
+$r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
+
+   $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
+
+
+
 
     // User Profile Routes
     $r->addRoute('GET',  '/profile',       ['App\Controllers\UserController', 'profile']);
@@ -190,6 +199,6 @@ switch ($routeInfo[0]) {
             $controller = new $class();
         }
 
-        echo $controller->$method($vars);
+        echo $controller->$method();
         break;
 }

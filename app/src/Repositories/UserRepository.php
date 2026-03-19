@@ -95,20 +95,34 @@ class UserRepository extends Repository implements IUserRepository
         );
     }
 
-    public function findByEmail(string $email): ?array
-    {
-        $stmt = $this->connection->prepare("SELECT * FROM Users WHERE Email = :email");
-        $stmt->execute(['email' => $email]);
-        return $stmt->fetch() ?: null;
+
+public function findByEmail(string $email): ?array
+{
+    $stmt = $this->connection->prepare("
+        SELECT *
+        FROM Users
+        WHERE Email = :email
+          AND Deleted_At IS NULL
+    ");
+
+    $stmt->execute([
+        'email' => $email
+    ]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$row) {
+        return null;
     }
 
-    /*public function findByUserName(string $userName): ?array
-    {
-        $stmt = $this->connection->prepare("SELECT * FROM Users WHERE userName = :userName");
-        $stmt->execute(['userName' => $userName]);
-        return $stmt->fetch() ?: null;
-    }
-    */
+    return [
+        'Id' => $row['Id'],
+        'Email' => $row['Email'],
+        'Password' => $row['Password'],
+        'UserName' => $row['UserName'],
+        'Role' => $row['Role'],
+    ];
+}
 
     public function adminGetAll(): array
     {
@@ -117,6 +131,24 @@ class UserRepository extends Repository implements IUserRepository
 
         return array_map(fn($row) => $this->mapToModel($row), $results);
     }
+
+
+public function updatePassword(int $userId, string $hashedPassword): bool
+{
+    $stmt = $this->connection->prepare("
+        UPDATE users
+        SET password = :password,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = :id
+          AND deleted_at IS NULL
+    ");
+
+    return $stmt->execute([
+        'password' => $hashedPassword,
+        'id' => $userId
+    ]);
+}
+
 
     public function updateProfile(\App\Models\UserModel $user): bool
     {

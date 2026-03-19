@@ -1,0 +1,381 @@
+/* =========================================================
+   Haarlem Dance Page (Figma Match)
+   - Line-up: big photos + 1 big gradient rectangle behind
+   - Schedule: gradient blocks + passes per day aligned
+   - Buttons: same login color everywhere
+   - Background: subtle vertical stripes
+   ========================================================= */
+
+body.dance-page{
+  background:#2a0d06;
+  color:#fff;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+
+/* Layout + theme */
+:root{
+  --container:1500px;
+  --pad-x:3%;
+
+  /* Your Figma gradient stops */
+  --grad: linear-gradient(135deg, #290D00 0%, #672C01 60%, #3B1600 100%);
+
+  --stroke: rgba(255,255,255,.14);
+  --glass: rgba(255,255,255,.06);
+
+  /* Button like login */
+  --btn: #DB9B3B;
+  --btn-hover: #C9872D;
+
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+}
+
+/* Section title */
+.section-title{
+  font-size:32px;
+  margin:0 0 26px;
+  font-weight:900;
+}
+
+/* =========================================================
+   Background stripes (like your Figma screenshot)
+   ========================================================= */
+.dance-about,
+.dance-lineup,
+.dance-program{
+  background:#2a0d06;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+.dance-hero{
+  background:#f1cbb8;
+  padding:70px var(--pad-x);
+}
+.dance-hero-inner{
+  max-width:var(--container);
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:50px;
+}
+.dance-hero-left h1{
+  font-size:56px;
+  margin:0 0 18px;
+  color:#1c120f;
+  font-weight:900;
+}
+.dance-hero-left p{
+  font-size:20px;
+  line-height:1.5;
+  max-width:620px;
+  color:#2b211d;
+  margin:0;
+}
+.dance-hero-right{
+  width:55%;
+  display:flex;
+  justify-content:flex-end;
+}
+.dance-hero-img{
+  width:min(680px,100%);
+  border-radius:40px;
+  object-fit:cover;
+  box-shadow:0 25px 60px rgba(0,0,0,.35);
+}
+
+/* =========================================================
+   ABOUT
+   ========================================================= */
+.dance-about{
+  padding:70px var(--pad-x);
+}
+.dance-about-inner{
+  max-width:var(--container);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:1.8fr 1fr;
+  gap:50px;
+}
+.dance-about-left h2{
+  font-size:32px;
+  margin:0 0 18px;
+  font-weight:900;
+}
+.dance-about-left p{
+  font-size:18px;
+  line-height:1.7;
+  margin:0 0 16px;
+  color:rgba(255,255,255,.9);
+}
+.dance-highlight-card{
+  background:#f0b59c;
+  color:#2a0d06;
+  padding:28px;
+  border-radius:20px;
+  font-weight:900;
+  font-size:18px;
+  line-height:1.5;
+  box-shadow:0 15px 40px rgba(0,0,0,.35);
+}
+
+/* =========================================================
+   LINEUP (Figma style)
+   - One big rectangle behind (linear gradient)
+   - Big oval artist images
+   ========================================================= */
+.dance-lineup{
+  padding:70px var(--pad-x);
+}
+
+.lineup-title{
+  text-align:center;
+  font-size:32px;
+  font-weight:900;
+  margin:0 0 18px;
+}
+
+/* Big rectangle behind all artists */
+.lineup-panel{
+  max-width:var(--container);
+  margin:0 auto;
+  padding:40px 40px 32px;
+  border-radius: var(--radius-xl);
+  background: var(--grad);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 25px 60px rgba(0,0,0,.35);
+}
+
+/* Grid inside the rectangle */
+.lineup-grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 34px 40px;
+}
+
+/* Each artist “tile” is minimal like Figma */
+.lineup-item{
+  text-align:center;
+  padding: 8px 10px;
+}
+
+/* Big oval portrait */
+.lineup-photo{
+  width: 170px;
+  height: 220px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: rgba(255,255,255,.18);
+  border: 10px solid rgba(255,255,255,.14);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+  margin: 0 auto 14px;
+}
+
+.lineup-name{
+  font-size: 20px;
+  font-weight: 900;
+  margin: 0 0 6px;
+}
+
+.lineup-genre{
+  font-size: 13px;
+  color: rgba(255,255,255,.85);
+  margin: 0 0 12px;
+}
+
+/* =========================================================
+   BUTTONS (same as login on ALL buttons)
+   ========================================================= */
+.btn,
+.btn-pill,
+.btn-outline{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px 24px;
+  min-height:48px;
+  background:var(--btn);
+  color:#ffffff;
+  border:none;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:800;
+  text-decoration:none;
+  cursor:pointer;
+  transition:background .2s ease, transform .1s ease;
+}
+.btn:hover,
+.btn-pill:hover,
+.btn-outline:hover{
+  background:var(--btn-hover);
+}
+.btn:active,
+.btn-pill:active,
+.btn-outline:active{
+  transform:scale(.98);
+}
+
+/* =========================================================
+   NOTE + PROGRAM SCHEDULE
+   ========================================================= */
+.dance-program{
+  padding:70px var(--pad-x) 90px;
+}
+
+.dance-note{
+  max-width: var(--container);
+  margin: -18px auto 26px;       /* pulls it slightly up + keeps space below */
+  padding: 18px 22px;
+  font-size: 16px;               /* bigger text */
+  line-height: 1.6;
+  font-weight: 700;
+
+  background: var(--grad);       /* same linear gradient */
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  color: rgba(255,255,255,.95);
+
+  box-shadow: 0 18px 45px rgba(0,0,0,.25);
+}
+
+/* Each day row */
+.day-row{
+  max-width:var(--container);
+  margin:0 auto 28px;
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:34px;
+  align-items:start;
+}
+
+/* Day heading */
+.day-row h3{
+  font-size:22px;
+  margin:0 0 16px;
+  font-weight:900;
+}
+
+/* Passes heading (bold like rest) */
+.passes-title{
+  font-size:22px;
+  margin:0 0 16px;
+  font-weight:900;
+}
+
+/* Event cards */
+.event-card{
+  display:grid;
+  grid-template-columns:110px 1fr auto;
+  gap:18px;
+  align-items:center;
+  background:var(--grad);
+  border:1px solid rgba(255,255,255,.10);
+  padding:18px;
+  border-radius:20px;
+  margin-bottom:14px;
+  overflow:hidden;
+}
+
+.event-card img{
+  width:110px;
+  height:92px;
+  border-radius:14px;
+  object-fit:cover;
+  box-shadow:0 12px 26px rgba(0,0,0,.32);
+}
+
+.event-title{
+  font-size:18px;
+  font-weight:900;
+  margin:0 0 8px;
+}
+
+.event-meta{
+  font-size:13px;
+  color:rgba(255,255,255,.85);
+  margin:0 0 12px;
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.event-price{
+  font-size:18px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+/* Pass cards */
+.pass-card{
+  background:var(--grad);
+  border:1px solid rgba(255,255,255,.10);
+  padding:18px;
+  border-radius:20px;
+  margin-bottom:14px;
+}
+
+.pass-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+
+.pass-card h4{
+  font-size:16px;
+  margin:0 0 6px;
+  font-weight:900;
+}
+
+.pass-card p{
+  font-size:12px;
+  margin:0 0 12px;
+  color:rgba(255,255,255,.85);
+}
+
+.pass-price{
+  font-size:16px;
+  font-weight:900;
+  white-space:nowrap;
+  margin-left:auto;
+  text-align:right;
+  min-width:70px;
+}
+
+/* Make pass buttons full width like blocks */
+.day-right .btn,
+.day-right .btn-pill,
+.day-right .btn-outline{
+  width:100%;
+}
+
+/* Keep passes aligned while scrolling (desktop only) */
+.day-right{
+  position: static !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width:1200px){
+  .dance-hero-left h1{ font-size:46px; }
+  .lineup-panel{ padding:30px 22px; }
+  .lineup-grid{ grid-template-columns: repeat(2, 1fr); }
+  .day-row{ grid-template-columns:1fr; }
+}
+
+@media (max-width:720px){
+  .dance-hero-inner{ flex-direction:column; text-align:center; }
+  .dance-hero-right{ width:100%; justify-content:center; }
+  .dance-about-inner{ grid-template-columns:1fr; }
+  .lineup-grid{ grid-template-columns:1fr; }
+  .event-card{ grid-template-columns:90px 1fr; }
+  .event-price{ grid-column:2/3; justify-self:end; }
+  .lineup-photo{ width:160px; height:210px; }
+}

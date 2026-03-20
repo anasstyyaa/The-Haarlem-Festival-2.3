@@ -44,7 +44,7 @@ public function getProgramItemId(): ?int
         return $this->event;
     }
 
-    public function getUser(): UserModel
+    public function getUser(): ?UserModel
     {
         return $this->user;
     }

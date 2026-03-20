@@ -21,6 +21,10 @@ use App\Repositories\HistoryEventRepository;
 use App\Repositories\HistoryVenueRepository;
 use App\Models\HistoryVenueModel;
 
+use App\Services\CommunicationService;
+use App\Services\UserService;
+use App\Repositories\UserRepository;
+
 class TicketController
 {
     private PersonalProgramService $programService;
@@ -31,6 +35,9 @@ class TicketController
     private JazzEventService $jazzEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
+    private CommunicationService $communicationService;
+    private UserService $userService;
+    private UserRepository $userRepository;
 
     public function __construct()
     {
@@ -40,6 +47,8 @@ class TicketController
         $this->restaurantSessionService = new RestaurantSessionService(new RestaurantSessionRepository(), new RestaurantRepository());
         $this->artistService = new ArtistService(new ArtistRepository());
         $this->jazzEventService = new JazzEventService(new JazzEventRepository());
+        $this->communicationService = new CommunicationService();
+        $this->userService = new UserService(new UserRepository());
 
         $this->historyService = new HistoryService(
             new HistoryEventRepository(),
@@ -141,11 +150,48 @@ class TicketController
         header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
         exit;
     }
+    
     public function paymentSuccess(): void
     {
-        unset($_SESSION['program']);
+        $program = $_SESSION['program'] ?? null;
+        $userId = $_SESSION['user']['id'] ?? 0; 
+        $stripeSessionId = $_GET['session_id'] ?? 'unknown'; // Stripe passes this back
 
-        $_SESSION['flash_success'] = "Thank you! Your payment was successful.";
+        if ($program && count($program->getTickets()) > 0) {
+            try {
+                foreach ($program->getTickets() as $ticket) {
+                    $this->programService->savePaidTicket($ticket, $stripeSessionId);
+                }
+
+                $communicationService = new CommunicationService();
+                $userId = $_SESSION['user']['id'];
+
+                $userModel = $this->userService->getUserById($userId); 
+
+                if ($userModel) {
+                    $userData = [
+                        'email'      => $userModel->getEmail(),
+                        'full_name' => $userModel->getFullName(),
+                    ];
+                } else {
+                    // Fallback if user isn't found for some reason
+                    $userData = [
+                        'email'      => $_SESSION['user']['email'],
+                        'full_name' => $_SESSION['user']['userName'],
+                    ];
+                }
+
+                $communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
+
+                unset($_SESSION['program']);
+                $_SESSION['flash_success'] = "Thank you! Your tickets have been secured.";
+
+            } catch (\Exception $e) {
+                error_log("Database Error during payment success: " . $e->getMessage());
+                $_SESSION['error'] = "Payment recorded, but there was an issue saving your tickets. Please contact support.";
+                //die("Database Error: " . $e->getMessage());
+            }
+        }
 
         require __DIR__ . '/../Views/payment/success.php';
     }
@@ -171,6 +217,12 @@ class TicketController
     }
     public function checkout(): void
     {
+        if (!isset($_SESSION['user'])) {
+            $_SESSION['flash_error'] = "You must be logged in to checkout.";
+            header('Location: /personalProgram'); 
+            exit();
+        }
+
         // Stripe Secret Key (a test key from stripe.com)
         $apiKey = getenv('STRIPE_SECRET_KEY');
 
@@ -182,7 +234,7 @@ class TicketController
 
         // Preparing the data for Stripe
         $data = [
-            'success_url' => 'http://localhost/payment-success',
+            'success_url' => 'http://localhost/payment-success?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => 'http://localhost/personalProgram',
             'mode' => 'payment',
             'payment_method_types[0]' => 'card',
@@ -207,7 +259,8 @@ class TicketController
 
             // Stripe needs the price in Cents (1000 = €10.00)
             $data["line_items[$i][price_data][currency]"] = 'eur';
-            $data["line_items[$i][price_data][unit_amount]"] = 1000;
+            $unitAmount = (int)($ticket->getUnitPrice() * 100); 
+            $data["line_items[$i][price_data][unit_amount]"] = $unitAmount;
             $data["line_items[$i][price_data][product_data][name]"] = $name;
             $data["line_items[$i][quantity]"] = $ticket->getNumberOfPeople();
             $i++;

@@ -2,6 +2,8 @@
 
 /** @var App\Models\PersonalProgram $program */
 $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
+
+$grandTotal = 0.0;
 ?>
 
 <?php require __DIR__ . '/../partials/header.php'; ?>
@@ -44,6 +46,7 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                             <?php
                             $event = $ticket->getEvent();
                             $details = $event->getDetails();
+                            $grandTotal += $ticket->getTotalPrice();
 
                             $title = "Event " . $event->getSubEventId();
                             $image = "/assets/images/placeholder.jpg";
@@ -153,11 +156,30 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
         </div>
 
         <div class="mt-4 text-end">
-            <form action="/checkout" method="POST">
-                <button type="submit" class="btn btn-success btn-m px-5 shadow-sm fw-bold">
-                    Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
-                </button>
-            </form>
+            <?php if (isset($_SESSION['user'])): ?>
+                <div class="mb-3">
+                    <span class="text-muted fs-5">Total to pay:</span>
+                    <span class="fw-bold fs-4 ms-2">€<?= number_format($grandTotal, 2) ?></span>
+                </div>
+                <form action="/checkout" method="POST">
+                    <button type="submit" class="btn btn-success btn-m px-5 shadow-sm fw-bold">
+                        Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            <?php else: ?>
+                <div class="alert alert-info d-inline-block shadow-sm border-0 py-3 px-4">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Almost there!</strong> Please log in to complete your purchase.
+                    <div class="mt-3">
+                        <a href="/login" class="btn btn-primary fw-bold px-4 me-2">
+                            Login <i class="bi bi-box-arrow-in-right ms-1"></i>
+                        </a>
+                        <a href="/register" class="btn btn-outline-primary fw-bold px-4">
+                            Register
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>

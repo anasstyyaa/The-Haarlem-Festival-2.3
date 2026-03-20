@@ -5,7 +5,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./app:/app
+      - .:/app
     depends_on:
       - php
 
@@ -14,7 +14,7 @@ services:
       context: .
       dockerfile: PHP.Dockerfile
     volumes:
-      - ./app:/app
+      - .:/app
     env_file:
       - .env
 

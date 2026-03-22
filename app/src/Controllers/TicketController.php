@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Repositories\TicketRepository;
+
 use App\Services\PersonalProgramService;
 use App\Repositories\EventRepository;
 use App\Models\PersonalProgram;
@@ -38,6 +40,7 @@ class TicketController
     private CommunicationService $communicationService;
     private UserService $userService;
     private UserRepository $userRepository;
+    private TicketRepository $ticketRepository;
 
     public function __construct()
     {
@@ -49,6 +52,7 @@ class TicketController
         $this->jazzEventService = new JazzEventService(new JazzEventRepository());
         $this->communicationService = new CommunicationService();
         $this->userService = new UserService(new UserRepository());
+        $this->ticketRepository = new TicketRepository();
 
         $this->historyService = new HistoryService(
             new HistoryEventRepository(),
@@ -69,10 +73,10 @@ class TicketController
 
             if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
                 $session = $this->restaurantSessionService->getSessionById($subId);
-    
+
                 if ($session) {
                     $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
-                    
+
                     if ($restaurant) {
                         $restaurant->setSessionData($session);
                         $event->setDetails($restaurant);
@@ -150,11 +154,11 @@ class TicketController
         header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
         exit;
     }
-    
+
     public function paymentSuccess(): void
     {
         $program = $_SESSION['program'] ?? null;
-        $userId = $_SESSION['user']['id'] ?? 0; 
+        $userId = $_SESSION['user']['id'] ?? 0;
         $stripeSessionId = $_GET['session_id'] ?? 'unknown'; // Stripe passes this back
 
         if ($program && count($program->getTickets()) > 0) {
@@ -166,7 +170,7 @@ class TicketController
                 $communicationService = new CommunicationService();
                 $userId = $_SESSION['user']['id'];
 
-                $userModel = $this->userService->getUserById($userId); 
+                $userModel = $this->userService->getUserById($userId);
 
                 if ($userModel) {
                     $userData = [
@@ -185,7 +189,6 @@ class TicketController
 
                 unset($_SESSION['program']);
                 $_SESSION['flash_success'] = "Thank you! Your tickets have been secured.";
-
             } catch (\Exception $e) {
                 error_log("Database Error during payment success: " . $e->getMessage());
                 $_SESSION['error'] = "Payment recorded, but there was an issue saving your tickets. Please contact support.";
@@ -219,7 +222,7 @@ class TicketController
     {
         if (!isset($_SESSION['user'])) {
             $_SESSION['flash_error'] = "You must be logged in to checkout.";
-            header('Location: /personalProgram'); 
+            header('Location: /personalProgram');
             exit();
         }
 
@@ -259,7 +262,7 @@ class TicketController
 
             // Stripe needs the price in Cents (1000 = €10.00)
             $data["line_items[$i][price_data][currency]"] = 'eur';
-            $unitAmount = (int)($ticket->getUnitPrice() * 100); 
+            $unitAmount = (int)($ticket->getUnitPrice() * 100);
             $data["line_items[$i][price_data][unit_amount]"] = $unitAmount;
             $data["line_items[$i][price_data][product_data][name]"] = $name;
             $data["line_items[$i][quantity]"] = $ticket->getNumberOfPeople();
@@ -285,5 +288,57 @@ class TicketController
             echo "<pre>" . print_r($response, true) . "</pre>";
             exit;
         }
+    }
+
+    public function scan(): void  //used to check if ticket exists or is scanned already
+    {
+        $this->requireEmployee(); //checks if user is employee before allowing access to scanning function
+        try {
+            $token = $_GET['token'] ?? '';
+            if ($token === '') {
+                echo "No ticket token provided.";
+                exit;
+            }
+            $ticket = $this->ticketRepository->getByToken($token);
+            if ($ticket === null) {
+                echo "Invalid ticket.";
+                exit;
+            }
+
+            if ((int)$ticket['is_scanned'] === 1) {
+                echo "This ticket has already been scanned.";
+                exit;
+            }
+            $this->ticketRepository->markAsScanned($token);
+            echo "Ticket is valid. Entry allowed.";
+            exit;
+        } catch (\Exception $e) {
+            error_log("Scan error: " . $e->getMessage());
+            echo "Something went wrong while scanning.";
+            exit;
+        }
+    }
+
+    private function requireEmployee(): void //checks if current user is employee
+    {
+        try {
+            if (!isset($_SESSION['user'])) {
+                throw new \Exception("User not logged in.");
+            }
+            if (($_SESSION['user']['role'] ?? '') !== 'Employee') {
+                throw new \Exception("User is not an employee.");
+            }
+        } catch (\Exception $e) {
+            error_log("Access error: " . $e->getMessage());
+            echo "Access denied. Employees only.";
+            exit;
+        }
+    }
+    
+    public function scanPage(): void
+    {
+        $this->requireEmployee();
+
+        require __DIR__ . '/../Views/employee/scan.php';
     }
 }

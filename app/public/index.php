@@ -117,6 +117,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/resetPassword', ['App\Controllers\AuthController', 'showResetPassword']);
     $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
     $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
+
+    // QR/employee scanning routes
+    $r->addRoute('GET', '/qr', ['App\Controllers\QrController', 'index']);
+    $r->addRoute('GET', '/scan', ['App\Controllers\TicketController', 'scan']);
+    $r->addRoute('GET', '/employee/scan', ['App\Controllers\TicketController', 'scanPage']);
 });
 
 /**

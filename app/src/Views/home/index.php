@@ -100,7 +100,10 @@
     background: #4b1608;
     color: white;
     padding: 80px 20px;
+    text-align: center;
+}
 
+.location-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -225,30 +228,20 @@
   text-decoration: none;
 } */
 </style>
- <?php foreach ($vm->getSections() as $section => $elements): 
-    if($section==7){
+ <?php foreach ($vm->getSections() as $section => $elements): ?>
+
+    <?php
+        $viewFile = __DIR__ . "/sections/section{$section}.php";
+
+        if (file_exists($viewFile)) {
+            require $viewFile;
+        } else {
+            require __DIR__ . "/sections/default.php";
+        }
     ?>
-    <div class="locations-flat"> 
-      <div class="section<?= htmlspecialchars($section) ?>">
-        
-        <?php foreach ($elements as $element): ?>
-            <?= $element->render(); ?>
-        <?php endforeach; ?>
- </div>
-    </div>
-    <?php } ?>
-
-    
-    <div class="section<?= htmlspecialchars($section) ?>">
-        
-        <?php foreach ($elements as $element): ?>
-            <?= $element->render(); ?>
-        <?php endforeach; ?>
-
-    </div>
 
 <?php endforeach; ?>
-<div class="locations-flat">
+<!-- <div class="locations-flat">
 
     <h2 class="locations-title">Event’s Main Locations</h2>
 
@@ -283,7 +276,7 @@
         <p>Activities take place in museums and family spaces.</p>
     </div>
 
-</div>
+</div> -->
 <!-- <div class="section1">
     <img src="/assets/images/home/FirstPic.png">
     <h1>HAARLEM FESTIVAL</h1>
@@ -312,7 +305,7 @@
     <p>25 July</p>
     <p>26 July</p>
 </div> -->
-
+<!-- 
 <div class="section4">
     <h2>Locations</h2>
 
@@ -335,7 +328,7 @@
     <img src="/assets/images/home/Dance2.png">
     <h3>Dance</h3>
     <p>Dynamic performances.</p>
-</div>
+</div> -->
 <!-- 
 <section class="home-hero">
     <img src="/assets/images/home/FirstPic.png" alt="Haarlem Festival" class="home-hero-image">
@@ -353,7 +346,7 @@
         </div>
     </div>
 </section>-->
-
+<!-- 
 <section class="home-about">
     <div class="home-container">
         <div class="home-about-grid">
@@ -441,7 +434,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> -->
 
 <section class="home-events" id="festival-events">
     <div class="home-container">

@@ -6,7 +6,7 @@ use App\Repositories\EventRepository;
 use App\Repositories\UserRepository;
 use App\Models\TicketModel;
 
-class PersonalProgramService
+class PersonalProgramService implements IPersonalProgramService
 {
     private EventRepository $eventRepository;
     private UserRepository $userRepository;

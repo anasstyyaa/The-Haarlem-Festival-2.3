@@ -4,6 +4,7 @@ namespace App\ViewModels;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\Models\PageElementModel;
+use App\Services\ButtonService;
 
 class PageElementViewModel
 {
@@ -11,7 +12,8 @@ class PageElementViewModel
 
     public function __construct(
         private TextRepository $textRepo,
-        private ImageRepository $imageRepo
+        private ImageRepository $imageRepo,
+        private ButtonService $buttonService
     ) {}
 
     /**
@@ -31,6 +33,10 @@ class PageElementViewModel
 
             case 'image':
                 $model = $this->imageRepo->getById($el->getSubElementId());
+                break;
+            
+            case 'button':
+                $model = $this->buttonService->getById($el->getSubElementId());
                 break;
 
             default:

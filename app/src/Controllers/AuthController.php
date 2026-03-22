@@ -7,6 +7,7 @@ use App\Repositories\PageElementRepository;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
+use App\Services\ButtonService;
 
 class AuthController
 {
@@ -41,10 +42,11 @@ class AuthController
     $pageRepo  = new PageElementRepository();
     $textRepo  = new TextRepository();
     $imageRepo = new ImageRepository();
+    $buttonService = new BUttonService();
 
     $elements = $pageRepo->getByPageName($pageName);
 
-    $vm = new PageElementViewModel($textRepo, $imageRepo);
+    $vm = new PageElementViewModel($textRepo, $imageRepo, $buttonService);
     $vm->build($elements);
 
     return $vm;

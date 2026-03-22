@@ -2,6 +2,7 @@
 namespace App\Models;
 use App\Models\EventModel;
 use App\Models\UserModel;
+use App\Models\Yummy\RestaurantModel;
 
 class TicketModel
 {
@@ -43,7 +44,7 @@ public function getProgramItemId(): ?int
         return $this->event;
     }
 
-    public function getUser(): UserModel
+    public function getUser(): ?UserModel
     {
         return $this->user;
     }
@@ -71,6 +72,26 @@ public function getProgramItemId(): ?int
     public function setUser(UserModel $user): void
     {
         $this->user = $user;
+    }
+
+    public function getUnitPrice(): float
+    {
+        $details = $this->event->getDetails();
+
+        if ($details instanceof RestaurantModel) {
+            return (float)($details->getReservationFee() ?? 10.00);
+        }
+
+        if (is_array($details) && isset($details['price'])) {
+            return (float)$details['price'];
+        }
+
+        return 15.00; 
+    }
+
+    public function getTotalPrice(): float
+    {
+        return $this->getUnitPrice() * $this->numberOfPeople;
     }
 
    

@@ -2,6 +2,8 @@
 
 /** @var App\Models\PersonalProgram $program */
 $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
+
+$grandTotal = 0.0;
 ?>
 
 <?php require __DIR__ . '/../partials/header.php'; ?>
@@ -35,6 +37,7 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                             <th>Time</th>
                             <th>Language</th>
                             <th class="text-center">Guests</th>
+                            <th class="text-center">Price</th>
                             <th class="text-end pe-4">Action</th>
                         </tr>
                     </thead>
@@ -43,6 +46,7 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                             <?php
                             $event = $ticket->getEvent();
                             $details = $event->getDetails();
+                            $grandTotal += $ticket->getTotalPrice();
 
                             $title = "Event " . $event->getSubEventId();
                             $image = "/assets/images/placeholder.jpg";
@@ -84,6 +88,14 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                                     $location = $details->getLocation();
                                 }
 
+                                if ($details instanceof \App\Models\Yummy\RestaurantModel) {
+                                    $session = $details->getSessionData();
+                                    if ($session) {
+                                        $date = date('Y-m-d', strtotime($session->getDate()));
+                                        $startTime = date('H:i', strtotime($session->getStartTime()));
+                                    }
+                                }
+
                                 if (method_exists($details, 'getSlotDate') && $details->getSlotDate()) {
                                     $date = date('Y-m-d', strtotime($details->getSlotDate()));
                                 }
@@ -119,6 +131,14 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
                                         <?= htmlspecialchars((string)$guestCount) ?>
                                     </span>
                                 </td>
+                                <td class="text-center">
+                                    <div class="fw-bold">€<?= number_format($ticket->getTotalPrice(), 2) ?></div>
+                                    <?php if ($ticket->getNumberOfPeople() > 1): ?>
+                                        <small class="text-muted">
+                                            €<?= number_format($ticket->getUnitPrice(), 2) ?> x <?= $ticket->getNumberOfPeople() ?>
+                                        </small>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="text-end pe-4">
                                     <form method="POST" action="/removeTicket" onsubmit="return confirm('Remove this item from your Personal Program?');">
                                         <input type="hidden" name="ticket_id" value="<?= $ticket->getProgramItemId() ?>">
@@ -136,11 +156,30 @@ $program = $_SESSION['program'] ?? new App\Models\PersonalProgram();
         </div>
 
         <div class="mt-4 text-end">
-            <form action="/checkout" method="POST">
-                <button type="submit" class="btn btn-success btn-m px-5 shadow-sm fw-bold">
-                    Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
-                </button>
-            </form>
+            <?php if (isset($_SESSION['user'])): ?>
+                <div class="mb-3">
+                    <span class="text-muted fs-5">Total to pay:</span>
+                    <span class="fw-bold fs-4 ms-2">€<?= number_format($grandTotal, 2) ?></span>
+                </div>
+                <form action="/checkout" method="POST">
+                    <button type="submit" class="btn btn-success btn-m px-5 shadow-sm fw-bold">
+                        Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            <?php else: ?>
+                <div class="alert alert-info d-inline-block shadow-sm border-0 py-3 px-4">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Almost there!</strong> Please log in to complete your purchase.
+                    <div class="mt-3">
+                        <a href="/login" class="btn btn-primary fw-bold px-4 me-2">
+                            Login <i class="bi bi-box-arrow-in-right ms-1"></i>
+                        </a>
+                        <a href="/register" class="btn btn-outline-primary fw-bold px-4">
+                            Register
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>

@@ -109,6 +109,14 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // Checkout routes
     $r->addRoute('POST', '/checkout', ['App\Controllers\TicketController', 'checkout']);
     $r->addRoute('GET', '/payment-success', ['App\Controllers\TicketController', 'paymentSuccess']);
+
+         
+     //password reset
+    $r->addRoute('GET', '/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);
+    $r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
+    $r->addRoute('GET', '/resetPassword', ['App\Controllers\AuthController', 'showResetPassword']);
+    $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
+    $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
 });
 
 /**
@@ -178,7 +186,14 @@ switch ($routeInfo[0]) {
         } elseif ($class === 'App\Controllers\TicketController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
-            $controller = new $class($restaurantService);
+            $artistRepository = new \App\Repositories\ArtistRepository();
+            $artistService = new \App\Services\ArtistService($artistRepository);
+            $jazzEventRepository = new \App\Repositories\JazzEventRepository();
+            $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
+            $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
+            $historyEventRepository = new \App\Repositories\HistoryEventRepository();
+            $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
+            $controller = new $class($restaurantService, $artistService, $jazzEventService, $historyService);
         } else {
             $controller = new $class();
         }

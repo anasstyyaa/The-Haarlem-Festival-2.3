@@ -8,6 +8,8 @@ use App\Models\PersonalProgram;
 
 use App\Services\Yummy\RestaurantService;
 use App\Repositories\Yummy\RestaurantRepository;
+use App\Repositories\Yummy\RestaurantSessionRepository;
+use App\Services\Yummy\RestaurantSessionService;
 
 use App\Services\ArtistService;
 use App\Repositories\ArtistRepository;
@@ -19,23 +21,34 @@ use App\Repositories\HistoryEventRepository;
 use App\Repositories\HistoryVenueRepository;
 use App\Models\HistoryVenueModel;
 
+use App\Services\CommunicationService;
+use App\Services\UserService;
+use App\Repositories\UserRepository;
+
 class TicketController
 {
     private PersonalProgramService $programService;
     private EventRepository $eventRepo;
     private RestaurantService $restaurantService;
+    private RestaurantSessionService $restaurantSessionService;
     private ArtistService $artistService;
     private JazzEventService $jazzEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
+    private CommunicationService $communicationService;
+    private UserService $userService;
+    private UserRepository $userRepository;
 
     public function __construct()
     {
         $this->programService = new PersonalProgramService();
         $this->eventRepo = new EventRepository();
         $this->restaurantService = new RestaurantService(new RestaurantRepository());
+        $this->restaurantSessionService = new RestaurantSessionService(new RestaurantSessionRepository(), new RestaurantRepository());
         $this->artistService = new ArtistService(new ArtistRepository());
         $this->jazzEventService = new JazzEventService(new JazzEventRepository());
+        $this->communicationService = new CommunicationService();
+        $this->userService = new UserService(new UserRepository());
 
         $this->historyService = new HistoryService(
             new HistoryEventRepository(),
@@ -55,10 +68,15 @@ class TicketController
             $subId = $event->getSubEventId();
 
             if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
-                $restaurant = $this->restaurantService->getRestaurantById($subId);
-
-                if ($restaurant) {
-                    $event->setDetails($restaurant);
+                $session = $this->restaurantSessionService->getSessionById($subId);
+    
+                if ($session) {
+                    $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
+                    
+                    if ($restaurant) {
+                        $restaurant->setSessionData($session);
+                        $event->setDetails($restaurant);
+                    }
                 }
             }
 
@@ -67,10 +85,12 @@ class TicketController
 
                 if ($jazzEvent) {
                     $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
+                    $venueInfo = (new JazzEventRepository())->getVenueInfoByJazzEventId($jazzEvent->getId());
 
-                    if ($artist) {
-                        $event->setDetails($artist);
-                    }
+                    $event->setDetails([
+                        'artist' => $artist,
+                        'venueInfo' => $venueInfo
+                    ]);
                 }
             }
 
@@ -130,6 +150,51 @@ class TicketController
         header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
         exit;
     }
+    
+    public function paymentSuccess(): void
+    {
+        $program = $_SESSION['program'] ?? null;
+        $userId = $_SESSION['user']['id'] ?? 0; 
+        $stripeSessionId = $_GET['session_id'] ?? 'unknown'; // Stripe passes this back
+
+        if ($program && count($program->getTickets()) > 0) {
+            try {
+                foreach ($program->getTickets() as $ticket) {
+                    $this->programService->savePaidTicket($ticket, $stripeSessionId);
+                }
+
+                $communicationService = new CommunicationService();
+                $userId = $_SESSION['user']['id'];
+
+                $userModel = $this->userService->getUserById($userId); 
+
+                if ($userModel) {
+                    $userData = [
+                        'email'      => $userModel->getEmail(),
+                        'full_name' => $userModel->getFullName(),
+                    ];
+                } else {
+                    // Fallback if user isn't found for some reason
+                    $userData = [
+                        'email'      => $_SESSION['user']['email'],
+                        'full_name' => $_SESSION['user']['userName'],
+                    ];
+                }
+
+                $communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
+
+                unset($_SESSION['program']);
+                $_SESSION['flash_success'] = "Thank you! Your tickets have been secured.";
+
+            } catch (\Exception $e) {
+                error_log("Database Error during payment success: " . $e->getMessage());
+                $_SESSION['error'] = "Payment recorded, but there was an issue saving your tickets. Please contact support.";
+                //die("Database Error: " . $e->getMessage());
+            }
+        }
+
+        require __DIR__ . '/../Views/payment/success.php';
+    }
 
     public function removeTicket(): void
     {
@@ -149,5 +214,76 @@ class TicketController
 
         header('Location: /personalProgram');
         exit;
+    }
+    public function checkout(): void
+    {
+        if (!isset($_SESSION['user'])) {
+            $_SESSION['flash_error'] = "You must be logged in to checkout.";
+            header('Location: /personalProgram'); 
+            exit();
+        }
+
+        // Stripe Secret Key (a test key from stripe.com)
+        $apiKey = getenv('STRIPE_SECRET_KEY');
+
+        $program = $_SESSION['program'] ?? null;
+        if (!$program || count($program->getTickets()) === 0) {
+            header("Location: /personalProgram");
+            exit;
+        }
+
+        // Preparing the data for Stripe
+        $data = [
+            'success_url' => 'http://localhost/payment-success?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => 'http://localhost/personalProgram',
+            'mode' => 'payment',
+            'payment_method_types[0]' => 'card',
+            'payment_method_types[1]' => 'ideal',
+        ];
+
+        $i = 0;
+        foreach ($program->getTickets() as $ticket) {
+            $event = $ticket->getEvent();
+            $details = $event->getDetails();
+            $name = "Festival Ticket";
+
+            if (is_array($details) && isset($details['artist'])) {
+                $artist = $details['artist'] ?? null;
+
+                if ($artist && method_exists($artist, 'getName')) {
+                    $name = $artist->getName();
+                }
+            } elseif ($details && method_exists($details, 'getName')) {
+                $name = $details->getName();
+            }
+
+            // Stripe needs the price in Cents (1000 = €10.00)
+            $data["line_items[$i][price_data][currency]"] = 'eur';
+            $unitAmount = (int)($ticket->getUnitPrice() * 100); 
+            $data["line_items[$i][price_data][unit_amount]"] = $unitAmount;
+            $data["line_items[$i][price_data][product_data][name]"] = $name;
+            $data["line_items[$i][quantity]"] = $ticket->getNumberOfPeople();
+            $i++;
+        }
+
+        // Sends the request to Stripe via cURL
+        $ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $apiKey . ':');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+
+        $response = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+
+        // Redirects to the Stripe payment page
+        if (isset($response['url'])) {
+            header("Location: " . $response['url']);
+            exit;
+        } else {
+            // If there is an error (e.g. invalid key), show it
+            echo "<h1>Stripe Error</h1>";
+            echo "<pre>" . print_r($response, true) . "</pre>";
+            exit;
+        }
     }
 }

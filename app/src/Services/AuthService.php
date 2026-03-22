@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\UserModel; 
 use App\Repositories\UserRepository;
-use App\Services\Interfaces\IAuthService;
+use App\Services\Interfaces\IAuthService; 
 
 class AuthService implements IAuthService
 {
@@ -31,4 +31,6 @@ class AuthService implements IAuthService
     {
         session_destroy();
     }
+
+    
 }

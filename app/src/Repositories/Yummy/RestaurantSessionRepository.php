@@ -9,6 +9,20 @@ use PDO;
 
 class RestaurantSessionRepository extends Repository implements IRestaurantSessionRepository {
 
+    public function getSessionById(int $id): ?RestaurantSessionModel {
+        $sql = "SELECT id, restaurant_id, [date], startTime, available_slots 
+                FROM RestaurantSessions 
+                WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        
+        $stmt->setFetchMode(\PDO::FETCH_CLASS, RestaurantSessionModel::class);
+        $session = $stmt->fetch();
+
+        return $session ?: null;
+    }
+
     public function getSessionsByRestaurantId(int $restaurantId): array {
         $sql = "SELECT id, restaurant_id, [date], startTime, available_slots 
                 FROM RestaurantSessions 

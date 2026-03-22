@@ -12,8 +12,10 @@ interface IUserRepository
     public function update(UserModel $user): bool;
     public function delete(int $id): bool;
     public function restore(int $id): bool;
-    public function findByEmail (string $email): ?array; 
+    public function findByEmail (string $email): ?array;
     public function adminGetAll(): array;
+    public function updatePassword(int $userId, string $hashedPassword): bool;
+    
     //public function findByUserName (string $userName): ?array; 
     public function updateProfile(UserModel $user): bool;
     public function getAllFiltered(string $search = '', string $role = '', string $sort = ''): array;

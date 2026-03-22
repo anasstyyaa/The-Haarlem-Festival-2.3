@@ -2,6 +2,8 @@
 
 namespace App\Models\Yummy;
 
+use App\Models\Yummy\RestaurantSessionModel;
+
 class RestaurantModel {
     private int $id = 0;
     private string $name = ""; 
@@ -19,6 +21,8 @@ class RestaurantModel {
     private ?int $session_duration = 90;
     private ?float $reservation_fee = 10.00;
     private ?int $total_slots = 35;
+
+    private ?RestaurantSessionModel $session_data = null;
 
 
     public function getId(): int { return $this->id; }
@@ -50,4 +54,7 @@ class RestaurantModel {
     public function setSessionDuration(?int $duration): void { $this->session_duration = $duration; }
     public function setReservationFee(?float $fee): void { $this->reservation_fee = $fee; }
     public function setTotalSlots(?int $slots): void { $this->total_slots = $slots; }
+
+    public function setSessionData(RestaurantSessionModel $session): void {$this->session_data = $session;}
+    public function getSessionData(): ?RestaurantSessionModel { return $this->session_data;}
 }

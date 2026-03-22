@@ -10,9 +10,16 @@ class HomeController
 
     public function index(): string
     {
-        ob_start();
-        require __DIR__ . '/../Views/home/index.php';
-        return ob_get_clean();
+       $elements = $this->pageRepo->getByPageName("home");
+
+$vm = new PageElementViewModel(
+    $this->textRepo,
+    $this->imageRepo
+);
+
+$vm->build($elements);
+
+require __DIR__ . '/../Views/home/index.php';
     }
 }
 

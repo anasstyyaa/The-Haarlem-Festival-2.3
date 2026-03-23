@@ -24,6 +24,8 @@ use App\Repositories\HistoryVenueRepository;
 use App\Repositories\HistoryEventRepository;
 
 use App\Repositories\KidsEventRepository;
+use App\Repositories\TicketRepository;
+use App\Repositories\UserRepository;
 use App\Services\KidsEventService;
 
 
@@ -42,15 +44,15 @@ class TicketController
     private KidsEventService $kidsEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
-    private UserRepository $userRepositoryus
+    //private UserRepository $userRepository;
     private TicketRepository $ticketRepository;
     
 
-    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, ICommunicationService $communicationService, IUserService $userService)
+    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, ICommunicationService $communicationService, IUserService $userService, TicketRepository $ticketRepository)
     {
         $this->programService = $programService; 
         $this->eventRepo = new EventRepository();
-        $this->ticketRepository = new TicketRepository();
+        $this->ticketRepository = $ticketRepository;
         $this->restaurantService = $restaurantService; 
         $this->restaurantSessionService = $restaurantSessionService; 
         $this->artistService = $artistService; 

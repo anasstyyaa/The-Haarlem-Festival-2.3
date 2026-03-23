@@ -12,6 +12,8 @@ error_reporting(E_ALL);
 
 use FastRoute\RouteCollector;
 use App\Models\Enums\EventTypeEnum;
+use App\Repositories\TicketRepository;
+
 use function FastRoute\simpleDispatcher;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
@@ -211,7 +213,7 @@ switch ($routeInfo[0]) {
 
             $userRepo = new App\Repositories\UserRepository();
             $userService = new App\Services\UserService($userRepo);
-            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $communicationService, $userService);
+            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $communicationService, $userService,$ticketRepo);
         } else {
             $controller = new $class();
         }

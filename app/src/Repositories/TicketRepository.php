@@ -69,7 +69,7 @@ class TicketRepository extends Repository
             return false;
         }
     }
-}
+
     public function savePendingTicket(TicketModel $ticket, string $tempOrderId): bool 
     {
         $sql = "INSERT INTO Tickets (

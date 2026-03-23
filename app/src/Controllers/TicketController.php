@@ -188,8 +188,6 @@ class TicketController
         if ($tempOrderId) {
             try {
                 $this->programService->updateTicketsToPaid($tempOrderId, $stripeSessionId);
-
-                $communicationService = new ICommunicationService();
                 $userId = $_SESSION['user']['id'];
 
                 $userModel = $this->userService->getUserById($userId); 
@@ -207,7 +205,7 @@ class TicketController
                     ];
                 }
 
-                $communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
+                $this->communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
 
                 unset($_SESSION['program']);
                 $_SESSION['flash_success'] = "Thank you! Your tickets have been secured.";

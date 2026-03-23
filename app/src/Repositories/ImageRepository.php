@@ -28,4 +28,18 @@ class ImageRepository extends Repository
             $row['altText'] ?? ''
         );
     }
+    public function updateImage(int $id, string $imgURL, string $altText): bool
+{
+    $sql = "UPDATE image 
+            SET imgURL = :imgURL, altText = :altText 
+            WHERE id = :id";
+
+    $stmt = $this->connection->prepare($sql);
+
+    return $stmt->execute([
+        'id' => $id,
+        'imgURL' => $imgURL,
+        'altText' => $altText
+    ]);
+}
 }

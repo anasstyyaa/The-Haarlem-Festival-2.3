@@ -102,4 +102,31 @@ class PageElementController
 
         echo "Error deleting element.";
     }
+    public function saveImgChanges(array $vars): void
+{
+    $id = (int)$vars['id'];
+
+    if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+        echo "Upload failed.";
+        return;
+    }
+
+    $file = $_FILES['image'];
+
+    $fileName = uniqid() . '_' . basename($file['name']);
+    $targetPath = __DIR__ . '/../../public/assets/images' . $fileName;
+
+    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+        echo "Failed to move uploaded file.";
+        return;
+    }
+
+    $imgURL = '/assets/images' . $fileName;
+    $altText = $_POST['altText'] ?? '';
+
+    $this->imgService->updateImage($id, $imgURL, $altText);
+
+    header('Location: /admin/kidsPage');
+    exit;
+}
 }

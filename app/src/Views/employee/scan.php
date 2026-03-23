@@ -5,7 +5,7 @@
 
     <p>Scan QR code using camera:</p>
 
-    <video id="preview" style="width:300px; border:1px solid black;"></video>
+    <div id="reader" style="width:300px; margin:0 auto;"></div>
 
     <br><br>
 
@@ -18,31 +18,23 @@
     </form>
 </div>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
-
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-    const html5QrCode = new Html5Qrcode("preview");
+    function onScanSuccess(decodedText, decodedResult) {
+        window.location.href = "/scan?token=" + encodeURIComponent(decodedText);
+    }
 
-    Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length) {
-            let cameraId = devices[0].id;
+    function onScanFailure(error) {
+        // ignore scan failures
+    }
 
-            html5QrCode.start(
-                cameraId,
-                {
-                    fps: 10,
-                    qrbox: 250
-                },
-                (decodedText) => {
-                    window.location.href = "/scan?token=" + decodedText;
-                },
-                (errorMessage) => {
-                }
-            );
-        }
-    }).catch(err => {
-        console.error(err);
-    });
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: 250 },
+        false
+    );
+
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

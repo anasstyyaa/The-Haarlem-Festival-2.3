@@ -290,34 +290,59 @@ class TicketController
         }
     }
 
-    public function scan(): void  //used to check if ticket exists or is scanned already
-    {
-        $this->requireEmployee(); //checks if user is employee before allowing access to scanning function
-        try {
-            $token = $_GET['token'] ?? '';
-            if ($token === '') {
-                echo "No ticket token provided.";
-                exit;
-            }
-            $ticket = $this->ticketRepository->getByToken($token);
-            if ($ticket === null) {
-                echo "Invalid ticket.";
-                exit;
-            }
+    /**
+ * Simple ticket scan method for employees
+ */
+public function scan(): void
+{
+    $this->requireEmployee();
 
-            if ((int)$ticket['is_scanned'] === 1) {
-                echo "This ticket has already been scanned.";
-                exit;
-            }
-            $this->ticketRepository->markAsScanned($token);
-            echo "Ticket is valid. Entry allowed.";
-            exit;
-        } catch (\Exception $e) {
-            error_log("Scan error: " . $e->getMessage());
-            echo "Something went wrong while scanning.";
-            exit;
+    try {
+        $token = $_GET['token'] ?? '';
+        if ($token === '') {
+            $status = 'error';
+            $message = 'No ticket token provided.';
+            $ticket = null;
+
+            require __DIR__ . '/../Views/employee/scanResult.php';
+            return;
         }
+        $ticket = $this->ticketRepository->getByToken($token);
+
+        if (!$ticket) {
+            $status = 'error';
+            $message = 'Invalid ticket.';
+            $ticket = null;
+
+            require __DIR__ . '/../Views/employee/scanResult.php';
+            return;
+        }
+
+        if ($ticket['is_scanned'] == 1) {
+            $status = 'warning';
+            $message = 'This ticket has already been scanned.';
+
+            require __DIR__ . '/../Views/employee/scanResult.php';
+            return;
+        }
+
+        $this->ticketRepository->markAsScanned($token);
+
+        $status = 'success';
+        $message = 'Ticket is valid. Entry allowed.';
+
+        require __DIR__ . '/../Views/employee/scanResult.php';
+
+    } catch (\Exception $e) {
+        error_log("Scan error: " . $e->getMessage());
+
+        $status = 'error';
+        $message = 'Something went wrong.';
+        $ticket = null;
+
+        require __DIR__ . '/../Views/employee/scanResult.php';
     }
+}
 
     private function requireEmployee(): void //checks if current user is employee
     {

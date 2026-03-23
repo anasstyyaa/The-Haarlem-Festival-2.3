@@ -110,7 +110,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // Checkout routes
     $r->addRoute('POST', '/checkout', ['App\Controllers\TicketController', 'checkout']);
     $r->addRoute('GET', '/payment-success', ['App\Controllers\TicketController', 'paymentSuccess']);
-
+    $r->addRoute('GET',  '/payment-failed', ['App\Controllers\TicketController', 'paymentFailed']); 
+    $r->addRoute('GET',  '/repay', ['App\Controllers\TicketController', 'repay']);
          
      //password reset
     $r->addRoute('GET', '/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);

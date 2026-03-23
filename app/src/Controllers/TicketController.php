@@ -172,12 +172,11 @@ class TicketController
         $program = $_SESSION['program'] ?? null;
         $userId = $_SESSION['user']['id'] ?? 0; 
         $stripeSessionId = $_GET['session_id'] ?? 'unknown'; // Stripe passes this back
+        $tempOrderId = $_GET['orderId'] ?? null;
 
-        if ($program && count($program->getTickets()) > 0) {
+        if ($tempOrderId) {
             try {
-                foreach ($program->getTickets() as $ticket) {
-                    $this->programService->savePaidTicket($ticket, $stripeSessionId);
-                }
+                $this->programService->updateTicketsToPaid($tempOrderId, $stripeSessionId);
 
                 $communicationService = new CommunicationService();
                 $userId = $_SESSION['user']['id'];
@@ -212,6 +211,32 @@ class TicketController
         require __DIR__ . '/../Views/payment/success.php';
     }
 
+    public function paymentFailed(): void
+    {
+        $tempOrderId = $_GET['orderId'] ?? null;
+        $userId = $_SESSION['user']['id'] ?? 0; 
+        if ($tempOrderId) {
+            $userModel = $this->userService->getUserById($userId); 
+
+           if ($userModel) {
+                $userData = [
+                    'email'      => $userModel->getEmail(),
+                    'full_name' => $userModel->getFullName(),
+                ];
+            } else {
+                // Fallback if user isn't found for some reason
+                $userData = [
+                    'email'      => $_SESSION['user']['email'],
+                    'full_name' => $_SESSION['user']['userName'],
+                ];
+            }
+        
+            $this->communicationService->sendPaymentReminder($userData, $tempOrderId);
+        }
+
+        require __DIR__ . '/../Views/payment/failed.php';
+    }
+
     public function removeTicket(): void
     {
         $ticketId = (int)($_POST['ticket_id'] ?? 0);
@@ -239,50 +264,75 @@ class TicketController
             exit();
         }
 
-        // Stripe Secret Key (a test key from stripe.com)
-        $apiKey = getenv('STRIPE_SECRET_KEY');
-
         $program = $_SESSION['program'] ?? null;
         if (!$program || count($program->getTickets()) === 0) {
             header("Location: /personalProgram");
             exit;
         }
+        $userId = $_SESSION['user']['id'];
+        $tempOrderId = $this->programService->createPendingTicketsFromSession($program, $userId);
+        $ticketNames = [];
 
-        // Preparing the data for Stripe
+        foreach ($program->getTickets() as $ticket) {
+            $details = $ticket->getEvent()->getDetails();
+            $name = "Festival Ticket";
+
+            if (is_array($details) && isset($details['artist'])) {
+                $name = $details['artist']->getName();
+            } elseif (is_array($details) && isset($details['name'])) {
+                $name = $details['name'];
+            } elseif (is_object($details) && method_exists($details, 'getName')) {
+                $name = $details->getName();
+            }
+            
+            $ticketNames[] = $name;
+        }
+
+        $this->redirectToStripe($program->getTickets(), $tempOrderId, $ticketNames);
+    }
+
+    public function repay(): void
+    {
+        $orderId = $_GET['orderId'] ?? '';
+        $tickets = $this->programService->getTicketsByOrderId($orderId);
+
+        if (empty($tickets)) {
+            die("Order not found.");
+        }
+
+        $createdAt = new \DateTime($tickets[0]['created_at']);
+        if ($createdAt->diff(new \DateTime())->h >= 24 || $createdAt->diff(new \DateTime())->days > 0) {
+            die("This reservation has expired (24-hour limit).");
+        }
+
+        $this->redirectToStripe($tickets, $orderId);
+    }
+
+
+    private function redirectToStripe(array $ticketsData, string $orderId, array $customNames = []): void //customNmaes may be empty
+    {
+        $apiKey = getenv('STRIPE_SECRET_KEY');
+
         $data = [
-            'success_url' => 'http://localhost/payment-success?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => 'http://localhost/personalProgram',
+            'success_url' => "http://localhost/payment-success?orderId=$orderId&session_id={CHECKOUT_SESSION_ID}",
+            'cancel_url' => "http://localhost/payment-failed?orderId=$orderId",
             'mode' => 'payment',
             'payment_method_types[0]' => 'card',
             'payment_method_types[1]' => 'ideal',
         ];
 
-        $i = 0;
-        foreach ($program->getTickets() as $ticket) {
-            $event = $ticket->getEvent();
-            $details = $event->getDetails();
-            $name = "Festival Ticket";
+        foreach ($ticketsData as $i => $ticket) {
+            // handeling both Object (from Session) or Array (from DB)
+            $unitPrice = is_array($ticket) ? $ticket['unit_price'] : $ticket->getUnitPrice();
+            $qty = is_array($ticket) ? $ticket['number_of_people'] : $ticket->getNumberOfPeople();
+            $name = $customNames[$i] ?? "Haarlem Festival Ticket";
 
-            if (is_array($details) && isset($details['artist'])) {
-                $artist = $details['artist'] ?? null;
-
-                if ($artist && method_exists($artist, 'getName')) {
-                    $name = $artist->getName();
-                }
-            } elseif ($details && method_exists($details, 'getName')) {
-                $name = $details->getName();
-            }
-
-            // Stripe needs the price in Cents (1000 = €10.00)
             $data["line_items[$i][price_data][currency]"] = 'eur';
-            $unitAmount = (int)($ticket->getUnitPrice() * 100); 
-            $data["line_items[$i][price_data][unit_amount]"] = $unitAmount;
+            $data["line_items[$i][price_data][unit_amount]"] = (int)($unitPrice * 100);
             $data["line_items[$i][price_data][product_data][name]"] = $name;
-            $data["line_items[$i][quantity]"] = $ticket->getNumberOfPeople();
-            $i++;
+            $data["line_items[$i][quantity]"] = $qty;
         }
 
-        // Sends the request to Stripe via cURL
         $ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERPWD, $apiKey . ':');
@@ -291,15 +341,11 @@ class TicketController
         $response = json_decode(curl_exec($ch), true);
         curl_close($ch);
 
-        // Redirects to the Stripe payment page
         if (isset($response['url'])) {
             header("Location: " . $response['url']);
             exit;
         } else {
-            // If there is an error (e.g. invalid key), show it
-            echo "<h1>Stripe Error</h1>";
-            echo "<pre>" . print_r($response, true) . "</pre>";
-            exit;
+            die("Stripe Error: " . ($response['error']['message'] ?? 'Unknown error'));
         }
     }
 }

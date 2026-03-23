@@ -27,7 +27,7 @@ class KidsEventRepository extends Repository
 
     public function getIdBySchedule(string $day, string $startTime, string $endTime): ?KidsEventModel
     {
-        $sql = "SELECT id FROM KidsEvent WHERE day = :day AND startTime = :startTime AND endTime = :endTime";
+        $sql = "SELECT * FROM KidsEvent WHERE day = :day AND startTime = :startTime AND endTime = :endTime";
 
         $stmt = $this->connection->prepare($sql);
         $stmt->execute([
@@ -42,25 +42,32 @@ class KidsEventRepository extends Repository
 
     public function create(KidsEventModel $event): bool
     {
-        $sql = "INSERT INTO KidsEvent (day, startTime, endTime) VALUES (:day, :startTime, :endTime)";
-
-        $stmt = $this->connection->prepare($sql);
-        return $stmt->execute([
-            'day'       => $event->getDay(),
-            'startTime' => $event->getStartTime(),
-            'endTime'   => $event->getEndTime()
-        ]);
-    }
-
-    public function update(KidsEventModel $event): bool
-    {
-        $sql = "UPDATE KidsEvent SET  day = :day,  startTime = :startTime,  endTime = :endTime  WHERE id = :id";
+        $sql = "INSERT INTO KidsEvent (day, startTime, endTime, type, location) 
+                VALUES (:day, :startTime, :endTime, :type, :location)";
 
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'day'       => $event->getDay(),
             'startTime' => $event->getStartTime(),
             'endTime'   => $event->getEndTime(),
+            'type'      => $event->getType(),
+            'location'  => $event->getLocation()
+        ]);
+    }
+
+    public function update(KidsEventModel $event): bool
+    {
+        $sql = "UPDATE KidsEvent 
+                SET day = :day, startTime = :startTime, endTime = :endTime, type = :type, location = :location
+                WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+        return $stmt->execute([
+            'day'       => $event->getDay(),
+            'startTime' => $event->getStartTime(),
+            'endTime'   => $event->getEndTime(),
+            'type'      => $event->getType(),
+            'location'  => $event->getLocation(),
             'id'        => $event->getId()
         ]);
     }
@@ -78,7 +85,9 @@ class KidsEventRepository extends Repository
             (int)($row['id'] ?? 0),
             $row['day'] ?? '',
             $row['startTime'] ?? '',
-            $row['endTime'] ?? ''
+            $row['endTime'] ?? '',
+            $row['type'] ?? 'Teylers Secret',                 
+            $row['location'] ?? 'Teylers Museum, Haarlem'      
         );
     }
 }

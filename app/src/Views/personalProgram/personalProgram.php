@@ -75,7 +75,13 @@ $grandTotal = 0.0;
                                         $location .= ', ' . $venueInfo['HallName'];
                                     }
                                 }
-                            } elseif ($details) {
+                            } elseif (is_array($details) && isset($details['name'])) {
+    // NEW: kids event logic
+    $title = $details['name'];
+    $location = $details['location'] ?? 'Haarlem';
+    $date = $details['date'] ?? '';
+    $startTime = $details['startTime'] ?? '';
+} elseif ($details) {
                                 if (method_exists($details, 'getName')) {
                                     $title = $details->getName();
                                 }

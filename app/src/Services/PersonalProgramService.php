@@ -1,6 +1,7 @@
 <?php 
 namespace App\Services;
 
+use App\Services\Interfaces\IPersonalProgramService;
 use App\Models\PersonalProgram;
 use App\Repositories\EventRepository;
 use App\Repositories\UserRepository;

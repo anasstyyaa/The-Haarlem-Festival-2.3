@@ -21,6 +21,9 @@ use App\Repositories\HistoryEventRepository;
 use App\Repositories\HistoryVenueRepository;
 use App\Models\HistoryVenueModel;
 
+use App\Repositories\KidsEventRepository;
+use App\Services\KidsEventService;
+
 use App\Services\CommunicationService;
 use App\Services\UserService;
 use App\Repositories\UserRepository;
@@ -38,6 +41,7 @@ class TicketController
     private CommunicationService $communicationService;
     private UserService $userService;
     private UserRepository $userRepository;
+    private KidsEventService $kidsEventService;
 
     public function __construct()
     {
@@ -56,6 +60,7 @@ class TicketController
         );
 
         $this->historyVenueRepository = new HistoryVenueRepository();
+        $this->kidsEventService = new KidsEventService(new KidsEventRepository());
     }
 
     public function index(): void
@@ -117,9 +122,20 @@ class TicketController
                     $event->setDetails($historyEvent);
                 }
             }
+             if (strcasecmp($event->getEventType()->name, 'kids') === 0) {
+    $kidsEvent = $this->kidsEventService->getEventById($subId);
+    if ($kidsEvent) {
+        $event->setDetails([
+            'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
+            'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
+            'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
+            'startTime' => $kidsEvent->getStartTime() ?? '10:00'
+        ]);
+    }
+}
         }
-
         require __DIR__ . '/../Views/personalProgram/personalProgram.php';
+    
     }
 
     public function addTicket(): void

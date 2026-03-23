@@ -39,4 +39,11 @@ class TicketRepository extends Repository
             'token'  => $token
         ]);
     }
+    public function getAll(): array
+{
+    $sql = "SELECT * FROM Tickets ORDER BY id DESC";
+    $stmt = $this->connection->query($sql);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }

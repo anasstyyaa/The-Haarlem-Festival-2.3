@@ -38,4 +38,27 @@ class KidsEventService
 {
     return $this->repository->delete($id);
 }
+public function mapDayToDate(string $dayName): ?string
+{
+    $dayName = strtolower(trim($dayName));
+    $daysMap = [
+        'monday'    => 1,
+        'tuesday'   => 2,
+        'wednesday' => 3,
+        'thursday'  => 4,
+        'friday'    => 5,
+        'saturday'  => 6,
+        'sunday'    => 7,
+    ];
+
+    if (!isset($daysMap[$dayName])) return null;
+
+    $today = (int)date('N'); 
+    $targetDay = $daysMap[$dayName];
+
+    $diff = ($targetDay - $today + 7) % 7; 
+    $diff = $diff === 0 ? 7 : $diff; 
+
+    return date('Y-m-d', strtotime("+$diff days"));
+}
 }

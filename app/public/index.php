@@ -203,6 +203,8 @@ switch ($routeInfo[0]) {
             $artistService = new \App\Services\ArtistService($artistRepository);
             $jazzEventRepository = new \App\Repositories\JazzEventRepository();
             $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
+            $jazzPassRepository = new \App\Repositories\JazzPassRepository();
+            $jazzPassService = new \App\Services\JazzPassService($jazzPassRepository);
 
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
@@ -214,7 +216,7 @@ switch ($routeInfo[0]) {
 
             $userRepo = new App\Repositories\UserRepository();
             $userService = new App\Services\UserService($userRepo);
-            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $communicationService, $userService);
+            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService,$jazzPassService, $communicationService, $userService);
         } else {
             $controller = new $class();
         }

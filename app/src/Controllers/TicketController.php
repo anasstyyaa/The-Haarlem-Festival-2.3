@@ -8,7 +8,7 @@ use App\Services\Interfaces\IPersonalProgramService;
 use App\Services\Interfaces\Yummy\IRestaurantService;
 use App\Services\Interfaces\Yummy\IRestaurantSessionService; 
 use App\Services\Interfaces\IArtistService; 
-use App\Services\Interfaces\IJazzEventService; 
+use App\Services\Interfaces\IJazzEventService;  
 use App\Services\Interfaces\IJazzPassService; 
 use App\Services\Interfaces\ICommunicationService; 
 use App\Services\Interfaces\IUserService; 
@@ -51,9 +51,9 @@ class TicketController
         $this->restaurantSessionService = $restaurantSessionService; 
         $this->artistService = $artistService; 
         $this->jazzEventService = $jazzEventService; 
-        $this->jazzPassService = $jazzPassService;
         //$this->historyService = $historyService; 
         $this->communicationService = $communicationService; 
+        $this->jazzPassService = $jazzPassService;
         $this->userService = $userService; 
 
         $this->kidsEventService = new KidsEventService(new KidsEventRepository());
@@ -73,7 +73,7 @@ class TicketController
             $event = $ticket->getEvent();
             $subId = $event->getSubEventId();
 
-            if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
+            if (strcasecmp($event->getEventType()->value, 'reservation') === 0) {
                 $session = $this->restaurantSessionService->getSessionById($subId);
     
                 if ($session) {
@@ -86,7 +86,7 @@ class TicketController
                 }
             }
 
-            if (strcasecmp($event->getEventType()->name, 'JazzEvent') === 0) {
+            if (strcasecmp($event->getEventType()->value, 'JazzEvent') === 0) {
                 $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
 
                 if ($jazzEvent) {
@@ -109,7 +109,7 @@ class TicketController
                 }
             }
 
-            if (strcasecmp($event->getEventType()->name, 'tour') === 0) {
+            if (strcasecmp($event->getEventType()->value, 'tour') === 0) {
                 $historyEvent = $this->historyService->getSessionByEventId($event->getId());
 
                 if ($historyEvent) {
@@ -133,7 +133,7 @@ class TicketController
                 }
             }
             
-            if (strcasecmp($event->getEventType()->name, 'kids') === 0) {
+            if (strcasecmp($event->getEventType()->value, 'kids') === 0) {
                 $kidsEvent = $this->kidsEventService->getEventById($subId);
                 if ($kidsEvent) {
                     $event->setDetails([
@@ -356,7 +356,7 @@ class TicketController
             foreach ($tickets as $t) {
                 $event = $this->eventRepo->getById($t['event_id']);
                 
-                if ($event && strcasecmp($event->getEventType()->name, 'reservation') === 0) {
+                if ($event && strcasecmp($event->getEventType()->value, 'reservation') === 0) {
                     $sessionId = (int)$t['sub_event_id'];
                     $quantity = (int)$t['number_of_people'];
 

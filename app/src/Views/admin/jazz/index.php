@@ -96,6 +96,7 @@ $venueMap = [
                     <th>Start</th>
                     <th>End</th>
                     <th>Price</th>
+                    <th>Tickets Left</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -112,6 +113,7 @@ $venueMap = [
                             <td><?= date('d M H:i', strtotime($event->getStartDateTime())) ?></td>
                             <td><?= date('H:i', strtotime($event->getEndDateTime())) ?></td>
                             <td>€<?= htmlspecialchars(number_format($event->getPrice(), 2)) ?></td>
+                            <td><?= htmlspecialchars($event->getTicketsLeft()) ?> / <?= htmlspecialchars($event->getCapacity()) ?></td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="/admin/jazz/events/edit/<?= $event->getId() ?>" class="btn btn-sm btn-outline-primary">
@@ -132,5 +134,66 @@ $venueMap = [
     </div>
 </div>
 
+<!-- Jazz Pass Section -->
+<div class="d-flex justify-content-between align-items-center mt-5 mb-3">
+    <h4 class="mb-0">Jazz Passes</h4>
+    <a href="/admin/jazz/passes/create" class="btn btn-primary">Add New Pass</a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Tickets Left</th>
+                    <th>Image</th>
+                    <th>Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($passes)): ?>
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No jazz passes found in database.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($passes as $pass): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($pass->getTitle()) ?></strong></td>
+                            <td><small class="text-muted"><?= htmlspecialchars($pass->getDescription() ?? '') ?></small></td>
+                            <td>€<?= number_format($pass->getPrice(), 2) ?></td>
+                            <td><?= htmlspecialchars($pass->getTicketsLeft()) ?> / <?= htmlspecialchars($pass->getCapacity()) ?></td>
+                            <td>
+                                <?php if ($pass->getImageUrl()): ?>
+                                    <img src="<?= htmlspecialchars($pass->getImageUrl()) ?>" alt="Pass" class="img-thumbnail" style="height: 60px;">
+                                <?php else: ?>
+                                    <span class="text-muted small">No image set</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?= $pass->isActive() ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>' ?>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="/admin/jazz/passes/edit/<?= $pass->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <a href="/admin/jazz/passes/delete/<?= $pass->getId() ?>"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Are you sure you want to delete this pass?')">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <?php require __DIR__ . '/../../partials/adminFooter.php'; ?>

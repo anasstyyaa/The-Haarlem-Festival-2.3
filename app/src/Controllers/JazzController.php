@@ -4,28 +4,34 @@ namespace App\Controllers;
 
 use App\Services\Interfaces\IArtistService;
 use App\Services\Interfaces\IJazzEventService; 
+use App\Services\Interfaces\IJazzPassService; 
 use App\Models\ArtistModel;
 use App\Models\JazzEventModel; 
+use App\Models\JazzPassModel;  
+use App\Models\Enums\EventTypeEnum;
 
 class JazzController
 {
     private IArtistService $artistService;
     private IJazzEventService $jazzEventService;
+    private IJazzPassService $jazzPassService;
 
-    public function __construct(IArtistService $artistService, IJazzEventService $jazzEventService){
+    public function __construct(IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService){
         $this->artistService = $artistService;
         $this->jazzEventService = $jazzEventService;
+        $this->jazzPassService = $jazzPassService;
     }
 
     public function index()
     {
         $artists = $this->artistService->getAllArtists();
         $lineup = [];
+        $passes = $this->jazzPassService->getAllActivePasses();
 
         foreach ($artists as $artist) {
             $events = $this->jazzEventService->getEventsForArtist(
                 $artist->getId(),
-                \App\Models\Enums\EventTypeEnum::JazzEvent
+                EventTypeEnum::JazzEvent
             );
 
             if (!empty($events)) {
@@ -48,6 +54,7 @@ class JazzController
 
         $artists = $this->artistService->getAllArtists();
         $events = $this->jazzEventService->getAllJazzEvents();
+        $passes = $this->jazzPassService->getAllActivePasses();
         include __DIR__ . '/../Views/admin/jazz/index.php';
     }
 
@@ -64,7 +71,7 @@ class JazzController
 
         $events = $this->jazzEventService->getEventsForArtist(
             $id,
-            \App\Models\Enums\EventTypeEnum::JazzEvent
+            EventTypeEnum::JazzEvent
         );
         include __DIR__ . '/../Views/event/jazz/detail.php';
     }
@@ -83,6 +90,11 @@ class JazzController
 
         $artists = $this->artistService->getAllArtists();
         include __DIR__ . '/../Views/admin/jazz/createEvent.php';
+    }
+
+    public function showCreatePassForm()
+    {
+        include __DIR__ . '/../Views/admin/jazz/createPass.php';
     }
 
     public function store()
@@ -124,6 +136,10 @@ class JazzController
             $event->setEndDateTime($endDateTime);
             $event->setPrice((float)($_POST['price'] ?? 0));
 
+            $capacity = (int)($_POST['capacity'] ?? 0);
+            $event->setCapacity($capacity);
+            $event->setTicketsLeft($capacity);
+
             if ($this->jazzEventService->createJazzEvent($event)) {
                 header('Location: /admin/jazz?status=created');
                 exit;
@@ -132,6 +148,34 @@ class JazzController
         //need the artists to show in the dropdown when creating an event. (If it were inside the POST block, Then opening the page normally would give: "Undefined variable: artists", because the view needs artists!)
         $artists = $this->artistService->getAllArtists();
         include __DIR__ . '/../Views/admin/jazz/createEvent.php';
+    }
+
+    public function storePass()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $fileName = $this->handlePassImageUpload('image_file', 'pass');
+
+            $pass = new JazzPassModel();
+            $pass->setTitle(trim($_POST['title'] ?? ''));
+            $pass->setDescription(trim($_POST['description'] ?? ''));
+            $pass->setPrice((float)($_POST['price'] ?? 0));
+            $pass->setIsActive(isset($_POST['is_active']) && $_POST['is_active'] == '1');
+
+            $capacity = (int)($_POST['capacity'] ?? 0);
+            $pass->setCapacity($capacity);
+            $pass->setTicketsLeft($capacity);
+
+            if ($fileName) {
+                $pass->setImageUrl('/assets/uploads/jazz/passes/' . $fileName);
+            }
+
+            if ($this->jazzPassService->createPass($pass)) {
+                header('Location: /admin/jazz?status=pass-created');
+                exit;
+            }
+        }
+
+        include __DIR__ . '/../Views/admin/jazz/createPass.php';
     }
 
     public function showEditForm($vars)
@@ -159,6 +203,19 @@ class JazzController
 
         $artists = $this->artistService->getAllArtists();
         include __DIR__ . '/../Views/admin/jazz/editEvent.php';
+    }
+
+    public function showEditPassForm($vars)
+    {
+        $id = (int)$vars['id'];
+        $pass = $this->jazzPassService->getPassById($id);
+
+        if (!$pass) {
+            header('Location: /admin/jazz?error=notfound');
+            exit;
+        }
+
+        include __DIR__ . '/../Views/admin/jazz/editPass.php';
     }
 
     public function update($vars)
@@ -213,6 +270,9 @@ class JazzController
             $event->setEndDateTime($endDateTime);
             $event->setPrice((float)($_POST['price'] ?? 0));
 
+            $event->setCapacity((int)($_POST['capacity'] ?? 0));
+            $event->setTicketsLeft((int)($_POST['tickets_left'] ?? 0));
+
             if ($this->jazzEventService->updateJazzEvent($id, $event)) {
                 header('Location: /admin/jazz?status=updated');
                 exit;
@@ -221,6 +281,39 @@ class JazzController
 
         $artists = $this->artistService->getAllArtists();
         include __DIR__ . '/../Views/admin/jazz/editEvent.php';
+    }
+
+    public function updatePass($vars)
+    {
+        $id = (int)$vars['id'];
+        $pass = $this->jazzPassService->getPassById($id);
+
+        if (!$pass) {
+            header('Location: /admin/jazz');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $pass->setTitle(trim($_POST['title'] ?? ''));
+            $pass->setDescription(trim($_POST['description'] ?? ''));
+            $pass->setPrice((float)($_POST['price'] ?? 0));
+            $pass->setIsActive(isset($_POST['is_active']) && $_POST['is_active'] == '1');
+
+            $pass->setCapacity((int)($_POST['capacity'] ?? 0));
+            $pass->setTicketsLeft((int)($_POST['tickets_left'] ?? 0));
+
+            $newImage = $this->handlePassImageUpload('image_file', 'pass');
+            if ($newImage) {
+                $pass->setImageUrl('/assets/uploads/jazz/passes/' . $newImage);
+            }
+
+            if ($this->jazzPassService->updatePass($id, $pass)) {
+                header('Location: /admin/jazz?status=pass-updated');
+                exit;
+            }
+        }
+
+        include __DIR__ . '/../Views/admin/jazz/editPass.php';
     }
 
     public function delete($vars)
@@ -239,6 +332,14 @@ class JazzController
         exit;
     }
 
+    public function deletePass($vars)
+    {
+        $id = (int)$vars['id'];
+        $this->jazzPassService->deletePass($id);
+        header('Location: /admin/jazz?status=pass-deleted');
+        exit;
+    }
+
     private function handleImageUpload(string $inputName, string $prefix): ?string
     {
         if (!isset($_FILES[$inputName]) || $_FILES[$inputName]['error'] !== UPLOAD_ERR_OK) {
@@ -246,6 +347,27 @@ class JazzController
         }
 
         $uploadDir = __DIR__ . '/../../public/assets/uploads/jazz/artists/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $extension = strtolower(pathinfo($_FILES[$inputName]['name'], PATHINFO_EXTENSION));
+        $newFileName = uniqid($prefix . '_', true) . '.' . $extension;
+
+        if (move_uploaded_file($_FILES[$inputName]['tmp_name'], $uploadDir . $newFileName)) {
+            return $newFileName;
+        }
+
+        return null;
+    }
+
+    private function handlePassImageUpload(string $inputName, string $prefix): ?string
+    {
+        if (!isset($_FILES[$inputName]) || $_FILES[$inputName]['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        $uploadDir = __DIR__ . '/../../public/assets/uploads/jazz/passes/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }

@@ -104,8 +104,8 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
 
         try {
             $stmt = $this->connection->prepare("
-                INSERT INTO JazzEvent (ArtistID, JazzVenueID, StartDateTime, EndDateTime, Price)
-                VALUES (:ArtistID, :JazzVenueID, :StartDateTime, :EndDateTime, :Price)
+                INSERT INTO JazzEvent (ArtistID, JazzVenueID, StartDateTime, EndDateTime, Price, Capacity, TicketsLeft)
+                VALUES (:ArtistID, :JazzVenueID, :StartDateTime, :EndDateTime, :Price, :Capacity, :TicketsLeft)
             ");
 
             $success = $stmt->execute([
@@ -113,7 +113,9 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
                 'JazzVenueID' => $event->getJazzVenueId(),
                 'StartDateTime' => $event->getStartDateTime(),
                 'EndDateTime' => $event->getEndDateTime(),
-                'Price' => $event->getPrice()
+                'Price' => $event->getPrice(),
+                'Capacity' => $event->getCapacity(),
+                'TicketsLeft' => $event->getTicketsLeft()
             ]);
 
             if (!$success) {
@@ -148,6 +150,8 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
                 StartDateTime = :StartDateTime,
                 EndDateTime = :EndDateTime,
                 Price = :Price,
+                Capacity = :Capacity,
+                TicketsLeft = :TicketsLeft,
                 updated_at = GETDATE()
             WHERE JazzEventID = :JazzEventID AND deleted_at IS NULL
         ");
@@ -158,7 +162,9 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
             'JazzVenueID' => $event->getJazzVenueId(),
             'StartDateTime' => $event->getStartDateTime(),
             'EndDateTime' => $event->getEndDateTime(),
-            'Price' => $event->getPrice()
+            'Price' => $event->getPrice(), 
+            'Capacity' => $event->getCapacity(),
+            'TicketsLeft' => $event->getTicketsLeft()
         ]);
     }
 
@@ -196,6 +202,23 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
             $this->connection->rollBack();
             throw $e;
         }
+    }
+
+    //for decreasing the ticket amounts 
+    public function decreaseTicketsLeft(int $jazzEventId, int $quantity): bool
+    {
+        $stmt = $this->connection->prepare("
+            UPDATE JazzEvent
+            SET TicketsLeft = TicketsLeft - :quantity
+            WHERE JazzEventID = :id
+            AND TicketsLeft >= :quantity
+            AND deleted_at IS NULL
+        ");
+
+        return $stmt->execute([
+            'id' => $jazzEventId,
+            'quantity' => $quantity
+        ]);
     }
 
     //Helper method (It inserts the generic row into Event table)

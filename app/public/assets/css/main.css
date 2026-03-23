@@ -823,6 +823,73 @@ body.admin-page #sidebar .nav-item {
   cursor: not-allowed;
 }
 
+/* Jazz passes */ 
+.jazz-passes {
+  padding: 80px 0;
+  background: #5c1a08;
+  color: white;
+}
+
+.passes-container {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+}
+
+.passes-container h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.passes-intro {
+  text-align: center;
+  margin-bottom: 40px;
+  opacity: 0.8;
+}
+
+.passes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.pass-card {
+  display: grid;
+  grid-template-columns: 160px 1fr 250px;
+  align-items: center;
+  gap: 25px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.pass-image img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.pass-info h3 {
+  margin-bottom: 8px;
+}
+
+.pass-price {
+  margin-top: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ff8a2a;
+}
+
+.pass-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+
+
+
 /* Personal Program Specific Styles */
 .program-container {
     max-width: 900px;

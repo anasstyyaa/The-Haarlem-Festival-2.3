@@ -59,6 +59,7 @@ $grandTotal = 0.0;
                             if (is_array($details) && isset($details['artist'])) {
                                 $artist = $details['artist'] ?? null;
                                 $venueInfo = $details['venueInfo'] ?? null;
+                                $jazzEvent = $details['jazzEvent'] ?? null;
 
                                 if ($artist && method_exists($artist, 'getName')) {
                                     $title = $artist->getName();
@@ -75,13 +76,23 @@ $grandTotal = 0.0;
                                         $location .= ', ' . $venueInfo['HallName'];
                                     }
                                 }
+
+                                if ($jazzEvent && method_exists($jazzEvent, 'getStartDateTime')) {
+                                    $date = date('Y-m-d', strtotime($jazzEvent->getStartDateTime()));
+                                    $startTime = date('H:i', strtotime($jazzEvent->getStartDateTime()));
+                                }
                             } elseif (is_array($details) && isset($details['name'])) {
-    // NEW: kids event logic
-    $title = $details['name'];
-    $location = $details['location'] ?? 'Haarlem';
-    $date = $details['date'] ?? '';
-    $startTime = $details['startTime'] ?? '';
-} elseif ($details) {
+                                // NEW: kids event logic
+                                $title = $details['name'];
+                                $location = $details['location'] ?? 'Haarlem';
+                                $date = $details['date'] ?? '';
+                                $startTime = $details['startTime'] ?? '';
+                            } elseif ($details) {
+                                
+                                if (method_exists($details, 'getTitle')) {
+                                    $title = $details->getTitle();
+                                }
+
                                 if (method_exists($details, 'getName')) {
                                     $title = $details->getName();
                                 }
@@ -113,8 +124,24 @@ $grandTotal = 0.0;
                                 if (method_exists($details, 'getLanguage') && $details->getLanguage()) {
                                     $language = $details->getLanguage();
                                 }
-                            }
 
+                                // jazz pass date/time mapping
+                                if ($event->getEventType()->value === 'jazzpass' && method_exists($details, 'getTitle')) {
+                                    $passTitle = strtolower($details->getTitle());
+
+                                    if (str_contains($passTitle, 'thursday')) {
+                                        $date = '2026-07-23';
+                                    } elseif (str_contains($passTitle, 'friday')) {
+                                        $date = '2026-07-24';
+                                    } elseif (str_contains($passTitle, 'saturday')) {
+                                        $date = '2026-07-25';
+                                    } elseif (str_contains($passTitle, 'all days') || str_contains($passTitle, 'all access')) {
+                                        $date = '23–25 Jul 2026';
+                                    }
+
+                                    $startTime = 'Festival hours';
+                                }
+                            } 
                             $guestCount = $ticket->getNumberOfPeople();
                             ?>
                             <tr>

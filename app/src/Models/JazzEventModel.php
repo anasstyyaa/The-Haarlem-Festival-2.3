@@ -9,6 +9,8 @@ class JazzEventModel{
     private string $StartDateTime;
     private ?string $EndDateTime;
     private float $Price;
+    private int $Capacity; 
+    private int $TicketsLeft; 
     private ?string $deleted_at;
     private ?string $updated_at;
     private string $created_at;
@@ -37,6 +39,14 @@ class JazzEventModel{
     public function getPrice(): float {
         return $this->Price;
     }
+
+    public function getCapacity(): int {
+        return $this->Capacity;
+    }
+    public function getTicketsLeft(): int {
+        return $this->TicketsLeft;
+    }
+
     public function getCreatedAt(): string {
     return $this->created_at;
 }
@@ -69,5 +79,13 @@ class JazzEventModel{
 
     public function setPrice(float $price): void {
         $this->Price = $price;
+    }
+
+    public function setCapacity(int $capacity): void {
+        $this->Capacity = $capacity;
+    }
+
+    public function setTicketsLeft(int $ticketsLeft): void {
+        $this->TicketsLeft = $ticketsLeft;
     }
 }

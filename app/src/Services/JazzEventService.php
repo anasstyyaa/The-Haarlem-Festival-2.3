@@ -46,6 +46,11 @@ class JazzEventService implements IJazzEventService
         return $this->repository->update($id, $event);
     }
 
+    public function decreaseTicketsLeft(int $jazzEventId, int $quantity): bool
+    {
+        return $this->repository->decreaseTicketsLeft($jazzEventId, $quantity);
+    }
+
     public function deleteJazzEvent(int $id): bool
     {
         return $this->repository->delete($id);

@@ -74,6 +74,30 @@
                         >
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Capacity</label>
+                        <input
+                            type="number"
+                            min="0"
+                            name="capacity"
+                            class="form-control"
+                            value="<?= htmlspecialchars((string)$event->getCapacity()) ?>"
+                            required
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tickets Left</label>
+                        <input
+                            type="number"
+                            min="0"
+                            name="tickets_left"
+                            class="form-control"
+                            value="<?= htmlspecialchars((string)$event->getTicketsLeft()) ?>"
+                            required
+                        >
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <a href="/admin/jazz" class="btn btn-light px-4">Cancel</a>
                         <button type="submit" class="btn btn-warning px-4">Update Event</button>

@@ -107,5 +107,66 @@
     </div>
 </section>
 
+<section class="jazz-passes">
+    <div class="passes-container">
+        <h2>All Access Passes</h2>
+        <p class="passes-intro">
+            Make the most of the Haarlem Festival with our special ticket options. Choose a day pass for flexible access on your preferred day, or go for the full festival pass to enjoy all three days without missing a moment! <br> 
+            The all-access option offers the complete festival experience, giving you the freedom to explore more performances, activities, and the unique atmosphere Haarlem has to offer!
+        </p>
+
+        <div class="passes-list">
+            <?php foreach ($passes as $pass): ?>
+                <div class="pass-card">
+
+                    <!-- LEFT IMAGE -->
+                    <div class="pass-image">
+                        <img src="<?= htmlspecialchars($pass->getImageUrl() ?: '/assets/img/placeholder.jpg') ?>" alt="<?= htmlspecialchars($pass->getTitle()) ?>">
+                    </div>
+
+                    <!-- MIDDLE TEXT -->
+                    <div class="pass-info">
+                        <h3><?= htmlspecialchars($pass->getTitle()) ?></h3>
+                        <p><?= htmlspecialchars(strip_tags($pass->getDescription() ?? '')) ?></p>
+                        <div class="pass-price">€<?= number_format($pass->getPrice(), 2) ?></div>
+                    </div>
+
+                    <!-- RIGHT ACTION -->
+                    <div class="pass-action">
+                        <form method="POST" action="/addTicket" class="ticket-form">
+
+                            <input type="hidden" name="event_id" value="<?= $pass->getId() ?>">
+                            <input type="hidden" name="event_type" value="jazzpass">
+
+                            <div class="ticket-quantity-wrapper">
+                            <div class="ticket-quantity-controls">
+                                <button type="button" class="qty-btn" onclick="changeQty('qty-pass-<?= $pass->getId() ?>', -1)">−</button>
+                                <input 
+                                    id="qty-pass-<?= $pass->getId() ?>"
+                                    class="ticket-quantity-input"
+                                    type="number"
+                                    name="number_of_people"
+                                    value="1"
+                                    min="1"
+                                    max="20"
+                                    required
+                                >
+                                <button type="button" class="qty-btn" onclick="changeQty('qty-pass-<?= $pass->getId() ?>', 1)">+</button>
+                            </div>
+
+                            <button class="jazz-ticket-button" type="submit">
+                                Add to Personal Program
+                            </button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
 <?php require __DIR__ . '/../../partials/footer.php'; ?>
 <script src="/js/jazzFilter.js"></script>
+<script src="/js/ticketCounter.js"></script>
+<script src="/js/flashMessage.js"></script>

@@ -11,5 +11,6 @@ interface IJazzEventRepository{
     public function getVenueInfoByJazzEventId(int $jazzEventId): ?array;
     public function create(JazzEventModel $event): bool;
     public function update(int $id, JazzEventModel $event): bool;
+    public function decreaseTicketsLeft(int $jazzEventId, int $quantity): bool;
     public function delete(int $id): bool;
 }

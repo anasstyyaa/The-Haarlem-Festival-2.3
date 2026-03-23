@@ -57,6 +57,13 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/jazz/events/edit/{id:\d+}', ['App\Controllers\JazzController', 'updateEvent']);
     $r->addRoute('GET', '/admin/jazz/events/delete/{id:\d+}', ['App\Controllers\JazzController', 'deleteEvent']);
 
+    // Admin Jazz Pass Management
+    $r->addRoute('GET', '/admin/jazz/passes/create', ['App\Controllers\JazzController', 'showCreatePassForm']);
+    $r->addRoute('POST', '/admin/jazz/passes/create', ['App\Controllers\JazzController', 'storePass']);
+    $r->addRoute('GET', '/admin/jazz/passes/edit/{id:\d+}', ['App\Controllers\JazzController', 'showEditPassForm']);
+    $r->addRoute('POST', '/admin/jazz/passes/edit/{id:\d+}', ['App\Controllers\JazzController', 'updatePass']);
+    $r->addRoute('GET', '/admin/jazz/passes/delete/{id:\d+}', ['App\Controllers\JazzController', 'deletePass']);
+
     // Public Jazz routes
     $r->addRoute('GET', '/jazz', ['App\Controllers\JazzController', 'index']);
     $r->addRoute('GET', '/jazz/{id:\d+}', ['App\Controllers\JazzController', 'detail']);
@@ -179,7 +186,8 @@ switch ($routeInfo[0]) {
             $artistService = new \App\Services\ArtistService($artistRepository);
             $jazzEventRepository = new \App\Repositories\JazzEventRepository();
             $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
-            $controller = new $class($artistService, $jazzEventService);
+            $jazzPassService = new \App\Services\JazzPassService(new \App\Repositories\JazzPassRepository());
+            $controller = new $class($artistService, $jazzEventService, $jazzPassService);
         } elseif ($class === 'App\Controllers\ChefController') {
             $chefRepo = new \App\Repositories\Yummy\ChefRepository();
             $chefService = new \App\Services\Yummy\ChefService($chefRepo);

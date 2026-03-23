@@ -15,6 +15,8 @@ use App\Services\ArtistService;
 use App\Repositories\ArtistRepository;
 use App\Services\JazzEventService;
 use App\Repositories\JazzEventRepository;
+use App\Services\JazzPassService;
+use App\Repositories\JazzPassRepository;
 
 use App\Services\HistoryService;
 use App\Repositories\HistoryEventRepository;
@@ -36,6 +38,7 @@ class TicketController
     private RestaurantSessionService $restaurantSessionService;
     private ArtistService $artistService;
     private JazzEventService $jazzEventService;
+    private JazzPassService $jazzPassService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
     private CommunicationService $communicationService;
@@ -51,6 +54,7 @@ class TicketController
         $this->restaurantSessionService = new RestaurantSessionService(new RestaurantSessionRepository(), new RestaurantRepository());
         $this->artistService = new ArtistService(new ArtistRepository());
         $this->jazzEventService = new JazzEventService(new JazzEventRepository());
+        $this->jazzPassService = new JazzPassService(new JazzPassRepository());
         $this->communicationService = new CommunicationService();
         $this->userService = new UserService(new UserRepository());
 
@@ -90,12 +94,21 @@ class TicketController
 
                 if ($jazzEvent) {
                     $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-                    $venueInfo = (new JazzEventRepository())->getVenueInfoByJazzEventId($jazzEvent->getId());
+                    $venueInfo = $this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId());
 
                     $event->setDetails([
                         'artist' => $artist,
-                        'venueInfo' => $venueInfo
+                        'venueInfo' => $venueInfo, 
+                        'jazzEvent' => $jazzEvent
                     ]);
+                }
+            }
+
+            if (strcasecmp($event->getEventType()->value, 'jazzpass') === 0) {
+                $jazzPass = $this->jazzPassService->getPassById($subId);
+
+                if ($jazzPass) {
+                    $event->setDetails($jazzPass);
                 }
             }
 
@@ -122,17 +135,18 @@ class TicketController
                     $event->setDetails($historyEvent);
                 }
             }
-             if (strcasecmp($event->getEventType()->name, 'kids') === 0) {
-    $kidsEvent = $this->kidsEventService->getEventById($subId);
-    if ($kidsEvent) {
-        $event->setDetails([
-            'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
-            'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
-            'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
-            'startTime' => $kidsEvent->getStartTime() ?? '10:00'
-        ]);
-    }
-}
+            
+            if (strcasecmp($event->getEventType()->name, 'kids') === 0) {
+                $kidsEvent = $this->kidsEventService->getEventById($subId);
+                if ($kidsEvent) {
+                    $event->setDetails([
+                        'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
+                        'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
+                        'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
+                        'startTime' => $kidsEvent->getStartTime() ?? '10:00'
+                    ]);
+                }
+            }
         }
         require __DIR__ . '/../Views/personalProgram/personalProgram.php';
     
@@ -149,7 +163,7 @@ class TicketController
         $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
 
         if ($eventId === 0) {
-            $_SESSION['error'] = "Configuration Error: No Event found for this restaurant (Type: $eventType, ID: $subEventId).";
+            $_SESSION['error'] = "Configuration Error: No Event found! (Type: $eventType, ID: $subEventId).";
             header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
             exit;
         }
@@ -177,6 +191,18 @@ class TicketController
             try {
                 foreach ($program->getTickets() as $ticket) {
                     $this->programService->savePaidTicket($ticket, $stripeSessionId);
+                }
+
+                $event = $ticket->getEvent();
+                $subEventId = $event->getSubEventId();
+                $quantity = $ticket->getNumberOfPeople();
+
+                if ($event->getEventType()->value === 'jazz') {
+                    $this->jazzEventService->decreaseTicketsLeft($subEventId, $quantity);
+                }
+
+                if ($event->getEventType()->value === 'jazzpass') {
+                    $this->jazzPassService->decreaseTicketsLeft($subEventId, $quantity);
                 }
 
                 $communicationService = new CommunicationService();

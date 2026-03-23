@@ -17,6 +17,7 @@ interface IJazzEventService
     public function createJazzEvent(JazzEventModel $event): bool;
 
     public function updateJazzEvent(int $id, JazzEventModel $event): bool;
+    public function decreaseTicketsLeft(int $jazzEventId, int $quantity): bool;
 
     public function deleteJazzEvent(int $id): bool;
 }

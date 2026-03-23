@@ -69,6 +69,11 @@ function isActive($url) {
                         <i class="bi bi-balloon-heart me-2"></i> Kids Page
                     </a>
                 </li>
+                 <li class="nav-item">
+                    <a href="/admin/home/index" class="nav-link <?= isActive('/admin/home/index') ?>">
+                        <i class="bi bi-balloon-heart me-2"></i> Home Page
+                    </a>
+                </li>
             </ul>
 
             <div class="mt-auto p-3">

@@ -526,4 +526,11 @@ public function scan(): void
 
         require __DIR__ . '/../Views/employee/scan.php';
     }
+
+      public function adminIndex()
+    {
+        $tickets = $this->ticketRepository->getAll();
+
+        require __DIR__ . '/../Views/admin/dashboard.php';
+    }
 }

@@ -76,6 +76,17 @@ class TicketRepository extends Repository
         ]);
     }
 
+    public function markAsExpired(string $orderId): bool 
+    {
+        $sql = "UPDATE Tickets 
+                SET [status] = 'expired' 
+                WHERE stripe_session_id = :orderId 
+                AND [status] = 'pending'";
+                
+        $stmt = $this->connection->prepare($sql);
+        return $stmt->execute(['orderId' => $orderId]);
+    }
+
     public function getAll(): array
     {
         $sql = "SELECT * FROM Tickets ORDER BY id DESC";

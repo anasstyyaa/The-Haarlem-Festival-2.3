@@ -28,8 +28,9 @@
                 <label class="form-label fw-bold small text-uppercase text-muted">3. Party Size</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white"><i class="bi bi-people"></i></span>
-                    <input type="number" name="number_of_people" class="form-control" min="1" max="10" value="2" required>
+                    <input type="number" id="peopleInput" name="number_of_people" class="form-control" min="1" value="2" required>
                 </div>
+                <div id="capacityWarning" class="text-danger small mt-1 d-none"></div>
             </div>
 
             <div class="mb-4">
@@ -41,7 +42,7 @@
                 <i class="bi bi-info-circle me-2"></i>Reservation fee: <strong>€<?= number_format($restaurant->getReservationFee(), 2) ?></strong> per person.
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">
+           <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">
                 Confirm Reservation <i class="bi bi-arrow-right ms-2"></i>
             </button>
         </form>

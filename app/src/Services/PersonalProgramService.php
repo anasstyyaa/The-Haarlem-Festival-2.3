@@ -82,4 +82,8 @@ class PersonalProgramService implements IPersonalProgramService
     public function getTicketsByOrderId(string $orderId): array {
         return $this->ticketRepository->getTicketsByOrderId($orderId);
     }
+
+    public function markOrderAsExpired(string $orderId): void {
+        $this->ticketRepository->markAsExpired($orderId);
+    }
 }

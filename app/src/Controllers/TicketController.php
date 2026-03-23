@@ -146,6 +146,19 @@ class TicketController
         $userId = $_SESSION['user']['id'] ?? null;
         $programItemId = $_POST['program_item_id'] ?? null;
 
+        // capacity check 
+        if (strcasecmp($eventType, 'reservation') === 0) {
+            $session = $this->restaurantSessionService->getSessionById($subEventId);
+            
+            if (!$session || $session->getAvailableSlots() < $numberOfPeople) {
+                $remaining = $session ? $session->getAvailableSlots() : 0;
+                $_SESSION['flash_error'] = "Sorry, there are only $remaining spots left for this session.";
+                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/yummy'));
+                exit;
+            }
+        }
+        // add similar checks for other events 
+
         $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
 
         if ($eventId === 0) {
@@ -274,7 +287,28 @@ class TicketController
         $ticketNames = [];
 
         foreach ($program->getTickets() as $ticket) {
-            $details = $ticket->getEvent()->getDetails();
+            $event = $ticket->getEvent();
+
+            if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
+                $sessionId = $event->getSubEventId();
+                $qty = $ticket->getNumberOfPeople();
+                $success = $this->restaurantSessionService->updateCapacity($sessionId, -$qty);
+
+                if (!$success) {
+                $_SESSION['flash_error'] = "Sorry, one of your selected restaurant sessions has just sold out or doesn't have enough seats left.";
+                    header("Location: /personalProgram");
+                    exit;
+                }
+            }
+        }
+
+        $userId = $_SESSION['user']['id'];
+        $tempOrderId = $this->programService->createPendingTicketsFromSession($program, $userId);
+        
+        $ticketNames = [];
+        foreach ($program->getTickets() as $ticket) {
+            $event = $ticket->getEvent();
+            $details = $event->getDetails();
             $name = "Festival Ticket";
 
             if (is_array($details) && isset($details['artist'])) {
@@ -287,6 +321,7 @@ class TicketController
             
             $ticketNames[] = $name;
         }
+        
 
         $this->redirectToStripe($program->getTickets(), $tempOrderId, $ticketNames);
     }
@@ -297,12 +332,34 @@ class TicketController
         $tickets = $this->programService->getTicketsByOrderId($orderId);
 
         if (empty($tickets)) {
-            die("Order not found.");
+            $_SESSION['flash_error'] = "This order was not found, has already been paid, or has expired.";
+            header("Location: /personalProgram");
+            exit;
         }
 
         $createdAt = new \DateTime($tickets[0]['created_at']);
-        if ($createdAt->diff(new \DateTime())->h >= 24 || $createdAt->diff(new \DateTime())->days > 0) {
-            die("This reservation has expired (24-hour limit).");
+        $now = new \DateTime();
+        $interval = $createdAt->diff($now);
+        
+        $hoursPassed = ($interval->days * 24) + $interval->h;
+
+        if ($hoursPassed >= 24) {
+            foreach ($tickets as $t) {
+                $event = $this->eventRepo->getById($t['event_id']);
+                
+                if ($event && strcasecmp($event->getEventType()->name, 'reservation') === 0) {
+                    $sessionId = (int)$t['sub_event_id'];
+                    $quantity = (int)$t['number_of_people'];
+
+                    $this->restaurantSessionService->updateCapacity($sessionId, $quantity);
+                }
+            }
+
+            $this->programService->markOrderAsExpired($orderId);
+
+            $_SESSION['flash_error'] = "Your 24-hour payment window has expired. The items have been released.";
+            header("Location: /personalProgram");
+            exit;
         }
 
         $this->redirectToStripe($tickets, $orderId);

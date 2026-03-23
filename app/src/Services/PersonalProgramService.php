@@ -53,4 +53,37 @@ class PersonalProgramService implements IPersonalProgramService
 
         return $this->ticketRepository->savePaidTicket($ticket, $stripeId);
     }
+
+    public function createPendingTicketsFromSession(PersonalProgram $program, int $userId): string 
+    {
+        // generating a unique reference for this "Pay Later" attempt
+        $tempOrderId = 'ORDER_' . bin2hex(random_bytes(8));
+
+        foreach ($program->getTickets() as $ticket) {
+            // setting the user on the ticket object if not already set
+            if (!$ticket->getUser()) {
+                $ticket->setUser($this->userRepository->getById($userId));
+            }
+            
+            $this->ticketRepository->savePendingTicket($ticket, $tempOrderId);
+        }
+
+        return $tempOrderId;
+    }
+
+    public function savePendingTicket(TicketModel $ticket, string $tempOrderId): bool {
+        return $this->ticketRepository->savePendingTicket($ticket, $tempOrderId);
+    }
+
+    public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool{
+        return $this->ticketRepository->updateTicketsToPaid($orderId, $actualStripeId);
+    }
+
+    public function getTicketsByOrderId(string $orderId): array {
+        return $this->ticketRepository->getTicketsByOrderId($orderId);
+    }
+
+    public function markOrderAsExpired(string $orderId): void {
+        $this->ticketRepository->markAsExpired($orderId);
+    }
 }

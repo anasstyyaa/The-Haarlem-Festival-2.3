@@ -36,15 +36,19 @@ class RestaurantSessionRepository extends Repository implements IRestaurantSessi
         return $stmt->fetchAll(PDO::FETCH_CLASS, RestaurantSessionModel::class);
     }
 
-    public function updateCapacity(int $sessionId, int $count): bool {
+    public function updateCapacity(int $sessionId, int $change): bool 
+    {
         $sql = "UPDATE RestaurantSessions 
-                SET available_slots = available_slots - :count 
-                WHERE id = :id AND available_slots >= :count";
+                SET available_slots = available_slots + :change_value 
+                WHERE id = :id 
+                AND (available_slots + :change_check) >= 0";
                 
         $stmt = $this->connection->prepare($sql);
+
         return $stmt->execute([
-            'id' => $sessionId,
-            'count' => $count
+            'id'           => $sessionId,
+            'change_value' => $change,
+            'change_check' => $change
         ]);
     }
 

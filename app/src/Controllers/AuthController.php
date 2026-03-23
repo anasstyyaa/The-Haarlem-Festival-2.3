@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Repositories\UserRepository;
@@ -49,7 +50,7 @@ class AuthController
 
     // GET 
     public function index(): string
-    {  
+    {
         $vm = $this->buildPageVM('home');
 
     return $this->render('home/index', [
@@ -75,7 +76,7 @@ class AuthController
     // GET /register
     public function showRegisterForm(): string
     {
-       return $this->render('auth/register', ['error' => null]);
+        return $this->render('auth/register', ['error' => null]);
     }
 
     // POST /register
@@ -126,11 +127,11 @@ class AuthController
 
         $verifyResponse = file_get_contents(
             'https://www.google.com/recaptcha/api/siteverify?' .
-            http_build_query([
-                'secret' => $secretKey,
-                'response' => $recaptchaResponse,
-                'remoteip' => $_SERVER['REMOTE_ADDR'] ?? null,
-            ])
+                http_build_query([
+                    'secret' => $secretKey,
+                    'response' => $recaptchaResponse,
+                    'remoteip' => $_SERVER['REMOTE_ADDR'] ?? null,
+                ])
         );
 
         $captchaResult = json_decode($verifyResponse, true);
@@ -144,29 +145,28 @@ class AuthController
         $fileName = null;   //default is null 
 
         //only process if the file was uploaded successfully without errors   
-        if ($uploadedFile && $uploadedFile['error'] === UPLOAD_ERR_OK){
+        if ($uploadedFile && $uploadedFile['error'] === UPLOAD_ERR_OK) {
 
-        // Validate file type
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            // Validate file type
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-        if (!in_array($uploadedFile['type'], $allowedTypes)) {
-            return $this->render('auth/register', ['error' => 'Only JPG, PNG, or WEBP images are allowed!']);
-        }
+            if (!in_array($uploadedFile['type'], $allowedTypes)) {
+                return $this->render('auth/register', ['error' => 'Only JPG, PNG, or WEBP images are allowed!']);
+            }
 
-        // Generate safe filename
-        //getting the file extensin
-        $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-        //generating a unique name (forexample two people upload profile.png)
-        $fileName = uniqid('assets/uploads/users/' . 'user_', true) . '.' . $extension;
-        //define where to store it
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/users/';
-        //actually storing it 
-        $destination = $uploadDir . $fileName;
+            // Generate safe filename
+            //getting the file extensin
+            $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+            //generating a unique name (forexample two people upload profile.png)
+            $fileName = uniqid('assets/uploads/users/' . 'user_', true) . '.' . $extension;
+            //define where to store it
+            $uploadDir = __DIR__ . '/../../public/assets/uploads/users/';
+            //actually storing it 
+            $destination = $uploadDir . $fileName;
 
-        if (!move_uploaded_file($uploadedFile['tmp_name'], $destination)) {
-            return $this->render('auth/register', ['error' => 'Failed to upload image!']);
-        }
-
+            if (!move_uploaded_file($uploadedFile['tmp_name'], $destination)) {
+                return $this->render('auth/register', ['error' => 'Failed to upload image!']);
+            }
         }
 
         // 5) Build model + hash password
@@ -180,9 +180,9 @@ class AuthController
             $fullName,
             $phoneNumber,
             'User',
-            date('Y-m-d H:i:s'), 
-            null, 
-            $fileName, 
+            date('Y-m-d H:i:s'),
+            null,
+            $fileName,
             null
         );
 
@@ -205,7 +205,7 @@ class AuthController
     // GET /login
     public function showLoginForm(): string
     {
-       return $this->render('auth/login', ['error' => null]);
+        return $this->render('auth/login', ['error' => null]);
     }
 
     // POST /login
@@ -233,7 +233,9 @@ class AuthController
         ];
 
         if ($user['Role'] === 'Admin') {
-        header('Location: /admin/users');
+            header('Location: /admin/users');
+        } elseif ($user['Role'] === 'Employee') {
+            header('Location: /employee/scan');
         } else {
             header('Location: /');
         }
@@ -250,82 +252,77 @@ class AuthController
     }
 
 
-// GET forgetPassword
+    // GET forgetPassword
 
-   public function showForgetPassword(): string
-{
-    return $this->render('auth/forgetPassword');
-}
-
-// Post email by the user
-public function sendResetLink(): string
-{
-    try {
-        $email = trim($_POST['email'] ?? '');
-
-        if ($email === '') {
-            return $this->render('auth/forgetPassword', [
-                'error' => 'Please enter your email address',
-                'email' => ''
-            ]);
-        }
-
-        $this->passwordReset->sendResetLink($email);
-
-        return $this->render('auth/forgetPassword', [
-            'success' => 'A password reset link has been sent address if provided email exists.',
-            'email' => $email
-        ]);
-
-    } catch (\Exception $e) {
-        return $this->render('auth/forgetPassword', [
-            'error' => 'Something went wrong while sending the reset link.',
-            'email' => trim($_POST['email'] ?? '')
-        ]);
+    public function showForgetPassword(): string
+    {
+        return $this->render('auth/forgetPassword');
     }
-}
 
-//Display the reset password page so that user can fill in the new pass
-public function showResetPassword(): string
-{
-    $token = $_GET['token'] ?? '';
+    // Post email by the user
+    public function sendResetLink(): string
+    {
+        try {
+            $email = trim($_POST['email'] ?? '');
 
-    return $this->render('auth/resetPassword', [
-        'token' => $token
-    ]);
-}
+            if ($email === '') {
+                return $this->render('auth/forgetPassword', [
+                    'error' => 'Please enter your email address',
+                    'email' => ''
+                ]);
+            }
 
- //submitted by the user to reset password
-public function resetPassword(): string
-{
-    try {
-        $token = $_POST['token'] ?? '';
-        $newPassword = $_POST['password'] ?? '';
-        $confirmPassword = $_POST['password_confirm'] ?? '';
+            $this->passwordReset->sendResetLink($email);
 
-        // Check passwords match
-        if ($newPassword !== $confirmPassword) {
-            return $this->render('auth/resetPassword', [
-                'error' => 'Passwords do not match.',
-                'token' => $token
+            return $this->render('auth/forgetPassword', [
+                'success' => 'A password reset link has been sent address if provided email exists.',
+                'email' => $email
+            ]);
+        } catch (\Exception $e) {
+            return $this->render('auth/forgetPassword', [
+                'error' => 'Something went wrong while sending the reset link.',
+                'email' => trim($_POST['email'] ?? '')
             ]);
         }
+    }
 
-        // Call service
-        $this->passwordReset->resetPassword($token, $newPassword);
+    //Display the reset password page so that user can fill in the new pass
+    public function showResetPassword(): string
+    {
+        $token = $_GET['token'] ?? '';
 
-        //  Redirect to login page after success
-        header('Location: /login');
-        exit;
-
-    } catch (\Exception $e) {
         return $this->render('auth/resetPassword', [
-            'error' => $e->getMessage(),
             'token' => $token
         ]);
     }
+
+    //submitted by the user to reset password
+    public function resetPassword(): string
+    {
+        try {
+            $token = $_POST['token'] ?? '';
+            $newPassword = $_POST['password'] ?? '';
+            $confirmPassword = $_POST['password_confirm'] ?? '';
+
+            // Check passwords match
+            if ($newPassword !== $confirmPassword) {
+                return $this->render('auth/resetPassword', [
+                    'error' => 'Passwords do not match.',
+                    'token' => $token
+                ]);
+            }
+
+            // Call service
+            $this->passwordReset->resetPassword($token, $newPassword);
+
+            //  Redirect to login page after success
+            header('Location: /login');
+            exit;
+        } catch (\Exception $e) {
+            return $this->render('auth/resetPassword', [
+                'error' => $e->getMessage(),
+                'token' => $token
+            ]);
+        }
+    }
 }
-
-
-}
-

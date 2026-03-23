@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Repositories\pository;
+
+use App\Services\PersonalProgramService;
 
 use App\Models\PersonalProgram;
 use App\Services\Interfaces\IPersonalProgramService;
@@ -22,6 +25,8 @@ use App\Repositories\HistoryVenueRepository;
 use App\Repositories\HistoryEventRepository;
 
 use App\Repositories\KidsEventRepository;
+use App\Repositories\TicketRepository;
+use App\Repositories\UserRepository;
 use App\Services\KidsEventService;
 
 
@@ -41,12 +46,16 @@ class TicketController
     private KidsEventService $kidsEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
+    //private UserRepository $userRepository;
+    private TicketRepository $ticketRepository;
     
 
-    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService,IJazzPassService $jazzPassService, ICommunicationService $communicationService, IUserService $userService)
+    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService, ICommunicationService $communicationService, IUserService $userService, TicketRepository $ticketRepository)
+
     {
         $this->programService = $programService; 
         $this->eventRepo = new EventRepository();
+        $this->ticketRepository = $ticketRepository;
         $this->restaurantService = $restaurantService; 
         $this->restaurantSessionService = $restaurantSessionService; 
         $this->artistService = $artistService; 
@@ -75,10 +84,10 @@ class TicketController
 
             if (strcasecmp($event->getEventType()->value, 'reservation') === 0) {
                 $session = $this->restaurantSessionService->getSessionById($subId);
-    
+
                 if ($session) {
                     $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
-                    
+
                     if ($restaurant) {
                         $restaurant->setSessionData($session);
                         $event->setDetails($restaurant);
@@ -190,11 +199,11 @@ class TicketController
         header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
         exit;
     }
-    
+
     public function paymentSuccess(): void
     {
         $program = $_SESSION['program'] ?? null;
-        $userId = $_SESSION['user']['id'] ?? 0; 
+        $userId = $_SESSION['user']['id'] ?? 0;
         $stripeSessionId = $_GET['session_id'] ?? 'unknown'; // Stripe passes this back
         $tempOrderId = $_GET['orderId'] ?? null;
 
@@ -230,7 +239,7 @@ class TicketController
 
                 $userId = $_SESSION['user']['id'];
 
-                $userModel = $this->userService->getUserById($userId); 
+                $userModel = $this->userService->getUserById($userId);
 
                 if ($userModel) {
                     $userData = [
@@ -249,7 +258,6 @@ class TicketController
 
                 unset($_SESSION['program']);
                 $_SESSION['flash_success'] = "Thank you! Your tickets have been secured.";
-
             } catch (\Exception $e) {
                 error_log("Database Error during payment success: " . $e->getMessage());
                 $_SESSION['error'] = "Payment recorded, but there was an issue saving your tickets. Please contact support.";
@@ -309,7 +317,7 @@ class TicketController
     {
         if (!isset($_SESSION['user'])) {
             $_SESSION['flash_error'] = "You must be logged in to checkout.";
-            header('Location: /personalProgram'); 
+            header('Location: /personalProgram');
             exit();
         }
 
@@ -357,7 +365,7 @@ class TicketController
             
             $ticketNames[] = $name;
         }
-        
+
 
         $this->redirectToStripe($program->getTickets(), $tempOrderId, $ticketNames);
     }
@@ -440,5 +448,82 @@ class TicketController
         } else {
             die("Stripe Error: " . ($response['error']['message'] ?? 'Unknown error'));
         }
+    }
+
+    /**
+ * Simple ticket scan method for employees
+ */
+public function scan(): void
+{
+    $this->requireEmployee();
+
+    try {
+        $token = $_GET['token'] ?? '';
+        if ($token === '') {
+            $status = 'error';
+            $message = 'No ticket token provided.';
+            $ticket = null;
+
+            require __DIR__ . '/../Views/employee/scanResult.php';
+            return;
+        }
+        $ticket = $this->ticketRepository->getByToken($token);
+
+        if (!$ticket) {
+            $status = 'error';
+            $message = 'Invalid ticket.';
+            $ticket = null;
+
+            require __DIR__ . '/../Views/employee/scanResult.php';
+            return;
+        }
+
+        if ($ticket['is_scanned'] == 1) {
+            $status = 'warning';
+            $message = 'This ticket has already been scanned.';
+
+            require __DIR__ . '/../Views/employee/scanResult.php';
+            return;
+        }
+
+        $this->ticketRepository->markAsScanned($token);
+
+        $status = 'success';
+        $message = 'Ticket is valid. Entry allowed.';
+
+        require __DIR__ . '/../Views/employee/scanResult.php';
+
+    } catch (\Exception $e) {
+        error_log("Scan error: " . $e->getMessage());
+
+        $status = 'error';
+        $message = 'Something went wrong.';
+        $ticket = null;
+
+        require __DIR__ . '/../Views/employee/scanResult.php';
+    }
+}
+
+    private function requireEmployee(): void //checks if current user is employee
+    {
+        try {
+            if (!isset($_SESSION['user'])) {
+                throw new \Exception("User not logged in.");
+            }
+            if (($_SESSION['user']['role'] ?? '') !== 'Employee') {
+                throw new \Exception("User is not an employee.");
+            }
+        } catch (\Exception $e) {
+            error_log("Access error: " . $e->getMessage());
+            echo "Access denied. Employees only.";
+            exit;
+        }
+    }
+    
+    public function scanPage(): void
+    {
+        $this->requireEmployee();
+
+        require __DIR__ . '/../Views/employee/scan.php';
     }
 }

@@ -9,19 +9,22 @@ use App\Repositories\PageElementRepository;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
+use App\Services\ButtonService;
 
 class KidsEventController
 {
     private PageElementRepository $pageRepo;
     private TextRepository $textRepo;
     private ImageRepository $imageRepo;
-private KidsEventService $service;
+    private ButtonService $buttonService;
+    private KidsEventService $service;
     public function __construct()
     {
         $this->service = new KidsEventService(new KidsEventRepository);
          $this->pageRepo  = new PageElementRepository();
         $this->textRepo  = new TextRepository();
         $this->imageRepo = new ImageRepository();
+        $this->buttonService = new ButtonService();
     }
 
    public function index(): void
@@ -30,7 +33,8 @@ private KidsEventService $service;
 
         $vm = new PageElementViewModel(
             $this->textRepo,
-            $this->imageRepo
+            $this->imageRepo, 
+            $this->buttonService
         );
 
         $vm->build($elements);
@@ -57,7 +61,8 @@ private KidsEventService $service;
 
         $vm = new PageElementViewModel(
             $this->textRepo,
-            $this->imageRepo
+            $this->imageRepo,
+            $this->buttonService
         );
 
         $vm->build($elements);

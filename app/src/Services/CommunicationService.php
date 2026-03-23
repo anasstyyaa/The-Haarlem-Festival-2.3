@@ -2,18 +2,19 @@
 
 namespace App\Services;
 
+use App\Services\Interfaces\ICommunicationService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-class CommunicationService
+class CommunicationService implements ICommunicationService
 {
     private function getPdfEngine(): Dompdf
     {
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true); // Useful if we want to add logos via URL
+        $options->set('isRemoteEnabled', true); // may be useful if we want to add logos via URL
         return new Dompdf($options);
     }
 
@@ -118,7 +119,7 @@ class CommunicationService
         foreach ($tickets as $ticket) {
             $details = $ticket->getEvent()->getDetails();
             
-            // Logical check for name (same as your invoice logic)
+            // logical check for name (same as invoice logic)
             if (is_array($details)) {
                 $eventName = $details['name'] ?? ($details['title'] ?? 'Festival Event');
             } elseif (is_object($details) && method_exists($details, 'getName')) {
@@ -127,7 +128,6 @@ class CommunicationService
                 $eventName = "Event #" . $ticket->getEvent()->getId();
             }
 
-            // Each ticket is wrapped in a div with a border and a page break
             $ticketSections .= "
                 <div style='border: 2px solid #333; padding: 30px; margin-bottom: 50px; font-family: sans-serif;'>
                     <h1 style='background: #333; color: white; padding: 10px; margin-top: 0;'>HAARLEM FESTIVAL TICKET</h1>
@@ -143,6 +143,50 @@ class CommunicationService
         }
 
         return "<html><body>$ticketSections</body></html>";
+    }
+
+    public function sendPaymentReminder(array $userData, string $orderId): bool
+    {
+        try {
+            $mail = new PHPMailer(true);
+            
+            // mailpit conf
+            $mail->isSMTP();
+            $mail->Host = 'mailpit'; 
+            $mail->Port = 1025;
+            $mail->SMTPAuth = false;
+
+            // recipients 
+            $mail->setFrom('noreply@haarlemfestival.com', 'Haarlem Festival');
+            $mail->addAddress($userData['email'], $userData['full_name']);
+
+            // content 
+            $mail->isHTML(true);
+            $mail->Subject = 'Complete your Haarlem Festival Order';
+            
+            // this link points to a new 'repay' route
+            $repayUrl = "http://localhost/repay?orderId=" . $orderId;
+
+            $mail->Body = "
+                <div style='font-family: sans-serif; line-height: 1.6;'>
+                    <h2>Hi {$userData['full_name']},</h2>
+                    <p>It looks like your payment wasn't completed. Don't worry, we've saved your tickets for you!</p>
+                    <p>Your reservation is held for <strong>24 hours</strong> from the time of your order.</p>
+                    <div style='margin: 30px 0;'>
+                        <a href='{$repayUrl}' style='background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+                            Complete My Payment Now
+                        </a>
+                    </div>
+                    <p style='color: #666; font-size: 0.9em;'>If you do not complete the payment within 24 hours, your tickets will be released back to the festival pool.</p>
+                    <p>See you at the festival!<br>The Haarlem Festival Team</p>
+                </div>
+            ";
+
+            return $mail->send();
+        } catch (Exception $e) {
+            error_log("Reminder Email Error: " . $e->getMessage());
+            return false;
+        }
     }
 
 }

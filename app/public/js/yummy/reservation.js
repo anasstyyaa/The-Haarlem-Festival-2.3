@@ -3,12 +3,13 @@ function initReservationForm(sessionsByDate) {
     const section = document.getElementById('timeSlotSection');
     const buttonContainer = document.getElementById('timeSlotButtons');
     const sessionInput = document.getElementById('selectedSessionId');
+    const peopleInput = document.getElementById('peopleInput');
+    const submitBtn = document.getElementById('submitBtn');
 
     if (!dateSelect) return;
 
     dateSelect.addEventListener('change', function() {
         const selectedDate = this.value;
-        
         buttonContainer.innerHTML = '';
         sessionInput.value = '';
         section.classList.add('d-none');
@@ -22,7 +23,7 @@ function initReservationForm(sessionsByDate) {
                 btn.className = 'btn btn-outline-dark flex-grow-1 py-2';
                 
                 const timeStr = session.startTime ? session.startTime.substring(0, 5) : "00:00";
-                const slots = session.availableSlots ?? 0;
+                const slots = session.availableSlots ?? session.available_slots ?? 0;
 
                 btn.innerHTML = `
                     <strong>${timeStr}</strong><br>
@@ -45,11 +46,18 @@ function initReservationForm(sessionsByDate) {
 
                     this.classList.remove('btn-outline-dark');
                     this.classList.add('btn-dark');
-                    
                     const selectedText = this.querySelector('.slot-text');
                     if(selectedText) selectedText.classList.replace('text-muted', 'text-white-50');
                     
                     sessionInput.value = session.id;
+
+                    if (peopleInput) {
+                        peopleInput.max = slots;
+                        
+                        if (parseInt(peopleInput.value) > slots) {
+                            peopleInput.value = slots;
+                        }
+                    }
                 };
 
                 buttonContainer.appendChild(btn);
@@ -57,4 +65,3 @@ function initReservationForm(sessionsByDate) {
         }
     });
 }
-

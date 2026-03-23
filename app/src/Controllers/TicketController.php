@@ -2,64 +2,69 @@
 
 namespace App\Controllers;
 
-use App\Repositories\TicketRepository;
+use App\Repositories\pository;
 
 use App\Services\PersonalProgramService;
-use App\Repositories\EventRepository;
+
 use App\Models\PersonalProgram;
+use App\Services\Interfaces\IPersonalProgramService;
+use App\Services\Interfaces\Yummy\IRestaurantService;
+use App\Services\Interfaces\Yummy\IRestaurantSessionService; 
+use App\Services\Interfaces\IArtistService; 
+use App\Services\Interfaces\IJazzEventService; 
+use App\Services\Interfaces\ICommunicationService; 
+use App\Services\Interfaces\IUserService; 
 
-use App\Services\Yummy\RestaurantService;
-use App\Repositories\Yummy\RestaurantRepository;
-use App\Repositories\Yummy\RestaurantSessionRepository;
-use App\Services\Yummy\RestaurantSessionService;
+use App\Repositories\EventRepository;
 
-use App\Services\ArtistService;
-use App\Repositories\ArtistRepository;
-use App\Services\JazzEventService;
-use App\Repositories\JazzEventRepository;
-
+use App\Services\Interfaces\IHistoryService; 
 use App\Services\HistoryService;
-use App\Repositories\HistoryEventRepository;
-use App\Repositories\HistoryVenueRepository;
 use App\Models\HistoryVenueModel;
+use App\Repositories\HistoryVenueRepository; 
+use App\Repositories\HistoryEventRepository;
 
-use App\Services\CommunicationService;
-use App\Services\UserService;
-use App\Repositories\UserRepository;
+use App\Repositories\KidsEventRepository;
+use App\Services\KidsEventService;
+
 
 class TicketController
 {
-    private PersonalProgramService $programService;
+    private IPersonalProgramService $programService;
     private EventRepository $eventRepo;
-    private RestaurantService $restaurantService;
-    private RestaurantSessionService $restaurantSessionService;
-    private ArtistService $artistService;
-    private JazzEventService $jazzEventService;
+    private IRestaurantService $restaurantService;
+    private IRestaurantSessionService $restaurantSessionService;
+    private IArtistService $artistService;
+    private IJazzEventService $jazzEventService;
+    //private IHistoryService $historyService;
+    private ICommunicationService $communicationService;
+    private IUserService $userService;
+
+    private KidsEventService $kidsEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
-    private CommunicationService $communicationService;
-    private UserService $userService;
-    private UserRepository $userRepository;
+    private UserRepository $userRepositoryus
     private TicketRepository $ticketRepository;
+    
 
-    public function __construct()
+    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, ICommunicationService $communicationService, IUserService $userService)
     {
-        $this->programService = new PersonalProgramService();
+        $this->programService = $programService; 
         $this->eventRepo = new EventRepository();
-        $this->restaurantService = new RestaurantService(new RestaurantRepository());
-        $this->restaurantSessionService = new RestaurantSessionService(new RestaurantSessionRepository(), new RestaurantRepository());
-        $this->artistService = new ArtistService(new ArtistRepository());
-        $this->jazzEventService = new JazzEventService(new JazzEventRepository());
-        $this->communicationService = new CommunicationService();
-        $this->userService = new UserService(new UserRepository());
         $this->ticketRepository = new TicketRepository();
+        $this->restaurantService = $restaurantService; 
+        $this->restaurantSessionService = $restaurantSessionService; 
+        $this->artistService = $artistService; 
+        $this->jazzEventService = $jazzEventService; 
+        //$this->historyService = $historyService; 
+        $this->communicationService = $communicationService; 
+        $this->userService = $userService; 
 
-        $this->historyService = new HistoryService(
+        $this->kidsEventService = new KidsEventService(new KidsEventRepository());
+         $this->historyService = new HistoryService(
             new HistoryEventRepository(),
             new HistoryVenueRepository()
         );
-
-        $this->historyVenueRepository = new HistoryVenueRepository();
+        $this->historyVenueRepository = new HistoryVenueRepository(); 
     }
 
     public function index(): void
@@ -89,7 +94,7 @@ class TicketController
 
                 if ($jazzEvent) {
                     $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-                    $venueInfo = (new JazzEventRepository())->getVenueInfoByJazzEventId($jazzEvent->getId());
+                    $venueInfo = ($this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId()));
 
                     $event->setDetails([
                         'artist' => $artist,
@@ -121,9 +126,20 @@ class TicketController
                     $event->setDetails($historyEvent);
                 }
             }
+             if (strcasecmp($event->getEventType()->name, 'kids') === 0) {
+    $kidsEvent = $this->kidsEventService->getEventById($subId);
+    if ($kidsEvent) {
+        $event->setDetails([
+            'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
+            'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
+            'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
+            'startTime' => $kidsEvent->getStartTime() ?? '10:00'
+        ]);
+    }
+}
         }
-
         require __DIR__ . '/../Views/personalProgram/personalProgram.php';
+    
     }
 
     public function addTicket(): void
@@ -133,6 +149,19 @@ class TicketController
         $eventType = $_POST['event_type'];
         $userId = $_SESSION['user']['id'] ?? null;
         $programItemId = $_POST['program_item_id'] ?? null;
+
+        // capacity check 
+        if (strcasecmp($eventType, 'reservation') === 0) {
+            $session = $this->restaurantSessionService->getSessionById($subEventId);
+            
+            if (!$session || $session->getAvailableSlots() < $numberOfPeople) {
+                $remaining = $session ? $session->getAvailableSlots() : 0;
+                $_SESSION['flash_error'] = "Sorry, there are only $remaining spots left for this session.";
+                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/yummy'));
+                exit;
+            }
+        }
+        // add similar checks for other events 
 
         $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
 
@@ -160,14 +189,11 @@ class TicketController
         $program = $_SESSION['program'] ?? null;
         $userId = $_SESSION['user']['id'] ?? 0;
         $stripeSessionId = $_GET['session_id'] ?? 'unknown'; // Stripe passes this back
+        $tempOrderId = $_GET['orderId'] ?? null;
 
-        if ($program && count($program->getTickets()) > 0) {
+        if ($tempOrderId) {
             try {
-                foreach ($program->getTickets() as $ticket) {
-                    $this->programService->savePaidTicket($ticket, $stripeSessionId);
-                }
-
-                $communicationService = new CommunicationService();
+                $this->programService->updateTicketsToPaid($tempOrderId, $stripeSessionId);
                 $userId = $_SESSION['user']['id'];
 
                 $userModel = $this->userService->getUserById($userId);
@@ -185,7 +211,7 @@ class TicketController
                     ];
                 }
 
-                $communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
+                $this->communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
 
                 unset($_SESSION['program']);
                 $_SESSION['flash_success'] = "Thank you! Your tickets have been secured.";
@@ -197,6 +223,32 @@ class TicketController
         }
 
         require __DIR__ . '/../Views/payment/success.php';
+    }
+
+    public function paymentFailed(): void
+    {
+        $tempOrderId = $_GET['orderId'] ?? null;
+        $userId = $_SESSION['user']['id'] ?? 0; 
+        if ($tempOrderId) {
+            $userModel = $this->userService->getUserById($userId); 
+
+           if ($userModel) {
+                $userData = [
+                    'email'      => $userModel->getEmail(),
+                    'full_name' => $userModel->getFullName(),
+                ];
+            } else {
+                // Fallback if user isn't found for some reason
+                $userData = [
+                    'email'      => $_SESSION['user']['email'],
+                    'full_name' => $_SESSION['user']['userName'],
+                ];
+            }
+        
+            $this->communicationService->sendPaymentReminder($userData, $tempOrderId);
+        }
+
+        require __DIR__ . '/../Views/payment/failed.php';
     }
 
     public function removeTicket(): void
@@ -226,50 +278,119 @@ class TicketController
             exit();
         }
 
-        // Stripe Secret Key (a test key from stripe.com)
-        $apiKey = getenv('STRIPE_SECRET_KEY');
-
         $program = $_SESSION['program'] ?? null;
         if (!$program || count($program->getTickets()) === 0) {
             header("Location: /personalProgram");
             exit;
         }
+        $userId = $_SESSION['user']['id'];
+        $tempOrderId = $this->programService->createPendingTicketsFromSession($program, $userId);
+        $ticketNames = [];
 
-        // Preparing the data for Stripe
-        $data = [
-            'success_url' => 'http://localhost/payment-success?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => 'http://localhost/personalProgram',
-            'mode' => 'payment',
-            'payment_method_types[0]' => 'card',
-            'payment_method_types[1]' => 'ideal',
-        ];
+        foreach ($program->getTickets() as $ticket) {
+            $event = $ticket->getEvent();
 
-        $i = 0;
+            if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
+                $sessionId = $event->getSubEventId();
+                $qty = $ticket->getNumberOfPeople();
+                $success = $this->restaurantSessionService->updateCapacity($sessionId, -$qty);
+
+                if (!$success) {
+                $_SESSION['flash_error'] = "Sorry, one of your selected restaurant sessions has just sold out or doesn't have enough seats left.";
+                    header("Location: /personalProgram");
+                    exit;
+                }
+            }
+        }
+
+        $userId = $_SESSION['user']['id'];
+        $tempOrderId = $this->programService->createPendingTicketsFromSession($program, $userId);
+        
+        $ticketNames = [];
         foreach ($program->getTickets() as $ticket) {
             $event = $ticket->getEvent();
             $details = $event->getDetails();
             $name = "Festival Ticket";
 
             if (is_array($details) && isset($details['artist'])) {
-                $artist = $details['artist'] ?? null;
-
-                if ($artist && method_exists($artist, 'getName')) {
-                    $name = $artist->getName();
-                }
-            } elseif ($details && method_exists($details, 'getName')) {
+                $name = $details['artist']->getName();
+            } elseif (is_array($details) && isset($details['name'])) {
+                $name = $details['name'];
+            } elseif (is_object($details) && method_exists($details, 'getName')) {
                 $name = $details->getName();
             }
-
-            // Stripe needs the price in Cents (1000 = €10.00)
-            $data["line_items[$i][price_data][currency]"] = 'eur';
-            $unitAmount = (int)($ticket->getUnitPrice() * 100);
-            $data["line_items[$i][price_data][unit_amount]"] = $unitAmount;
-            $data["line_items[$i][price_data][product_data][name]"] = $name;
-            $data["line_items[$i][quantity]"] = $ticket->getNumberOfPeople();
-            $i++;
+            
+            $ticketNames[] = $name;
         }
 
-        // Sends the request to Stripe via cURL
+
+        $this->redirectToStripe($program->getTickets(), $tempOrderId, $ticketNames);
+    }
+
+    public function repay(): void
+    {
+        $orderId = $_GET['orderId'] ?? '';
+        $tickets = $this->programService->getTicketsByOrderId($orderId);
+
+        if (empty($tickets)) {
+            $_SESSION['flash_error'] = "This order was not found, has already been paid, or has expired.";
+            header("Location: /personalProgram");
+            exit;
+        }
+
+        $createdAt = new \DateTime($tickets[0]['created_at']);
+        $now = new \DateTime();
+        $interval = $createdAt->diff($now);
+        
+        $hoursPassed = ($interval->days * 24) + $interval->h;
+
+        if ($hoursPassed >= 24) {
+            foreach ($tickets as $t) {
+                $event = $this->eventRepo->getById($t['event_id']);
+                
+                if ($event && strcasecmp($event->getEventType()->name, 'reservation') === 0) {
+                    $sessionId = (int)$t['sub_event_id'];
+                    $quantity = (int)$t['number_of_people'];
+
+                    $this->restaurantSessionService->updateCapacity($sessionId, $quantity);
+                }
+            }
+
+            $this->programService->markOrderAsExpired($orderId);
+
+            $_SESSION['flash_error'] = "Your 24-hour payment window has expired. The items have been released.";
+            header("Location: /personalProgram");
+            exit;
+        }
+
+        $this->redirectToStripe($tickets, $orderId);
+    }
+
+
+    private function redirectToStripe(array $ticketsData, string $orderId, array $customNames = []): void //customNmaes may be empty
+    {
+        $apiKey = getenv('STRIPE_SECRET_KEY');
+
+        $data = [
+            'success_url' => "http://localhost/payment-success?orderId=$orderId&session_id={CHECKOUT_SESSION_ID}",
+            'cancel_url' => "http://localhost/payment-failed?orderId=$orderId",
+            'mode' => 'payment',
+            'payment_method_types[0]' => 'card',
+            'payment_method_types[1]' => 'ideal',
+        ];
+
+        foreach ($ticketsData as $i => $ticket) {
+            // handeling both Object (from Session) or Array (from DB)
+            $unitPrice = is_array($ticket) ? $ticket['unit_price'] : $ticket->getUnitPrice();
+            $qty = is_array($ticket) ? $ticket['number_of_people'] : $ticket->getNumberOfPeople();
+            $name = $customNames[$i] ?? "Haarlem Festival Ticket";
+
+            $data["line_items[$i][price_data][currency]"] = 'eur';
+            $data["line_items[$i][price_data][unit_amount]"] = (int)($unitPrice * 100);
+            $data["line_items[$i][price_data][product_data][name]"] = $name;
+            $data["line_items[$i][quantity]"] = $qty;
+        }
+
         $ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERPWD, $apiKey . ':');
@@ -278,15 +399,11 @@ class TicketController
         $response = json_decode(curl_exec($ch), true);
         curl_close($ch);
 
-        // Redirects to the Stripe payment page
         if (isset($response['url'])) {
             header("Location: " . $response['url']);
             exit;
         } else {
-            // If there is an error (e.g. invalid key), show it
-            echo "<h1>Stripe Error</h1>";
-            echo "<pre>" . print_r($response, true) . "</pre>";
-            exit;
+            die("Stripe Error: " . ($response['error']['message'] ?? 'Unknown error'));
         }
     }
 

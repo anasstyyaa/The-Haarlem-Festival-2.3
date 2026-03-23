@@ -25,17 +25,39 @@ class ArtistRepository extends Repository implements IArtistRepository{
         return $artist ?: null;
     }
 
+    public function getJazzArtists(): array
+    {
+        $stmt = $this->connection->prepare("
+        SELECT *
+        FROM Artist
+        WHERE deleted_at IS NULL
+        AND ArtistType = :artistType
+        ORDER BY ArtistID ASC
+        ");
+        $stmt->execute([
+            'artistType' => 'jazz'
+        ]);
+
+        $artists = [];
+        while ($artist = $stmt->fetchObject(ArtistModel::class)) {
+            $artists[] = $artist;
+        }
+
+        return $artists;
+    }
+
     public function create(ArtistModel $artist): bool
     {
-        $sql = "INSERT INTO Artist (ArtistName, ShortDescription, Description, ImageURL)
-                VALUES (:ArtistName, :ShortDescription, :Description, :ImageURL)";
+        $sql = "INSERT INTO Artist (ArtistName, ShortDescription, Description, ImageURL, ArtistType)
+                VALUES (:ArtistName, :ShortDescription, :Description, :ImageURL, :ArtistType)";
         $stmt = $this->connection->prepare($sql);
 
         return $stmt->execute([
             'ArtistName'  => $artist->getName(),
             'ShortDescription' => $artist->getShortDescription(),
             'Description'  => $artist->getDescription(),
-            'ImageURL'   => $artist->getImageUrl()
+            'ImageURL'   => $artist->getImageUrl(), 
+            'ArtistType' => $artist->getArtistType()
         ]);
     }
 
@@ -46,6 +68,7 @@ class ArtistRepository extends Repository implements IArtistRepository{
                     ShortDescription = :ShortDescription,
                     Description = :Description,
                     ImageURL = :ImageURL,
+                    ArtistType = :ArtistType,
                     updated_at = GETDATE()
                 WHERE ArtistID = :ArtistID AND deleted_at IS NULL";
 
@@ -57,6 +80,7 @@ class ArtistRepository extends Repository implements IArtistRepository{
             'ShortDescription' => $artist->getShortDescription(),
             'Description'  => $artist->getDescription(),
             'ImageURL'   => $artist->getImageUrl(),
+            'ArtistType' => $artist->getArtistType()
         ]);
     }
 

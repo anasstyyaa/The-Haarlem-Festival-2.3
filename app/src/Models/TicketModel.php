@@ -3,6 +3,8 @@ namespace App\Models;
 use App\Models\EventModel;
 use App\Models\UserModel;
 use App\Models\Yummy\RestaurantModel;
+use App\Models\JazzPassModel; 
+use App\Models\JazzEventModel; 
 
 class TicketModel
 {
@@ -80,6 +82,14 @@ public function getProgramItemId(): ?int
 
         if ($details instanceof RestaurantModel) {
             return (float)($details->getReservationFee() ?? 10.00);
+        }
+
+        if ($details instanceof JazzPassModel) {
+            return (float)$details->getPrice();
+        }
+
+        if (is_array($details) && isset($details['jazzEvent']) && $details['jazzEvent'] instanceof      JazzEventModel) {
+            return (float)$details['jazzEvent']->getPrice();
         }
 
         if (is_array($details) && isset($details['price'])) {

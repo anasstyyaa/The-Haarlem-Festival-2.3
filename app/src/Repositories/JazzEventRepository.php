@@ -215,10 +215,12 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
             AND deleted_at IS NULL
         ");
 
-        return $stmt->execute([
+        $stmt->execute([
             'id' => $jazzEventId,
             'quantity' => $quantity
         ]);
+        
+        return $stmt->rowCount() > 0;
     }
 
     //Helper method (It inserts the generic row into Event table)

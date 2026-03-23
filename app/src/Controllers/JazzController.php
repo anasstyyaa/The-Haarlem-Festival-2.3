@@ -24,7 +24,7 @@ class JazzController
 
     public function index()
     {
-        $artists = $this->artistService->getAllArtists();
+        $artists = $this->artistService->getJazzArtists();
         $lineup = [];
         $passes = $this->jazzPassService->getAllActivePasses();
 
@@ -52,7 +52,7 @@ class JazzController
             exit;
         }
 
-        $artists = $this->artistService->getAllArtists();
+        $artists = $this->artistService->getJazzArtists();
         $events = $this->jazzEventService->getAllJazzEvents();
         $passes = $this->jazzPassService->getAllActivePasses();
         include __DIR__ . '/../Views/admin/jazz/index.php';
@@ -88,7 +88,7 @@ class JazzController
             exit;
         }
 
-        $artists = $this->artistService->getAllArtists();
+        $artists = $this->artistService->getJazzArtists();
         include __DIR__ . '/../Views/admin/jazz/createEvent.php';
     }
 
@@ -106,9 +106,12 @@ class JazzController
             $artist->setName(trim($_POST['name'] ?? ''));
             $artist->setShortDescription(trim($_POST['short_description'] ?? ''));
             $artist->setDescription(trim($_POST['description'] ?? ''));
+            $artist->setArtistType('jazz');
 
             if ($fileName) {
                 $artist->setImageUrl('/assets/uploads/jazz/artists/' . $fileName);
+            }else{
+                $artist->setImageUrl(null); 
             }
 
             if ($this->artistService->createArtist($artist)) {
@@ -146,7 +149,7 @@ class JazzController
             }
         }
         //need the artists to show in the dropdown when creating an event. (If it were inside the POST block, Then opening the page normally would give: "Undefined variable: artists", because the view needs artists!)
-        $artists = $this->artistService->getAllArtists();
+        $artists = $this->artistService->getJazzArtists();
         include __DIR__ . '/../Views/admin/jazz/createEvent.php';
     }
 
@@ -201,7 +204,7 @@ class JazzController
             exit;
         }
 
-        $artists = $this->artistService->getAllArtists();
+        $artists = $this->artistService->getJazzArtists();
         include __DIR__ . '/../Views/admin/jazz/editEvent.php';
     }
 
@@ -232,6 +235,7 @@ class JazzController
             $artist->setName(trim($_POST['name'] ?? ''));
             $artist->setShortDescription(trim($_POST['short_description'] ?? ''));
             $artist->setDescription(trim($_POST['description'] ?? ''));
+            $artist->setArtistType('jazz');
 
             $newImage = $this->handleImageUpload('image_file', 'artist');
             if ($newImage) {
@@ -279,7 +283,7 @@ class JazzController
             }
         }
 
-        $artists = $this->artistService->getAllArtists();
+        $artists = $this->artistService->getJazzArtists();
         include __DIR__ . '/../Views/admin/jazz/editEvent.php';
     }
 

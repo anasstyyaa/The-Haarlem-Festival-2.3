@@ -6,7 +6,8 @@ class ArtistModel{
     private string $ArtistName;
     private ?string $ShortDescription;
     private ?string $Description;
-    private ?string $ImageURL;
+    private ?string $ImageURL = null;
+    private string $ArtistType = 'jazz'; 
     private string $created_at; 
     private ?string $updated_at;
     private ?string $deleted_at;
@@ -25,6 +26,9 @@ class ArtistModel{
     }
     public function getImageUrl(): ?string { 
         return $this->ImageURL; 
+    }
+    public function getArtistType(): string {
+        return $this->ArtistType;
     }
      public function getCreatedAt(): string {
         return $this->created_at;
@@ -48,5 +52,8 @@ class ArtistModel{
     }
     public function setImageUrl(?string $image_url): void { 
         $this->ImageURL = $image_url; 
+    }
+    public function setArtistType(string $artistType): void {
+        $this->ArtistType = $artistType;
     }
 }

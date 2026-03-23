@@ -86,7 +86,7 @@ class TicketController
                 }
             }
 
-            if (strcasecmp($event->getEventType()->value, 'JazzEvent') === 0) {
+            if (strcasecmp($event->getEventType()->value, 'jazz') === 0) {
                 $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
 
                 if ($jazzEvent) {
@@ -200,7 +200,34 @@ class TicketController
 
         if ($tempOrderId) {
             try {
+                //get pending tickets first 
+                $tickets = $this->programService->getTicketsByOrderId($tempOrderId);
+                // then mark them as paid
                 $this->programService->updateTicketsToPaid($tempOrderId, $stripeSessionId);
+                //decrease stock 
+                foreach ($tickets as $t) {
+                    $event = $this->eventRepo->getById((int)$t['event_id']);
+
+                    if (!$event) {
+                        continue;
+                    }
+
+                    $subEventId = (int)$event->getSubEventId();
+                    $quantity = (int)$t['number_of_people'];
+                    $eventType = $event->getEventType()->value;
+
+
+                    if ($eventType === 'jazz') {
+                        $this->jazzEventService->decreaseTicketsLeft($subEventId, $quantity);
+                        
+                    }
+
+                    if ($eventType === 'jazzpass') {
+                        $this->jazzPassService->decreaseTicketsLeft($subEventId, $quantity);
+                        
+                    }
+                }
+
                 $userId = $_SESSION['user']['id'];
 
                 $userModel = $this->userService->getUserById($userId); 
@@ -218,7 +245,7 @@ class TicketController
                     ];
                 }
 
-                $this->communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
+                //$this->communicationService->sendOrderConfirmation($userData, $program->getTickets(), $stripeSessionId);
 
                 unset($_SESSION['program']);
                 $_SESSION['flash_success'] = "Thank you! Your tickets have been secured.";

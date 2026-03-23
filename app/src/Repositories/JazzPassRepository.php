@@ -133,10 +133,12 @@ class JazzPassRepository extends Repository implements IJazzPassRepository
             AND Deleted_At IS NULL
         ");
 
-        return $stmt->execute([
+        $stmt->execute([
             'id' => $jazzPassId,
             'quantity' => $quantity
         ]);
+
+        return $stmt->rowCount() > 0;
     }
 
     public function delete(int $id): bool

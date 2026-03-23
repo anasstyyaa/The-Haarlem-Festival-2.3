@@ -25,6 +25,11 @@ class ArtistService implements IArtistService
         return $this->repository->getById($id);
     }
 
+    public function getJazzArtists(): array
+    {
+        return $this->repository->getJazzArtists();
+    }
+
     public function createArtist(ArtistModel $artist): bool
     {
         return $this->repository->create($artist);

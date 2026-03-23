@@ -9,6 +9,7 @@ interface IArtistRepository
     public function getAllActive(): array;
 
     public function getById(int $id): ?ArtistModel;
+    public function getJazzArtists(): array;
 
     public function create(ArtistModel $artist): bool;
 

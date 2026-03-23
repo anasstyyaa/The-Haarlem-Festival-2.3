@@ -2,65 +2,63 @@
 
 namespace App\Controllers;
 
-use App\Services\PersonalProgramService;
-use App\Repositories\EventRepository;
+
 use App\Models\PersonalProgram;
+use App\Services\Interfaces\IPersonalProgramService;
+use App\Services\Interfaces\Yummy\IRestaurantService;
+use App\Services\Interfaces\Yummy\IRestaurantSessionService; 
+use App\Services\Interfaces\IArtistService; 
+use App\Services\Interfaces\IJazzEventService; 
+use App\Services\Interfaces\ICommunicationService; 
+use App\Services\Interfaces\IUserService; 
 
-use App\Services\Yummy\RestaurantService;
-use App\Repositories\Yummy\RestaurantRepository;
-use App\Repositories\Yummy\RestaurantSessionRepository;
-use App\Services\Yummy\RestaurantSessionService;
+use App\Repositories\EventRepository;
 
-use App\Services\ArtistService;
-use App\Repositories\ArtistRepository;
-use App\Services\JazzEventService;
-use App\Repositories\JazzEventRepository;
-
+use App\Services\Interfaces\IHistoryService; 
 use App\Services\HistoryService;
-use App\Repositories\HistoryEventRepository;
-use App\Repositories\HistoryVenueRepository;
 use App\Models\HistoryVenueModel;
+use App\Repositories\HistoryVenueRepository; 
+use App\Repositories\HistoryEventRepository;
 
 use App\Repositories\KidsEventRepository;
 use App\Services\KidsEventService;
 
-use App\Services\CommunicationService;
-use App\Services\UserService;
-use App\Repositories\UserRepository;
 
 class TicketController
 {
-    private PersonalProgramService $programService;
+    private IPersonalProgramService $programService;
     private EventRepository $eventRepo;
-    private RestaurantService $restaurantService;
-    private RestaurantSessionService $restaurantSessionService;
-    private ArtistService $artistService;
-    private JazzEventService $jazzEventService;
+    private IRestaurantService $restaurantService;
+    private IRestaurantSessionService $restaurantSessionService;
+    private IArtistService $artistService;
+    private IJazzEventService $jazzEventService;
+    //private IHistoryService $historyService;
+    private ICommunicationService $communicationService;
+    private IUserService $userService;
+
+    private KidsEventService $kidsEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
-    private CommunicationService $communicationService;
-    private UserService $userService;
-    private UserRepository $userRepository;
-    private KidsEventService $kidsEventService;
+    
 
-    public function __construct()
+    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, ICommunicationService $communicationService, IUserService $userService)
     {
-        $this->programService = new PersonalProgramService();
+        $this->programService = $programService; 
         $this->eventRepo = new EventRepository();
-        $this->restaurantService = new RestaurantService(new RestaurantRepository());
-        $this->restaurantSessionService = new RestaurantSessionService(new RestaurantSessionRepository(), new RestaurantRepository());
-        $this->artistService = new ArtistService(new ArtistRepository());
-        $this->jazzEventService = new JazzEventService(new JazzEventRepository());
-        $this->communicationService = new CommunicationService();
-        $this->userService = new UserService(new UserRepository());
+        $this->restaurantService = $restaurantService; 
+        $this->restaurantSessionService = $restaurantSessionService; 
+        $this->artistService = $artistService; 
+        $this->jazzEventService = $jazzEventService; 
+        //$this->historyService = $historyService; 
+        $this->communicationService = $communicationService; 
+        $this->userService = $userService; 
 
-        $this->historyService = new HistoryService(
+        $this->kidsEventService = new KidsEventService(new KidsEventRepository());
+         $this->historyService = new HistoryService(
             new HistoryEventRepository(),
             new HistoryVenueRepository()
         );
-
-        $this->historyVenueRepository = new HistoryVenueRepository();
-        $this->kidsEventService = new KidsEventService(new KidsEventRepository());
+        $this->historyVenueRepository = new HistoryVenueRepository(); 
     }
 
     public function index(): void
@@ -90,7 +88,7 @@ class TicketController
 
                 if ($jazzEvent) {
                     $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-                    $venueInfo = (new JazzEventRepository())->getVenueInfoByJazzEventId($jazzEvent->getId());
+                    $venueInfo = ($this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId()));
 
                     $event->setDetails([
                         'artist' => $artist,
@@ -191,7 +189,7 @@ class TicketController
             try {
                 $this->programService->updateTicketsToPaid($tempOrderId, $stripeSessionId);
 
-                $communicationService = new CommunicationService();
+                $communicationService = new ICommunicationService();
                 $userId = $_SESSION['user']['id'];
 
                 $userModel = $this->userService->getUserById($userId); 

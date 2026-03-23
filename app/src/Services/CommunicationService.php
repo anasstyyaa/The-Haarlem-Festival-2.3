@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
+use App\Services\Interfaces\ICommunicationService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-class CommunicationService
+class CommunicationService implements ICommunicationService
 {
     private function getPdfEngine(): Dompdf
     {

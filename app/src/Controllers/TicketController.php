@@ -533,4 +533,22 @@ public function scan(): void
 
         require __DIR__ . '/../Views/admin/dashboard.php';
     }
+    public function exportCsv(): void
+{
+    $tickets = $this->ticketRepository->getAllWithDetails();
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="tickets.csv"');
+
+    $output = fopen('php://output', 'w');
+
+    fputcsv($output, array_keys($tickets[0]));
+
+    foreach ($tickets as $row) {
+        fputcsv($output, $row);
+    }
+
+    fclose($output);
+    exit;
+}
 }

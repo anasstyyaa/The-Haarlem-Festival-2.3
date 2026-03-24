@@ -529,7 +529,7 @@ public function scan(): void
 
       public function adminIndex()
     {
-        $tickets = $this->ticketRepository->getAll();
+        $tickets = $this->ticketRepository->getAllWithDetails();
 
         require __DIR__ . '/../Views/admin/dashboard.php';
     }

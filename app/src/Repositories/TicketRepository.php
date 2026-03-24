@@ -124,6 +124,32 @@ class TicketRepository extends Repository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getAllWithDetails(): array
+{
+    $sql = "
+        SELECT 
+            t.id,
+            t.user_id,
+            u.Email,
+            u.FullName,
+            t.event_id,
+            e.eventType,
+            t.sub_event_id,
+            t.number_of_people,
+            t.unit_price,
+            t.total_price,
+            t.status,
+            t.is_scanned, 
+            t.created_at
+        FROM Tickets t
+        LEFT JOIN Users u ON u.Id = t.user_id
+        LEFT JOIN Event e ON e.id = t.event_id
+        ORDER BY t.id DESC
+    ";
+
+    $stmt = $this->connection->query($sql);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     public function getTicketsByOrderId(string $orderId): array
     {

@@ -9,7 +9,7 @@ use PDO;
 
 class ArtistRepository extends Repository implements IArtistRepository{
 
-    //This method returns artists 
+    //This method returns all artists 
     public function getAllActive(): array
     {
         $stmt = $this->connection->prepare("SELECT * FROM Artist WHERE deleted_at IS NULL ORDER BY ArtistID ASC");
@@ -38,6 +38,7 @@ class ArtistRepository extends Repository implements IArtistRepository{
             'artistType' => 'jazz'
         ]);
 
+        // Fetch results as ArtistModel objects, ensuring we return an array of ArtistModel instances
         $artists = [];
         while ($artist = $stmt->fetchObject(ArtistModel::class)) {
             $artists[] = $artist;

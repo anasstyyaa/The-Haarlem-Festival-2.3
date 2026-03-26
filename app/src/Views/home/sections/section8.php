@@ -1,4 +1,5 @@
 <?php
+/** @var PageElementViewModel[] $elements */
 $titleElement = array_shift($elements);
 $chunks = array_chunk($elements, 4);
 ?>

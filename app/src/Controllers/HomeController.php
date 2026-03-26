@@ -25,7 +25,7 @@ class HomeController
     $this->buttonService = new ButtonService();
 }
 
-    public function index(): string
+    public function index()
     {
        $elements = $this->pageRepo->getByPageName("home");
 

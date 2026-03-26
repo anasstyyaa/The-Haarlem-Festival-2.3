@@ -101,7 +101,7 @@ class JazzController
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $fileName = $this->handleImageUpload('image_file', 'artist');
+            $fileName = $this->handleImageUpload('image_file', 'artist', 'artists');
 
             $artist = new ArtistModel();
             $artist->setName(trim($_POST['name'] ?? ''));
@@ -157,7 +157,7 @@ class JazzController
     public function storePass()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $fileName = $this->handlePassImageUpload('image_file', 'pass');
+            $fileName = $this->handleImageUpload('image_file', 'pass', 'passes');
 
             $pass = new JazzPassModel();
             $pass->setTitle(trim($_POST['title'] ?? ''));
@@ -238,7 +238,7 @@ class JazzController
             $artist->setDescription(trim($_POST['description'] ?? ''));
             $artist->setArtistType('jazz');
 
-            $newImage = $this->handleImageUpload('image_file', 'artist');
+            $newImage = $this->handleImageUpload('image_file', 'artist', 'artists');
             if ($newImage) {
                 $artist->setImageUrl('/assets/uploads/jazz/artists/' . $newImage);
             }
@@ -307,7 +307,7 @@ class JazzController
             $pass->setCapacity((int)($_POST['capacity'] ?? 0));
             $pass->setTicketsLeft((int)($_POST['tickets_left'] ?? 0));
 
-            $newImage = $this->handlePassImageUpload('image_file', 'pass');
+            $newImage = $this->handleImageUpload('image_file', 'pass', 'passes');
             if ($newImage) {
                 $pass->setImageUrl('/assets/uploads/jazz/passes/' . $newImage);
             }
@@ -345,13 +345,14 @@ class JazzController
         exit;
     }
 
-    private function handleImageUpload(string $inputName, string $prefix): ?string
+    private function handleImageUpload(string $inputName, string $prefix, string $folder): ?string
     {
         if (!isset($_FILES[$inputName]) || $_FILES[$inputName]['error'] !== UPLOAD_ERR_OK) {
             return null;
         }
 
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/jazz/artists/';
+        $uploadDir = __DIR__ . '/../../public/assets/uploads/jazz/' . $folder . '/';
+
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
@@ -365,25 +366,5 @@ class JazzController
 
         return null;
     }
-
-    private function handlePassImageUpload(string $inputName, string $prefix): ?string
-    {
-        if (!isset($_FILES[$inputName]) || $_FILES[$inputName]['error'] !== UPLOAD_ERR_OK) {
-            return null;
-        }
-
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/jazz/passes/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $extension = strtolower(pathinfo($_FILES[$inputName]['name'], PATHINFO_EXTENSION));
-        $newFileName = uniqid($prefix . '_', true) . '.' . $extension;
-
-        if (move_uploaded_file($_FILES[$inputName]['tmp_name'], $uploadDir . $newFileName)) {
-            return $newFileName;
-        }
-
-        return null;
-    }
+    
 }

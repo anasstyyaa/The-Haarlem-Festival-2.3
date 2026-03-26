@@ -43,6 +43,7 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
         return $event ?: null;
     }
 
+    //combining the data from Event, JazzEvent and JazzVenue tables to get all the necessary info for the personal program page. (view model is used here to hold the combined data from multiple tables)
     public function getEventsForArtist(int $artistId, EventTypeEnum $eventType): array
     {
             $sql = "

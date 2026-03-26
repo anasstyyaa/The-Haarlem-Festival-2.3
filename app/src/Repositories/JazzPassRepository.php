@@ -25,6 +25,7 @@ class JazzPassRepository extends Repository implements IJazzPassRepository
         return $stmt->fetchAll(PDO::FETCH_CLASS, JazzPassModel::class);
     }
 
+    //get all passes for admin view (including inactive and deleted ones)
     public function getAllAdmin(): array
     {
         $stmt = $this->connection->prepare("
@@ -78,7 +79,7 @@ class JazzPassRepository extends Repository implements IJazzPassRepository
             }
 
             $jazzPassId = (int)$this->connection->lastInsertId();
-
+            // Create the corresponding entry in the Event table
             $wrapperSuccess = $this->createEventWrapper($jazzPassId);
 
             if (!$wrapperSuccess) {

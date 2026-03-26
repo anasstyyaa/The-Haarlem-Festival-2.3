@@ -58,6 +58,7 @@ class JazzController
         include __DIR__ . '/../Views/admin/jazz/index.php';
     }
 
+    //artist detail 
     public function detail($vars)
     {
         $id = (int)$vars['id'];

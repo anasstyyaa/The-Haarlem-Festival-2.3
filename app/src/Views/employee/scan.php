@@ -21,11 +21,11 @@
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
     function onScanSuccess(decodedText, decodedResult) {
-        window.location.href = "/scan?token=" + encodeURIComponent(decodedText);
-    }
+    alert(decodedText);
+}
 
     function onScanFailure(error) {
-        // ignore scan failures
+        //this ignores scan failures
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner(

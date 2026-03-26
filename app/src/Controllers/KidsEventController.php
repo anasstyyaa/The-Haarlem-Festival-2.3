@@ -11,6 +11,10 @@ use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
 use App\Services\ButtonService;
 
+use App\Services\ExtraKidsEventService;
+use App\Models\ExtraKidsEventModel;
+use App\ViewModels\ExtraKidsEventViewModel;
+
 class KidsEventController
 {
     private PageElementRepository $pageRepo;
@@ -18,6 +22,7 @@ class KidsEventController
     private ImageRepository $imageRepo;
     private ButtonService $buttonService;
     private KidsEventService $service;
+    private ExtraKidsEventService $extraKidsService;
     public function __construct()
     {
         $this->service = new KidsEventService(new KidsEventRepository);
@@ -25,6 +30,7 @@ class KidsEventController
         $this->textRepo  = new TextRepository();
         $this->imageRepo = new ImageRepository();
         $this->buttonService = new ButtonService();
+        $this->extraKidsService = new ExtraKidsEventService();
     }
 
    public function index(): void
@@ -53,6 +59,8 @@ class KidsEventController
 // }
 // die();
     $vmKids = new KidsEventViewModel($kidsEvents);
+      $extraEvents = $this->extraKidsService->getAllEvents();
+        $extraViewModel = new ExtraKidsEventViewModel($extraEvents);
    require __DIR__ . '/../Views/event/kidsEvent.php';
 }
  public function adminIndex(): void
@@ -123,5 +131,39 @@ public function delete(): void
     header("Location: /admin/kidsPage");
     exit;
 }
+ public function detail($vars)
+    {
+        $id = (int)$vars['id'];
+        $event = $this->extraKidsService->getEventById($id);
+
+        if (!$event) {
+            http_response_code(404);
+            echo "Event not found";
+            return;
+        }
+
+        include __DIR__ . '/../Views/event/extraKidsEventDetail.php';
+    }
+
+    public function storeExtra()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $event = new ExtraKidsEventModel();
+            $event->setName($_POST['name'] ?? '');
+            $event->setDescription($_POST['description'] ?? '');
+
+            if ($this->extraKidsService->createEvent($event)) {
+                header('Location: /extrakids');
+                exit;
+            }
+        }
+    }
+
+    public function deleteExtra($vars)
+    {
+        $this->extraKidsService->deleteEvent((int)$vars['id']);
+        header('Location: /extrakids');
+        exit;
+    }
 
 }

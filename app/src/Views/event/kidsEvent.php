@@ -1,8 +1,10 @@
 <?php 
 use App\ViewModels\KidsEventViewModel;
 use App\ViewModels\PageElementViewModel;
+use App\ViewModels\ExtraKidsEventViewModel;
 /** @var KidsEventViewModel $vmKids */
 /** @var PageElementViewModel $vm */
+/** @var ExtraKidsEventViewModel $extraViewModel */
 
 ?>
 <?php require __DIR__ . '/../partials/header.php'; ?>
@@ -24,6 +26,85 @@ use App\ViewModels\PageElementViewModel;
             padding: 5px 10px;
             cursor: pointer;
         }
+
+
+
+        /* ===== HERO / PAGE TITLE ===== */
+
+.kids-events h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+}
+
+/* ===== GRID ===== */
+.kids-events {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.kids-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    width: 100%;
+}
+
+/* ===== CARD ===== */
+.kids-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.kids-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+/* IMAGE */
+.kids-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+/* CONTENT */
+.kids-card h3 {
+    font-size: 1.4rem;
+    margin: 15px;
+}
+
+.kids-card p {
+    font-size: 0.95rem;
+    margin: 0 15px 20px;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* BUTTON */
+.kids-card a {
+    margin: 0 15px 20px;
+    padding: 10px;
+    text-align: center;
+    background: #ff7a18;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.kids-card a:hover {
+    background: #e56710;
+}
+
     </style>
 </head>
 <body>
@@ -38,6 +119,24 @@ use App\ViewModels\PageElementViewModel;
     </div>
 
 <?php endforeach; ?>
+<section class="kids-events">
+    <h1>Extra Kids Events</h1>
+
+    <div class="kids-grid">
+        <?php foreach ($extraViewModel->events as $event): ?>
+            <div class="kids-card">
+                <?php if ($event['image']): ?>
+                    <img src="<?= htmlspecialchars($event['image']) ?>">
+                <?php endif; ?>
+
+                <h3><?= htmlspecialchars($event['name']) ?></h3>
+
+
+                <a href="/extrakids/<?= $event['id'] ?>">View Details</a>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</section>
     <h2 style="text-align:center;">Kids Events</h2>
     <table>
         <thead>

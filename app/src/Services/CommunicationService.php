@@ -82,13 +82,7 @@ class CommunicationService implements ICommunicationService
             $totalExclVat += $lineExcl;
             $totalVat += $vatAmount;
 
-            if (is_array($details)) {
-                $eventName = $details['name'] ?? ($details['title'] ?? 'Festival Event');
-            } elseif (is_object($details) && method_exists($details, 'getName')) {
-                $eventName = $details->getName();
-            } else {
-                $eventName = "Event #" . $ticket->getEvent()->getId();
-            }
+            $eventName = $this->getEventNameFromTicket($ticket);
 
             $rows .= "
                 <tr>
@@ -170,14 +164,7 @@ class CommunicationService implements ICommunicationService
         foreach ($tickets as $ticket) {
             $details = $ticket->getEvent()->getDetails();
             
-            // logical check for name (same as invoice logic)
-            if (is_array($details)) {
-                $eventName = $details['name'] ?? ($details['title'] ?? 'Festival Event');
-            } elseif (is_object($details) && method_exists($details, 'getName')) {
-                $eventName = $details->getName();
-            } else {
-                $eventName = "Event #" . $ticket->getEvent()->getId();
-            }
+            $eventName = $this->getEventNameFromTicket($ticket);
 
             $ticketSections .= "
                 <div style='border: 2px solid #333; padding: 30px; margin-bottom: 50px; font-family: sans-serif;'>
@@ -238,6 +225,29 @@ class CommunicationService implements ICommunicationService
             error_log("Reminder Email Error: " . $e->getMessage());
             return false;
         }
+    }
+
+    private function getEventNameFromTicket($ticket): string
+    {
+        $details = $ticket->getEvent()->getDetails();
+        
+        if (is_array($details)) {
+            if (isset($details['artist']) && is_object($details['artist'])) {
+                return "Jazz: " . $details['artist']->getName();
+            }
+            return $details['name'] ?? ($details['title'] ?? 'Festival Event');
+        }
+
+        if (is_object($details)) {
+            if (method_exists($details, 'getName')) {
+                return $details->getName();
+            }
+            if (method_exists($details, 'getType')) {
+                return $details->getType();
+            }
+        }
+
+        return $ticket->getEvent()->getEventType()->value . " Ticket";
     }
 
 }

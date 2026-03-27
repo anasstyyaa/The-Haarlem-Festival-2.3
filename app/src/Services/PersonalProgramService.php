@@ -22,16 +22,14 @@ class PersonalProgramService implements IPersonalProgramService
 
     public function addTicketToProgram(int $eventId, int $numberOfPeople, ?int $userId, ?int $programItemId = null): void {
         $event = $this->eventRepository->getById($eventId);
-
-        $user = null;
-        if ($userId !== null) {
-            $user = $this->userRepository->getById($userId);
-        }
+        $user = ($userId !== null) ? $this->userRepository->getById($userId) : null;
 
         $ticket = new TicketModel(0, $event, $user, $numberOfPeople);
 
-        if ($programItemId !== null) {
-            $ticket->setProgramItemId($programItemId);
+        if ($programItemId !== null && (int)$programItemId > 0) {
+            $ticket->setProgramItemId((int)$programItemId);
+        } else {
+            $ticket->setProgramItemId($event->getSubEventId());
         }
 
         $program = $_SESSION['program'] ?? new PersonalProgram();
@@ -56,15 +54,13 @@ class PersonalProgramService implements IPersonalProgramService
 
     public function createPendingTicketsFromSession(PersonalProgram $program, int $userId): string 
     {
-        // generating a unique reference for this "Pay Later" attempt
         $tempOrderId = 'ORDER_' . bin2hex(random_bytes(8));
 
         foreach ($program->getTickets() as $ticket) {
-            // setting the user on the ticket object if not already set
             if (!$ticket->getUser()) {
                 $ticket->setUser($this->userRepository->getById($userId));
             }
-            
+        
             $this->ticketRepository->savePendingTicket($ticket, $tempOrderId);
         }
 

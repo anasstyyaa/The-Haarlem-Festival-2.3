@@ -168,7 +168,8 @@ class TicketController
 
         // capacity check 
         if (strcasecmp($eventType, 'reservation') === 0) {
-            $session = $this->restaurantSessionService->getSessionById($subEventId);
+            $targetId = $programItemId ? (int)$programItemId : (int)$subEventId; 
+            $session = $this->restaurantSessionService->getSessionById($targetId);
             
             if (!$session || $session->getAvailableSlots() < $numberOfPeople) {
                 $remaining = $session ? $session->getAvailableSlots() : 0;
@@ -217,23 +218,24 @@ class TicketController
                 foreach ($tickets as $t) {
                     $event = $this->eventRepo->getById((int)$t['event_id']);
 
-                    if (!$event) {
-                        continue;
-                    }
+                    if (!$event) continue;
 
                     $subEventId = (int)$event->getSubEventId();
+                    $targetSessionId = !empty($t['program_item_id']) ? (int)$t['program_item_id'] : $subEventId;
+                    
                     $quantity = (int)$t['number_of_people'];
                     $eventType = $event->getEventType()->value;
 
-
                     if ($eventType === 'jazz') {
-                        $this->jazzEventService->decreaseTicketsLeft($subEventId, $quantity);
-                        
+                        $this->jazzEventService->decreaseTicketsLeft($targetSessionId, $quantity);
                     }
 
                     if ($eventType === 'jazzpass') {
-                        $this->jazzPassService->decreaseTicketsLeft($subEventId, $quantity);
-                        
+                        $this->jazzPassService->decreaseTicketsLeft($targetSessionId, $quantity);
+                    }
+
+                    if ($eventType === 'reservation') {
+                        $this->restaurantSessionService->updateCapacity($targetSessionId, -$quantity);
                     }
                 }
 
@@ -245,6 +247,10 @@ class TicketController
                     $userData = [
                         'email'      => $userModel->getEmail(),
                         'full_name' => $userModel->getFullName(),
+                        'phone'      => $userModel->getPhoneNumber(), 
+                        //'address'    => $userModel->getAddress(),     
+                        'invoice_date' => date('d-m-Y'),
+                        'payment_date' => date('d-m-Y')
                     ];
                 } else {
                     // Fallback if user isn't found for some reason
@@ -313,6 +319,8 @@ class TicketController
         header('Location: /personalProgram');
         exit;
     }
+
+
     public function checkout(): void
     {
         if (!isset($_SESSION['user'])) {
@@ -326,35 +334,31 @@ class TicketController
             header("Location: /personalProgram");
             exit;
         }
+
         $userId = $_SESSION['user']['id'];
+        
         $tempOrderId = $this->programService->createPendingTicketsFromSession($program, $userId);
+        
         $ticketNames = [];
 
         foreach ($program->getTickets() as $ticket) {
             $event = $ticket->getEvent();
+            $details = $event->getDetails();
 
-            if (strcasecmp($event->getEventType()->name, 'reservation') === 0) {
-                $sessionId = $event->getSubEventId();
+            if (strcasecmp($event->getEventType()->value, 'reservation') === 0) {
+                $sessionId = $ticket->getProgramItemId() ?: $event->getSubEventId();
                 $qty = $ticket->getNumberOfPeople();
+                
                 $success = $this->restaurantSessionService->updateCapacity($sessionId, -$qty);
 
                 if (!$success) {
-                $_SESSION['flash_error'] = "Sorry, one of your selected restaurant sessions has just sold out or doesn't have enough seats left.";
+                    $_SESSION['flash_error'] = "Sorry, one of your selected restaurant sessions has just sold out or doesn't have enough seats left.";
                     header("Location: /personalProgram");
                     exit;
                 }
             }
-        }
 
-        $userId = $_SESSION['user']['id'];
-        $tempOrderId = $this->programService->createPendingTicketsFromSession($program, $userId);
-        
-        $ticketNames = [];
-        foreach ($program->getTickets() as $ticket) {
-            $event = $ticket->getEvent();
-            $details = $event->getDetails();
             $name = "Festival Ticket";
-
             if (is_array($details) && isset($details['artist'])) {
                 $name = $details['artist']->getName();
             } elseif (is_array($details) && isset($details['name'])) {
@@ -392,7 +396,7 @@ class TicketController
                 $event = $this->eventRepo->getById($t['event_id']);
                 
                 if ($event && strcasecmp($event->getEventType()->value, 'reservation') === 0) {
-                    $sessionId = (int)$t['sub_event_id'];
+                    $sessionId = (int)$t['program_item_id']; 
                     $quantity = (int)$t['number_of_people'];
 
                     $this->restaurantSessionService->updateCapacity($sessionId, $quantity);

@@ -120,6 +120,26 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
+
+    // Public Dance routes
+    $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
+    $r->addRoute('GET', '/dance/{id:\d+}', ['App\Controllers\DanceController', 'detail']);
+
+    // Admin Dance Artist Management
+    $r->addRoute('GET', '/admin/dance', ['App\Controllers\DanceController', 'adminIndex']);
+    $r->addRoute('GET', '/admin/dance/create', ['App\Controllers\DanceController', 'showCreateForm']);
+    $r->addRoute('POST', '/admin/dance/create', ['App\Controllers\DanceController', 'store']);
+    $r->addRoute('GET', '/admin/dance/edit/{id:\d+}', ['App\Controllers\DanceController', 'showEditForm']);
+    $r->addRoute('POST', '/admin/dance/edit/{id:\d+}', ['App\Controllers\DanceController', 'update']);
+    $r->addRoute('GET', '/admin/dance/delete/{id:\d+}', ['App\Controllers\DanceController', 'delete']);
+
+    // Admin Dance Event Management
+    $r->addRoute('GET', '/admin/dance/events/create', ['App\Controllers\DanceController', 'showCreateEventForm']);
+    $r->addRoute('POST', '/admin/dance/events/create', ['App\Controllers\DanceController', 'storeEvent']);
+    $r->addRoute('GET', '/admin/dance/events/edit/{id:\d+}', ['App\Controllers\DanceController', 'showEditEventForm']);
+    $r->addRoute('POST', '/admin/dance/events/edit/{id:\d+}', ['App\Controllers\DanceController', 'updateEvent']);
+    $r->addRoute('GET', '/admin/dance/events/delete/{id:\d+}', ['App\Controllers\DanceController', 'deleteEvent']);
+
     // Checkout routes
     $r->addRoute('POST', '/checkout', ['App\Controllers\TicketController', 'checkout']);
     $r->addRoute('GET', '/payment-success', ['App\Controllers\TicketController', 'paymentSuccess']);
@@ -131,7 +151,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
     $r->addRoute('GET', '/resetPassword', ['App\Controllers\AuthController', 'showResetPassword']);
     $r->addRoute('POST', '/resetPassword', ['App\Controllers\AuthController', 'resetPassword']);
-    $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);
+    
 
     // QR/employee scanning routes
     $r->addRoute('GET', '/qr', ['App\Controllers\QrController', 'index']);

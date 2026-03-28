@@ -21,9 +21,7 @@
     width: 100%;
     height: 420px;
 
-    background-image: url('/assets/images/dance/dance-hero.jpg');
-    background-size: cover;
-    background-position: center;
+    background: url('/assets/images/home/Dancehero.png') center / cover no-repeat;
 
     position: relative;
 }
@@ -70,6 +68,7 @@
 .dance-btn:hover {
     background: #f2b3a0;
 }
+ 
 
 
 /* ========== SECTION BACKGROUNDS ========== */
@@ -88,7 +87,14 @@
 
 .dance-wave-top {
     position: absolute;
-    top: -44px;
+    top: -44px;.dance-about-section {
+    position: relative;
+    padding: 40px 0 34px;
+}
+
+.dance-wave-top {
+    display: none;
+}
     left: 0;
     width: 100%;
     height: 90px;

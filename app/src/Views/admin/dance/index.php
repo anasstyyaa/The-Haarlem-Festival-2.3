@@ -82,7 +82,7 @@ foreach ($lineup as $item) {
                 3 days of dance nights with internationally recognized legendary Dutch DJs.
             </p>
 
-            <a href="#lineup" class="dance-btn">Explore Lineup</a>
+            
         </div>
 
     </div>
@@ -90,7 +90,7 @@ foreach ($lineup as $item) {
 
     <!-- ABOUT -->
     <section class="dance-about-section">
-        <div class="dance-wave-top"></div>
+        
 
         <div class="dance-container dance-about-grid">
             <div class="dance-about-text">
@@ -119,7 +119,7 @@ foreach ($lineup as $item) {
             </aside>
         </div>
     </section>
-
+    
     <!-- FEATURED DJS -->
     <section class="dance-featured-section">
         <div class="dance-container">
@@ -139,23 +139,36 @@ foreach ($lineup as $item) {
                 <div class="dance-featured-card">
                     <div class="dance-dj-grid">
                         <?php foreach ($featuredDjs as $dj): ?>
-                            <div class="dance-dj-item">
-                                <div class="dance-dj-image-wrap">
-                                    <img
-                                        src="<?= htmlspecialchars($dj->getImageUrl() ?? '/assets/images/default-dj.jpg') ?>"
-                                        alt="<?= htmlspecialchars($dj->getName()) ?>"
-                                    >
-                                </div>
+    <div class="dance-dj-item">
+        <div class="dance-dj-image-wrap">
+<?php
+$djImages = [
+    'Hardwell' => '/assets/images/dance/Hardwel.jpg',
+    'Armin van Buuren' => '/assets/images/Armin van buuren.jpg',
+    'Martin Garrix' => '/assets/images/dance/Martin-Garrix-2024-01.jpg',
+    'Tiësto' => '/assets/images/dance/Tiesto.png',
+    'Nicky Romero' => '/assets/images/Nicky.png.png',
+    'Afrojack' => '/assets/images/dance/Afrojack.png',
+];
 
-                                <h3><?= htmlspecialchars($dj->getName()) ?></h3>
+$imagePath = $djImages[$dj->getName()] ?? '/assets/images/default-dj.jpg';
+?>
+<img
+    src="<?= htmlspecialchars($imagePath) ?>"
+    alt="<?= htmlspecialchars($dj->getName()) ?>"
+>
+           
+        </div>
 
-                                <p class="dance-dj-genre">
-                                    <?= htmlspecialchars($featuredGenres[$dj->getName()] ?? 'Dance Artist') ?>
-                                </p>
+        <h3><?= htmlspecialchars($dj->getName()) ?></h3>
 
-                                <a href="/dance/<?= $dj->getId(); ?>" class="dance-small-btn">More Info</a>
-                            </div>
-                        <?php endforeach; ?>
+        <p class="dance-dj-genre">
+            <?= htmlspecialchars($featuredGenres[$dj->getName()] ?? 'Dance Artist') ?>
+        </p>
+
+        <a href="/dance/<?= $dj->getId(); ?>" class="dance-small-btn">More Info</a>
+    </div>
+<?php endforeach; ?>
                     </div>
                 </div>
             <?php endif; ?>

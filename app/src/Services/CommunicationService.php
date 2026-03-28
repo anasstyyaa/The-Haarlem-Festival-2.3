@@ -64,50 +64,95 @@ class CommunicationService implements ICommunicationService
     private function renderInvoiceHtml(array $user, array $tickets, string $orderId): string
     {
         $rows = "";
-        $total = 0;
+        $totalExclVat = 0;
+        $totalVat = 0;
+        
         foreach ($tickets as $ticket) {
-            $subtotal = $ticket->getTotalPrice();
-            $total += $subtotal;
-            
             $details = $ticket->getEvent()->getDetails();
             
-            
-            if (is_array($details)) {
-                $eventName = $details['name'] ?? ($details['title'] ?? 'Festival Event');
-            } elseif (is_object($details) && method_exists($details, 'getName')) {
-                $eventName = $details->getName();
-            } else {
-                $eventName = "Event #" . $ticket->getEvent()->getId();
-            }
+            $qty = $ticket->getNumberOfPeople();
+            $unitPriceIncl = $ticket->getUnitPrice();
+            $lineTotalIncl = $ticket->getTotalPrice();
+
+            // Assumption: 9% VAT for Festival/Food, 21% for others. 
+            $vatRate = 0.09; 
+            $vatAmount = $lineTotalIncl - ($lineTotalIncl / (1 + $vatRate));
+            $lineExcl = $lineTotalIncl - $vatAmount;
+
+            $totalExclVat += $lineExcl;
+            $totalVat += $vatAmount;
+
+            $eventName = $this->getEventNameFromTicket($ticket);
 
             $rows .= "
                 <tr>
-                    <td style='padding: 10px; border-bottom: 1px solid #eee;'>{$eventName}</td>
-                    <td style='padding: 10px; border-bottom: 1px solid #eee;'>{$ticket->getNumberOfPeople()}</td>
-                    <td style='padding: 10px; border-bottom: 1px solid #eee;'>&euro;" . number_format($ticket->getUnitPrice(), 2) . "</td>
-                    <td style='padding: 10px; border-bottom: 1px solid #eee;'>&euro;" . number_format($subtotal, 2) . "</td>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee;'>{$eventName}</td>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee;'>{$qty}</td>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee;'>&euro;" . number_format($unitPriceIncl, 2) . "</td>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee; text-align:right;'>&euro;" . number_format($lineTotalIncl, 2) . " <br><small>(" . ($vatRate * 100) . "% VAT)</small></td>
                 </tr>";
         }
+
+        $grandTotal = $totalExclVat + $totalVat;
 
         // CSS for Dompdf
         return "
         <html>
-        <body style='font-family: sans-serif;'>
-            <h1 style='color: #333;'>INVOICE</h1>
-            <p><strong>Order ID:</strong> $orderId</p>
-            <p><strong>Customer:</strong> {$user['full_name']}</p>
-            <table style='width: 100%; border-collapse: collapse;'>
+        <body style='font-family: sans-serif; color: #333;'>
+            <table style='width: 100%;'>
+                <tr>
+                    <td><h1>INVOICE</h1></td>
+                    <td style='text-align: right;'>
+                        <strong>Haarlem Festival</strong><br>
+                    </td>
+                </tr>
+            </table>
+
+            <hr>
+
+            <table style='width: 100%; margin-top: 20px;'>
+                <tr>
+                    <td style='width: 50%; vertical-align: top;'>
+                        <strong>Bill To:</strong><br>
+                        {$user['full_name']}<br>
+                        {$user['email']}<br>
+                        {$user['phone']}
+                    </td>
+                    <td style='width: 50%; text-align: right; vertical-align: top;'>
+                        <strong>Invoice #:</strong> INV-{$orderId}<br>
+                        <strong>Invoice Date:</strong> {$user['invoice_date']}<br>
+                        <strong>Payment Date:</strong> {$user['payment_date']}<br>
+                        <strong>Status:</strong> PAID
+                    </td>
+                </tr>
+            </table>
+
+            <table style='width: 100%; border-collapse: collapse; margin-top: 30px;'>
                 <thead>
-                    <tr style='background: #f4f4f4;'>
-                        <th style='text-align: left; padding: 10px;'>Event</th>
-                        <th style='text-align: left; padding: 10px;'>Qty</th>
-                        <th style='text-align: left; padding: 10px;'>Price</th>
-                        <th style='text-align: left; padding: 10px;'>Total</th>
+                    <tr style='background: #333; color: white;'>
+                        <th style='padding: 10px; text-align: left;'>Description</th>
+                        <th style='padding: 10px; text-align: left;'>Qty</th>
+                        <th style='padding: 10px; text-align: left;'>Unit Price</th>
+                        <th style='padding: 10px; text-align: right;'>Total (Incl. VAT)</th>
                     </tr>
                 </thead>
-                <tbody>$rows</tbody>
+                <tbody>{$rows}</tbody>
             </table>
-            <h3 style='text-align: right;'>Grand Total: &euro;" . number_format($total, 2) . "</h3>
+
+            <table style='width: 40%; margin-left: 60%; margin-top: 20px;'>
+                <tr>
+                    <td style='padding: 5px;'>Subtotal (Excl. VAT):</td>
+                    <td style='text-align: right;'>&euro;" . number_format($totalExclVat, 2) . "</td>
+                </tr>
+                <tr>
+                    <td style='padding: 5px;'>VAT Total:</td>
+                    <td style='text-align: right;'>&euro;" . number_format($totalVat, 2) . "</td>
+                </tr>
+                <tr style='font-weight: bold; font-size: 1.2em; border-top: 2px solid #333;'>
+                    <td style='padding: 5px;'>Grand Total:</td>
+                    <td style='text-align: right;'>&euro;" . number_format($grandTotal, 2) . "</td>
+                </tr>
+            </table>
         </body>
         </html>";
     }
@@ -119,14 +164,7 @@ class CommunicationService implements ICommunicationService
         foreach ($tickets as $ticket) {
             $details = $ticket->getEvent()->getDetails();
             
-            // logical check for name (same as invoice logic)
-            if (is_array($details)) {
-                $eventName = $details['name'] ?? ($details['title'] ?? 'Festival Event');
-            } elseif (is_object($details) && method_exists($details, 'getName')) {
-                $eventName = $details->getName();
-            } else {
-                $eventName = "Event #" . $ticket->getEvent()->getId();
-            }
+            $eventName = $this->getEventNameFromTicket($ticket);
 
             $ticketSections .= "
                 <div style='border: 2px solid #333; padding: 30px; margin-bottom: 50px; font-family: sans-serif;'>
@@ -187,6 +225,29 @@ class CommunicationService implements ICommunicationService
             error_log("Reminder Email Error: " . $e->getMessage());
             return false;
         }
+    }
+
+    private function getEventNameFromTicket($ticket): string
+    {
+        $details = $ticket->getEvent()->getDetails();
+        
+        if (is_array($details)) {
+            if (isset($details['artist']) && is_object($details['artist'])) {
+                return "Jazz: " . $details['artist']->getName();
+            }
+            return $details['name'] ?? ($details['title'] ?? 'Festival Event');
+        }
+
+        if (is_object($details)) {
+            if (method_exists($details, 'getName')) {
+                return $details->getName();
+            }
+            if (method_exists($details, 'getType')) {
+                return $details->getType();
+            }
+        }
+
+        return $ticket->getEvent()->getEventType()->value . " Ticket";
     }
 
 }

@@ -1,10 +1,12 @@
 <?php
 namespace App\Repositories;
+
+use App\Repositories\Interfaces\ITicketRepository; 
 use App\Framework\Repository;
 use App\Models\TicketModel;
 use PDO;
 
-class TicketRepository extends Repository
+class TicketRepository extends Repository implements ITicketRepository
 {
     public function savePaidTicket(TicketModel $ticket, string $stripeId): bool
     {
@@ -18,9 +20,10 @@ class TicketRepository extends Repository
                     [status], 
                     stripe_session_id,
                     unique_ticket_token, 
-                    is_scanned
+                    is_scanned, 
+                    program_item_id
                 ) 
-                VALUES (:uid, :eid, :subid, :count, :uprice, :tprice, 'paid', :stripe, :token, 0)";
+                VALUES (:uid, :eid, :subid, :count, :uprice, :tprice, 'paid', :stripe, :token, 0, :program_id)";
 
         $stmt = $this->connection->prepare($sql);
 
@@ -34,7 +37,8 @@ class TicketRepository extends Repository
             'uprice' => $ticket->getUnitPrice(),
             'tprice' => $ticket->getTotalPrice(),
             'stripe' => $stripeId,
-            'token'  => $token
+            'token'  => $token, 
+            'program_id' => $ticket->getProgramItemId() 
         ]);
     }
 
@@ -75,22 +79,24 @@ class TicketRepository extends Repository
         $sql = "INSERT INTO Tickets (
                     user_id, event_id, sub_event_id, number_of_people, 
                     unit_price, total_price, [status], stripe_session_id,
-                    unique_ticket_token, is_scanned, created_at
+                    unique_ticket_token, is_scanned, created_at,
+                    program_item_id
                 ) 
-                VALUES (:uid, :eid, :subid, :count, :uprice, :tprice, 'pending', :orderId, :token, 0, GETDATE())";
+                VALUES (:uid, :eid, :subid, :count, :uprice, :tprice, 'pending', :orderId, :token, 0, GETDATE(), :program_id)";
 
         $stmt = $this->connection->prepare($sql);
         $token = bin2hex(random_bytes(16));
 
         return $stmt->execute([
-            'uid'     => $ticket->getUser() ? $ticket->getUser()->getId() : null,
-            'eid'     => $ticket->getEvent()->getId(),
-            'subid'   => $ticket->getEvent()->getSubEventId(),
-            'count'   => $ticket->getNumberOfPeople(),
-            'uprice'  => $ticket->getUnitPrice(),
-            'tprice'  => $ticket->getTotalPrice(),
-            'orderId' => $tempOrderId, 
-            'token'   => $token
+            'uid'        => $ticket->getUser() ? $ticket->getUser()->getId() : null,
+            'eid'        => $ticket->getEvent()->getId(),
+            'subid'      => $ticket->getEvent()->getSubEventId(),
+            'count'      => $ticket->getNumberOfPeople(),
+            'uprice'     => $ticket->getUnitPrice(),
+            'tprice'     => $ticket->getTotalPrice(),
+            'orderId'    => $tempOrderId, 
+            'token'      => $token,
+            'program_id' => $ticket->getProgramItemId() 
         ]);
     }
 
@@ -124,39 +130,44 @@ class TicketRepository extends Repository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function getAllWithDetails(): array
-{
-    $sql = "
-        SELECT 
-            t.id,
-            t.user_id,
-            u.Email,
-            u.FullName,
-            t.event_id,
-            e.eventType,
-            t.sub_event_id,
-            t.number_of_people,
-            t.unit_price,
-            t.total_price,
-            t.status,
-            t.is_scanned, 
-            t.created_at
-        FROM Tickets t
-        LEFT JOIN Users u ON u.Id = t.user_id
-        LEFT JOIN Event e ON e.id = t.event_id
-        ORDER BY t.id DESC
-    ";
-
-    $stmt = $this->connection->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-    public function getTicketsByOrderId(string $orderId): array
     {
-        $sql = "SELECT * FROM Tickets WHERE stripe_session_id = :orderId AND [status] = 'pending'";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute(['orderId' => $orderId]);
+        $sql = "
+            SELECT 
+                t.id,
+                t.user_id,
+                u.Email,
+                u.FullName,
+                t.event_id,
+                e.eventType,
+                t.sub_event_id,
+                t.number_of_people,
+                t.unit_price,
+                t.total_price,
+                t.status,
+                t.is_scanned, 
+                t.created_at
+            FROM Tickets t
+            LEFT JOIN Users u ON u.Id = t.user_id
+            LEFT JOIN Event e ON e.id = t.event_id
+            ORDER BY t.id DESC
+        ";
 
+        $stmt = $this->connection->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getTicketsByOrderId(string $orderId): array 
+    {
+        $sql = "SELECT * FROM Tickets 
+                WHERE stripe_session_id = :orderId 
+                AND [status] = 'pending'";
+        
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute(['orderId' => $orderId]); 
+        
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
 }

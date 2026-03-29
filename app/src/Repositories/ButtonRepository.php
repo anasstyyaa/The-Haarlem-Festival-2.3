@@ -20,7 +20,7 @@ class ButtonRepository extends Repository
         return $row ? $this->mapToModel($row) : null;
     }
 
-    private function mapToModel(array $row): ButtonModel
+    public function mapToModel(array $row): ButtonModel
     {
         return new ButtonModel(
             (int)$row['id'],

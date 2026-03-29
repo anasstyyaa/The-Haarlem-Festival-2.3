@@ -91,17 +91,17 @@ class PageElementController
     //     exit;
     // }
 
-    public function delete(array $vars): void
-    {
-        $id = (int)$vars['id'];
+    // public function delete(array $vars): void
+    // {
+    //     $id = (int)$vars['id'];
 
-        if ($this->service->deleteElement($id)) {
-            header('Location: /admin/page-elements');
-            exit;
-        }
+    //     if ($this->service->deleteElement($id)) {
+    //         header('Location: /admin/page-elements');
+    //         exit;
+    //     }
 
-        echo "Error deleting element.";
-    }
+    //     echo "Error deleting element.";
+    // }
     public function saveImgChanges(array $vars): void
 {
     $id = (int)$vars['id'];

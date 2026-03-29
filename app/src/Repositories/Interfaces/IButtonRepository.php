@@ -8,7 +8,7 @@ interface IButtonRepository
 {
      public function getById(int $id): ?ButtonModel;
 
-    private function mapToModel(array $row): ButtonModel;
+    public function mapToModel(array $row): ButtonModel;
     public function saveButtonTextChanges($id, $newText);
 
 }

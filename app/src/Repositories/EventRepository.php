@@ -5,9 +5,10 @@ namespace App\Repositories;
 use App\Framework\Repository;
 use App\Models\EventModel;
 use App\Models\Enums\EventTypeEnum;
+use App\Repositories\Interfaces\IEventRepository;
 use PDO;
 
-class EventRepository extends Repository
+class EventRepository extends Repository implements IEventRepository
 {
     public function getAll(): array
     {
@@ -72,24 +73,25 @@ class EventRepository extends Repository
         );
     }
 
-    public function checkEventType(int $subEventId, string $eventType):int{
-    $sql = "SELECT id FROM Event WHERE subEventId = :subEventId AND eventType = :eventType ";
-    $stmt = $this->connection->prepare($sql);
-    $stmt->execute([
-        'subEventId' => $subEventId,
-        'eventType'  => $eventType
-    ]);
+    public function checkEventType(int $subEventId, string $eventType):int
+    {
+        $sql = "SELECT id FROM Event WHERE subEventId = :subEventId AND eventType = :eventType ";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute([
+            'subEventId' => $subEventId,
+            'eventType'  => $eventType
+        ]);
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($row) {
-        return (int)$row['id'];
-    }
+        if ($row) {
+            return (int)$row['id'];
+        }
 
-    $tempEvent = new EventModel(0, EventTypeEnum::from($eventType), $subEventId); // id = 0 because the create method will assign the new ID after insertion
+        $tempEvent = new EventModel(0, EventTypeEnum::from($eventType), $subEventId); // id = 0 because the create method will assign the new ID after insertion
 
-    $this->create($tempEvent);
+        $this->create($tempEvent);
 
-    return (int)$this->connection->lastInsertId();
+        return (int)$this->connection->lastInsertId();
     }
 }

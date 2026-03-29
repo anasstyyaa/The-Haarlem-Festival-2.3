@@ -34,6 +34,10 @@ class KidsEventService
     public function create(KidsEventModel $event): bool{
         return $this->repository->create($event);
     }
+      public function update(KidsEventModel $event): bool
+    {
+        return $this->repository->update($event);
+    }
     public function delete(int $id): bool
 {
     return $this->repository->delete($id);

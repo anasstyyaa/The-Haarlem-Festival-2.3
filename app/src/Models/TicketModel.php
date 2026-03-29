@@ -13,27 +13,20 @@ class TicketModel
     private ?UserModel $user;
     private int $numberOfPeople;
     private ?int $programItemId = null;
-
-public function setProgramItemId(int $id): void
-{
-    $this->programItemId = $id;
-}
-
-public function getProgramItemId(): ?int
-{
-    return $this->programItemId;
-}
+    private ?string $uniqueTicketToken = null;
 
     public function __construct(
         int $id,
         EventModel $event,
         ?UserModel $user,
-        int $numberOfPeople
+        int $numberOfPeople,
+        ?string $uniqueTicketToken = null
     ) {
         $this->id = $id;
         $this->event = $event;
         $this->user = $user;
         $this->setNumberOfPeople($numberOfPeople);
+        $this->uniqueTicketToken = $uniqueTicketToken;
     }
 
     public function getId(): int
@@ -104,5 +97,23 @@ public function getProgramItemId(): ?int
         return $this->getUnitPrice() * $this->numberOfPeople;
     }
 
-   
+    public function setProgramItemId(int $id): void
+    {
+        $this->programItemId = $id;
+    }
+
+    public function getProgramItemId(): ?int
+    {
+        return $this->programItemId;
+    }
+
+    public function getUniqueTicketToken(): ?string
+    {
+        return $this->uniqueTicketToken;
+    }
+
+    public function setUniqueTicketToken(string $token): void
+    {
+        $this->uniqueTicketToken = $token;
+    }
 }

@@ -1,79 +1,71 @@
 <?php 
-$bodyClass = 'restaurant-profile'; 
+$bodyClass = 'restaurant-detail'; 
 require __DIR__ . '/../../partials/header.php';
 ?>
 
-<div class="container py-5">
-    <nav aria-label="breadcrumb" class="d-flex justify-content-left mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/yummy">Yummy</a></li>
-            <li class="breadcrumb-item active"><?= htmlspecialchars($restaurant->getName()) ?></li>
-        </ol>
-    </nav>
+<div style="background-color: #3a0d00; min-height: 100vh; color: #f4d9c6;">
 
-    <div class="text-center mb-5">
-        <h1 class="display-3 fw-bold"><?= htmlspecialchars($restaurant->getName()) ?></h1>
-        <p class="lead text-muted">
-            <span class="badge bg-primary me-2"><?= htmlspecialchars($restaurant->getCuisine()) ?></span>
-            <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($restaurant->getLocation()) ?>
-        </p>
-    </div>
-
-    <div class="row justify-content-center mb-5">
-        <div class="col-lg-10">
-            <img src="<?= htmlspecialchars($restaurant->getImageUrl()) ?>" 
-                 class="img-fluid rounded-4 shadow-lg w-100" 
-                 style="max-height: 600px; object-fit: cover;" 
-                 alt="<?= htmlspecialchars($restaurant->getName()) ?>">
+    <section class="jazz-hero">
+        <img src="<?= htmlspecialchars($restaurant->getImageUrl()) ?>" alt="<?= htmlspecialchars($restaurant->getName()) ?>">
+        <div class="hero-overlay">
+            <a href="/yummy" class="jazz-back mb-3"><i class="bi bi-arrow-left"></i> Back to Restaurants</a>
+            <h1><?= htmlspecialchars($restaurant->getName()) ?></h1>
+            <p>
+                <span class="badge" style="background-color: rgba(244, 217, 198, 0.2); color: #f4d9c6; border: 1px solid #f4d9c6;">
+                    <?= htmlspecialchars($restaurant->getCuisine()) ?>
+                </span>
+                <span class="ms-3"><i class="bi bi-geo-alt-fill"></i> <?= htmlspecialchars($restaurant->getLocation()) ?></span>
+            </p>
         </div>
-    </div>
+    </section>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="restaurant-rich-content mb-5 fs-5">
-                <?= $restaurant->getLongDescription(); ?>
-            </div>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                <div class="restaurant-detail-description mb-5">
+                    <div class="fs-5" style="opacity: 0.9; line-height: 1.8;">
+                        <?= $restaurant->getLongDescription(); ?>
+                    </div>
+                </div>
 
-            <hr class="my-5">
+                <hr style="border-color: rgba(244, 217, 198, 0.2);" class="my-5">
 
-            <?php if (isset($chef) && $chef): ?>
-                <div class="chef-profile-section p-4 p-md-5 bg-light rounded-4 shadow-sm mb-5">
-                    <div class="row align-items-center">
-                        <div class="col-md-4 text-center mb-4 mb-md-0">
-                            <?php if ($chef->getImageUrl()): ?>
-                                <img src="<?= htmlspecialchars($chef->getImageUrl()) ?>" 
-                                     class="rounded-circle shadow" 
-                                     style="width: 200px; height: 200px; object-fit: cover; border: 5px solid white;" 
-                                     alt="<?= htmlspecialchars($chef->getName()) ?>">
-                            <?php else: ?>
-                                <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center text-white shadow" 
-                                     style="width: 200px; height: 200px; font-size: 4rem;">
-                                    <i class="bi bi-person-fill"></i>
+                <?php if (isset($chef) && $chef): ?>
+                    <div class="chef-section mb-5 p-4 p-md-5" style="background: #4a1608; border-radius: 24px; border: 1px solid rgba(245, 197, 186, 0.2);">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center mb-4 mb-md-0">
+                                <?php if ($chef->getImageUrl()): ?>
+                                    <img src="<?= htmlspecialchars($chef->getImageUrl()) ?>" 
+                                         class="rounded-circle shadow-lg" 
+                                         style="width: 220px; height: 220px; object-fit: cover; border: 4px solid #f5c5ba;" 
+                                         alt="<?= htmlspecialchars($chef->getName()) ?>">
+                                <?php endif; ?>
+                            </div>
+                            <div class="col-md-8">
+                                <h6 style="color: #ff8a2a;" class="text-uppercase fw-bold mb-1">Executive Chef</h6>
+                                <h2 class="fw-bold mb-2 text-white"><?= htmlspecialchars($chef->getName()) ?></h2>
+                                <p style="color: #f5c5ba;" class="mb-3">
+                                    <i class="bi bi-award-fill me-1"></i> 
+                                    <?= $chef->getExperienceYears() ?> Years of Professional Excellence
+                                </p>
+                                <div class="fst-italic" style="color: #f4d9c6; opacity: 0.8;">
+                                    <?= $chef->getDescription() ?>
                                 </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="col-md-8">
-                            <h6 class="text-primary text-uppercase fw-bold mb-1">Executive Chef</h6>
-                            <h2 class="fw-bold mb-2"><?= htmlspecialchars($chef->getName()) ?></h2>
-                            <p class="text-muted mb-3">
-                                <i class="bi bi-award-fill me-1"></i> 
-                                <?= $chef->getExperienceYears() ?> Years of Professional Excellence
-                            </p>
-                            <div class="chef-bio fst-italic text-secondary">
-                                <?= $chef->getDescription() ?>
                             </div>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
 
-            <div class="col-lg-8">
-                <?php include __DIR__ . '/partials/_reservationForm.php'; ?>
+                <div class="row justify-content-center mt-5">
+                    <div class="col-lg-9">
+                        <?php include __DIR__ . '/partials/_reservationForm.php'; ?>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
-
-<?php include __DIR__ . '/../../partials/flashMessage.php'; ?>
 
 <?php require __DIR__ . '/../../partials/footer.php'; ?>

@@ -13,7 +13,6 @@ interface IRestaurantSessionRepository {
     public function deleteSession(int $id): bool;
     public function updateSession(RestaurantSessionModel $session): bool;
     public function existsAtTime(RestaurantSessionModel $session, int $duration, int $excludeId = 0): bool;
-
     public function beginTransaction();
     public function commit();
     public function rollBack();

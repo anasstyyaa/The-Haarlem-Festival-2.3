@@ -45,6 +45,10 @@ class RestaurantSessionService implements IRestaurantSessionService {
         $duration = $restaurant->getSessionDuration();
         $times = $session->getSelectedTimes();
 
+        if ($session->getAvailableSlots() > $restaurant->getTotalSlots()) {
+            throw new \Exception("Capacity Error: Session capacity (" . $session->getAvailableSlots() . ") cannot exceed the restaurant's total capacity (" . $restaurant->getTotalSlots() . ").");
+        }
+
         // internal overlap check (check the form data against itself)
         sort($times); 
         
@@ -97,9 +101,14 @@ class RestaurantSessionService implements IRestaurantSessionService {
         }
 
         $restaurant = $this->restaurantRepository->getById($session->getRestaurantId());
+
+        if ($session->getAvailableSlots() > $restaurant->getTotalSlots()) {
+            throw new \Exception("Capacity Error: This session cannot hold " . $session->getAvailableSlots() . " people because the restaurant max capacity is " . $restaurant->getTotalSlots() . ".");
+        }
+
         $duration = $restaurant->getSessionDuration();
 
-        $isOverlapping = $this->repository->existsAtTime($session, $session->getId());
+        $isOverlapping = $this->repository->existsAtTime($session, $duration, $session->getId());
 
         if ($isOverlapping) {
             throw new \Exception("A session already exists at this date and time for this restaurant.");

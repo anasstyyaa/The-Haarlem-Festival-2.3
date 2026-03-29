@@ -20,7 +20,7 @@ function initReservationForm(sessionsByDate) {
             sessionsByDate[selectedDate].forEach(session => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'btn btn-outline-dark flex-grow-1 py-2';
+                btn.className = 'btn btn-outline-dark time-slot-btn flex-grow-1 py-2';
                 
                 const timeStr = session.startTime ? session.startTime.substring(0, 5) : "00:00";
                 const slots = session.availableSlots ?? session.available_slots ?? 0;

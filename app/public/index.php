@@ -233,8 +233,8 @@ switch ($routeInfo[0]) {
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
             $restaurantSessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository(); 
             $restaurantSessionService = new \App\Services\Yummy\RestaurantSessionService($restaurantSessionRepo, $restaurantRepo);
-            $eventRepo = new App\Repositories\EventRepository();
-            $userRepo = new App\Repositories\UserRepository();
+            $eventRepo = new \App\Repositories\EventRepository();
+            $userRepo = new \App\Repositories\UserRepository();
 
             $communicationService = new \App\Services\CommunicationService(); 
             $ticketRepo =  new \App\Repositories\TicketRepository();
@@ -245,9 +245,9 @@ switch ($routeInfo[0]) {
             $jazzPassRepository = new \App\Repositories\JazzPassRepository();
             $jazzPassService = new \App\Services\JazzPassService($jazzPassRepository);
 
-            $userService = new App\Services\UserService($userRepo);
+            $userService = new \App\Services\UserService($userRepo);
          
-            $paymentService = new App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo); 
+            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo); 
 
             $controller = new $class($paymentService, $communicationService, $userService); 
         } else {

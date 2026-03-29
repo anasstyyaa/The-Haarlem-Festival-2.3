@@ -163,13 +163,13 @@ class TicketController
 
         // capacity check 
         if (strcasecmp($eventType, 'reservation') === 0) {
-            $targetId = $programItemId ? (int)$programItemId : (int)$subEventId; 
-            $session = $this->restaurantSessionService->getSessionById($targetId);
-            
-            if (!$session || $session->getAvailableSlots() < $numberOfPeople) {
-                $remaining = $session ? $session->getAvailableSlots() : 0;
-                $_SESSION['flash_error'] = "Sorry, there are only $remaining spots left for this session.";
-                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/yummy'));
+            if ($programItemId) {
+                // overriding the Restaurant ID with the Session ID
+                $subEventId = $programItemId; 
+            } else {
+                // If no session ID is found, i can't create a valid ticket
+                $_SESSION['error'] = "Please select a specific time slot.";
+                header("Location: " . $_SERVER['HTTP_REFERER']);
                 exit;
             }
         }
@@ -197,7 +197,7 @@ class TicketController
         }
         // add similar checks for other events 
 
-        $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
+        $eventId = $this->eventRepo->checkEventType((int)$subEventId, $eventType);
 
         if ($eventId === 0) {
             $_SESSION['error'] = "Configuration Error: No Event found! (Type: $eventType, ID: $subEventId).";

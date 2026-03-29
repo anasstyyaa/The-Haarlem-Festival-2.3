@@ -14,18 +14,18 @@
         <?php unset($_SESSION['flash_success']); ?>
     <?php endif; ?>
 
-    <?php if (isset($_SESSION['flash_error'])): ?>
+    <?php if (isset($_SESSION['error'])): ?>
         <div class="alert alert-danger alert-dismissible fade show shadow-lg border-0 mb-3" role="alert">
             <div class="d-flex align-items-center pe-4">
                 <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
                 <div>
                     <h6 class="alert-heading mb-1 fw-bold">Action Failed</h6>
-                    <p class="mb-0 small text-dark"><?= $_SESSION['flash_error']; ?></p>
+                    <p class="mb-0 small text-dark"><?= $_SESSION['error']; ?></p>
                 </div>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <?php unset($_SESSION['flash_error']); ?>
+        <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 
 </div>

@@ -51,19 +51,23 @@ body {
 
 .nav-icons {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   align-items: center;
 }
 
 .icon-link {
   text-decoration: none;
-  color: #f4d9c6;
-  font-size: 18px;
-  transition: 0.3s ease;
+  color: #f4d9c6; /* Your light peach color */
+  font-size: 20px; /* Adjusted size */
+  transition: all 0.3s ease; /* Smooth transition for color and transform */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-link:hover {
-  transform: scale(1.2);
+  color: #ffc107; /* Bootstrap Gold/Warning color */
+  transform: translateY(-3px) scale(1.2); /* Lifts up and grows */
 }
 
 .login-btn {
@@ -1224,4 +1228,83 @@ body.admin-page #sidebar .nav-item {
     width: 120px;
     height: 120px;
   }
+}
+
+
+
+
+  /* YUMMY PAGE */
+
+
+
+
+/* Styling the 'View Restaurant' button specifically */
+/* Base style - added !important to text-decoration to beat Bootstrap */
+/* Universal 'More' and 'Confirm' Button style */
+.more-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: transparent !important; /* Forces transparency on <button> tags */
+    border: 1px solid #f5c5ba !important;
+    color: #f4d9c6 !important; 
+    padding: 12px 20px;
+    border-radius: 25px;
+    text-decoration: none !important;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Hover effect for all .more-btn instances */
+.more-btn:hover {
+    background-color: #f5c5ba !important;
+    color: #3a0d00 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(245, 197, 186, 0.4);
+}
+
+/* Specific fix for inputs inside the form to match the peach/brown theme */
+.input-group-text.custom-dark-input {
+    background-color: rgba(245, 197, 186, 0.1) !important;
+    border-right: none !important;
+}
+
+.custom-dark-input {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(245, 197, 186, 0.3) !important;
+    color: #f4d9c6 !important;
+    padding: 12px;
+}
+
+.custom-dark-input:focus {
+    border-color: #f5c5ba !important;
+    box-shadow: 0 0 8px rgba(245, 197, 186, 0.2) !important;
+}
+
+/* Fix for the Date dropdown and Number input icon colors */
+.custom-dark-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.8) sepia(1) saturate(5) hue-rotate(320deg);
+}
+
+/* Base State for the Time Buttons */
+#timeSlotButtons .btn-outline-dark.time-slot-btn {
+    border: 1px solid #f5c5ba !important;
+    background-color: transparent !important;
+    color: #f4d9c6 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* HOVER State - This will now work */
+#timeSlotButtons .btn-outline-dark.time-slot-btn:hover {
+    background-color: rgba(245, 197, 186, 0.2) !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+
+/* SELECTED/ACTIVE State */
+#timeSlotButtons .btn-dark.time-slot-btn {
+    background-color: #f5c5ba !important;
+    border-color: #f5c5ba !important;
+    color: #3a0d00 !important;
 }

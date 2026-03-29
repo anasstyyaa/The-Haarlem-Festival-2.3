@@ -145,7 +145,26 @@ class PaymentController extends Controller
 
     private function getDisplayName($event): string {
         $details = $event->getDetails();
-        if (is_array($details)) return $details['artist']->getName() ?? ($details['name'] ?? "Festival Ticket");
-        return (is_object($details) && method_exists($details, 'getName')) ? $details->getName() : "Festival Ticket";
+        //if (is_array($details)) return $details['artist']->getName() ?? ($details['name'] ?? "Festival Ticket");
+        //return (is_object($details) && method_exists($details, 'getName')) ? $details->getName() : "Festival Ticket";
+        if (is_array($details)) {
+        if (isset($details['artist']) && $details['artist']) {
+            return $details['artist']->getName();
+        }
+
+        if (isset($details['name'])) {
+            return $details['name'];
+        }
+        }
+
+        if (is_object($details) && method_exists($details, 'getTitle')) {
+            return $details->getTitle();
+        }
+
+        if (is_object($details) && method_exists($details, 'getName')) {
+            return $details->getName();
+        }
+
+        return "Festival Ticket";
     }
 }

@@ -173,6 +173,28 @@ class TicketController
                 exit;
             }
         }
+
+        if (strcasecmp($eventType, 'jazz') === 0) {
+            $jazzEvent = $this->jazzEventService->getJazzEventById((int)$subEventId);
+
+            if (!$jazzEvent || $jazzEvent->getTicketsLeft() < $numberOfPeople) {
+                $remaining = $jazzEvent ? $jazzEvent->getTicketsLeft() : 0;
+                $_SESSION['flash_error'] = "Sorry, there are only $remaining tickets left for this jazz event.";
+                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/jazz'));
+                exit;
+            }
+        }
+
+        if (strcasecmp($eventType, 'jazzpass') === 0) {
+            $jazzPass = $this->jazzPassService->getPassById((int)$subEventId);
+
+            if (!$jazzPass || $jazzPass->getTicketsLeft() < $numberOfPeople) {
+                $remaining = $jazzPass ? $jazzPass->getTicketsLeft() : 0;
+                $_SESSION['flash_error'] = "Sorry, there are only $remaining passes left.";
+                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/jazz'));
+                exit;
+            }
+        }
         // add similar checks for other events 
 
         $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);

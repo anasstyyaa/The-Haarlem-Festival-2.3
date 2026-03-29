@@ -35,12 +35,13 @@ class PaymentService implements IPaymentService
         foreach ($tickets as $ticket) {
             $event = $ticket->getEvent();
             $qty = $ticket->getNumberOfPeople();
-            $targetId = $ticket->getProgramItemId();
+            //$targetId = $ticket->getProgramItemId();
+            $targetId = $event->getSubEventId() ?: $ticket->getProgramItemId(); // fallback to program item id if sub event id is not set
 
             // Ensure targetId exists before trying to update capacity
             if (!$targetId) continue;
 
-            match ($event->getEventType()->value) {
+            match (strtolower($event->getEventType()->value)) {
                 'jazz'        => $this->jazzService->decreaseTicketsLeft($targetId, $qty),
                 'jazzpass'    => $this->jazzPassService->decreaseTicketsLeft($targetId, $qty),
                 'reservation' => $this->restaurantSessionService->updateCapacity($targetId, -$qty),
@@ -146,7 +147,8 @@ class PaymentService implements IPaymentService
     private function populateTicketDetails(TicketModel $ticket): void
     {
         $event = $ticket->getEvent();
-        $subId = $ticket->getProgramItemId() ?: $event->getSubEventId();
+        //$subId = $ticket->getProgramItemId() ?: $event->getSubEventId();
+        $subId = $event->getSubEventId() ?: $ticket->getProgramItemId(); // fallback to program item id if sub event id is not set
         $type = strtolower($event->getEventType()->value);
 
         if ($type === 'reservation') {

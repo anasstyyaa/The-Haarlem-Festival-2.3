@@ -361,7 +361,7 @@ class CommunicationService implements ICommunicationService
         }
 
         if ($type === 'jazz' && is_array($details) && isset($details['jazzEvent'])) {
-            return (new \DateTime($details['jazzEvent']->getStartTime()))->format('l, d F Y');
+            return (new \DateTime($details['jazzEvent']->getStartDateTime()))->format('l, d F Y');
         }
 
         return "Check Schedule for Details";

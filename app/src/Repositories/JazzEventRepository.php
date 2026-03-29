@@ -210,15 +210,16 @@ class JazzEventRepository extends Repository implements IJazzEventRepository
     {
         $stmt = $this->connection->prepare("
             UPDATE JazzEvent
-            SET TicketsLeft = TicketsLeft - :quantity
+            SET TicketsLeft = TicketsLeft - :quantityToSubtract
             WHERE JazzEventID = :id
-            AND TicketsLeft >= :quantity
+            AND TicketsLeft >= :minimumRequired
             AND deleted_at IS NULL
         ");
 
         $stmt->execute([
             'id' => $jazzEventId,
-            'quantity' => $quantity
+            'quantityToSubtract' => $quantity,
+            'minimumRequired' => $quantity
         ]);
         
         return $stmt->rowCount() > 0;

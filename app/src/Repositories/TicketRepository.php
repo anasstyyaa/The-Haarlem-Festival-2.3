@@ -102,12 +102,11 @@ class TicketRepository extends Repository implements ITicketRepository
 
     public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool 
     {
-        $sql = "UPDATE Tickets SET [status] = 'paid', stripe_session_id = :stripe 
+        $sql = "UPDATE Tickets SET [status] = 'paid'
                 WHERE stripe_session_id = :orderId AND [status] = 'pending'";
         
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
-            'stripe'  => $actualStripeId,
             'orderId' => $orderId
         ]);
     }

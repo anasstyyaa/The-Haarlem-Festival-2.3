@@ -131,11 +131,11 @@ class PaymentService implements IPaymentService
                 (int)$row['id'],
                 $event,
                 $user,
-                (int)$row['number_of_people']
+                (int)$row['number_of_people'],
+                $row['unique_ticket_token'] 
             );
             $ticket->setProgramItemId((int)$row['program_item_id']);
 
-            // IMPORTANT: We must populate the details here so the Invoice isn't empty!
             $this->populateTicketDetails($ticket);
 
             $populatedTickets[] = $ticket;
@@ -143,18 +143,13 @@ class PaymentService implements IPaymentService
         return $populatedTickets;
     }
 
-    /**
-     * This replaces the messy logic that was in your Controller's index()
-     */
     private function populateTicketDetails(TicketModel $ticket): void
     {
         $event = $ticket->getEvent();
         $subId = $ticket->getProgramItemId() ?: $event->getSubEventId();
         $type = strtolower($event->getEventType()->value);
 
-        // This logic matches your old Controller index() exactly, but it's now reusable
         if ($type === 'reservation') {
-            // You'll need to inject RestaurantServices into this class or use Repos directly
             $repo = new \App\Repositories\Yummy\RestaurantRepository();
             $sessRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
             $session = $sessRepo->getSessionById($subId);
@@ -175,7 +170,7 @@ class PaymentService implements IPaymentService
                 ]);
             }
         }
-        // ... Add similar blocks for 'tour' and 'kids'
+        // add similar blocks for 'tour' and 'kids'
     }
 
 }

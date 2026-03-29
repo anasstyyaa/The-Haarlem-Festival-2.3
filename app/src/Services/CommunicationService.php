@@ -10,7 +10,8 @@ use PHPMailer\PHPMailer\Exception;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use chillerlan\QRCode\Common\EccLevel;
-use chillerlan\QRCode\Output\QROutputInterface;
+//use chillerlan\QRCode\Output\QROutputInterface;
+
 
 class CommunicationService implements ICommunicationService
 {

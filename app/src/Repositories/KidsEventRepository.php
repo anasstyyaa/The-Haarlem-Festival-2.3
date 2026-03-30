@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\KidsEventModel;
+use App\Repositories\Interfaces\IKidsEventRepository;
 use PDO;
 
-class KidsEventRepository extends Repository
+class KidsEventRepository extends Repository implements IKidsEventRepository
 {
     public function getAll(): array
     {

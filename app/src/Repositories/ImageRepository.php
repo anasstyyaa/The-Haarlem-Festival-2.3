@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\ImageModel;
+use App\Repositories\Interfaces\IImageRepository;
 use PDO;
 
-class ImageRepository extends Repository
+class ImageRepository extends Repository implements IImageRepository
 {
     public function getById(int $id): ?ImageModel
     {

@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\TextModel;
+use App\Repositories\Interfaces\ITextRepository;
 use PDO;
 
-class TextRepository extends Repository 
+class TextRepository extends Repository implements ITextRepository
 {
     public function getById(int $id): ?TextModel
     {

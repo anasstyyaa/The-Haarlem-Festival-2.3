@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\PageElementModel;
+use App\Repositories\Interfaces\IPageElementRepository;
 use PDO;
 
-class PageElementRepository extends Repository
+class PageElementRepository extends Repository implements IPageElementRepository
 {
     /**
      * @return PageElementModel[]
@@ -26,7 +27,7 @@ class PageElementRepository extends Repository
         return array_map(fn($row) => $this->mapToModel($row), $rows);
     }
 
-    private function mapToModel(array $row): PageElementModel
+    public function mapToModel(array $row): PageElementModel
     {
         return new PageElementModel(
             (int)$row['id'],

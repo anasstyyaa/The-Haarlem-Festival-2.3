@@ -11,6 +11,7 @@
             <thead class="table-dark">
                 <tr>
                     <th class="ps-3">ID</th>
+                    <th>Image</th>
                     <th>Venue Name</th>
                     <th>Details</th>
                     <th>Location</th>
@@ -20,15 +21,36 @@
             <tbody>
                 <?php if (empty($venues)): ?>
                     <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">No history venues found.</td>
+                        <td colspan="6" class="text-center py-4 text-muted">No history venues found.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($venues as $venue): ?>
                         <tr>
                             <td class="ps-3"><?= $venue->getVenueId() ?></td>
+
+                            <td>
+                                <?php if ($venue->getImgURL()): ?>
+                                    <img
+                                        src="<?= htmlspecialchars($venue->getImgURL()) ?>"
+                                        alt="<?= htmlspecialchars($venue->getAltText() ?? $venue->getVenueName()) ?>"
+                                        style="width: 90px; height: 60px; object-fit: cover; border-radius: 8px;"
+                                    >
+                                <?php else: ?>
+                                    <span class="text-muted">No image</span>
+                                <?php endif; ?>
+                            </td>
+
                             <td><strong><?= htmlspecialchars($venue->getVenueName()) ?></strong></td>
-                            <td><?= htmlspecialchars($venue->getDetails() ?? '') ?></td>
+
+                            <td>
+                                <?php
+                                $details = $venue->getDetails() ?? '';
+                                echo htmlspecialchars(mb_strimwidth($details, 0, 120, '...'));
+                                ?>
+                            </td>
+
                             <td><?= htmlspecialchars($venue->getLocation() ?? '') ?></td>
+
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="/admin/history/venues/edit?id=<?= $venue->getVenueId() ?>" class="btn btn-sm btn-outline-primary">

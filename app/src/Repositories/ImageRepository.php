@@ -28,6 +28,18 @@ class ImageRepository extends Repository
             $row['altText'] ?? ''
         );
     }
+    public function createImage(string $imgURL, string $altText): int
+    {
+        $sql = "INSERT INTO image (imgURL, altText) VALUES (:imgURL, :altText)";
+        $stmt = $this->connection->prepare($sql);
+
+        $stmt->execute([
+            'imgURL' => $imgURL,
+            'altText' => $altText
+        ]);
+
+        return (int)$this->connection->lastInsertId();
+    }
     public function updateImage(int $id, string $imgURL, string $altText): bool
 {
     $sql = "UPDATE image 

@@ -1308,3 +1308,460 @@ body.admin-page #sidebar .nav-item {
     border-color: #f5c5ba !important;
     color: #3a0d00 !important;
 }
+
+/* =========================
+   HISTORY PAGE
+========================= */
+
+.history-page {
+    background-color: #efcfc7;
+    color: #2f1208;
+}
+
+.history-page__container {
+    width: min(1200px, calc(100% - 64px));
+    margin: 0 auto;
+}
+
+.history-page img {
+    display: block;
+    max-width: 100%;
+}
+
+.history-page__hero {
+    position: relative;
+    min-height: 620px;
+    background-image: linear-gradient(rgba(32, 10, 4, 0.45), rgba(32, 10, 4, 0.45)),
+        url('/assets/images/history/hero.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.history-page__hero--full {
+    display: flex;
+    align-items: center;
+}
+
+.history-page__hero-overlay {
+    width: 100%;
+    padding: 80px 0;
+}
+
+.history-page__hero-content-full {
+    max-width: 700px;
+    color: #fff;
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.history-page__hero-title {
+    font-size: clamp(3rem, 5vw, 5.5rem);
+    line-height: 1.05;
+    font-weight: 700;
+    margin: 0 0 24px;
+}
+
+.history-page__hero-subtitle {
+    font-size: 1.3rem;
+    line-height: 1.7;
+    margin: 0 0 32px;
+    max-width: 560px;
+}
+
+.history-page__primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 999px;
+    background-color: #5b1804;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.history-page__primary-button:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+.history-page__story-section,
+.history-page__timeline-section,
+.history-page__venues-section,
+.history-page__bottom-section {
+    background-color: #551703;
+    color: #f7ddd5;
+}
+
+.history-page__story-section {
+    padding: 72px 0;
+}
+
+.history-page__story-grid {
+    display: grid;
+    grid-template-columns: 0.92fr 1.08fr;
+    gap: 72px;
+    align-items: center;
+}
+
+.history-page__story-image {
+    width: 100%;
+    max-width: 420px;
+    height: 420px;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+}
+
+.history-page__section-title {
+    font-size: clamp(2rem, 3vw, 3.2rem);
+    line-height: 1.15;
+    margin: 0 0 20px;
+    font-weight: 700;
+}
+
+.history-page__section-title--dark {
+    color: #2f1208;
+}
+
+.history-page__story-text p,
+.history-page__tour-text p,
+.history-page__timeline-card p,
+.history-page__venue-content p,
+.history-page__nearby-card p,
+.history-page__schedule-block p {
+    font-size: 1.08rem;
+    line-height: 1.75;
+}
+
+.history-page__subheading {
+    font-size: 2rem;
+    margin: 28px 0 18px;
+    font-weight: 700;
+}
+
+.history-page__facts-list {
+    margin: 0;
+    padding-left: 22px;
+    line-height: 1.9;
+    font-size: 1.05rem;
+}
+
+.history-page__tour-section {
+    padding: 72px 0;
+    background-color: #efcfc7;
+    color: #2f1208;
+}
+
+.history-page__tour-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    gap: 72px;
+    align-items: start;
+}
+
+.history-page__tour-details {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+}
+
+.history-page__detail-item {
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(91, 24, 4, 0.08);
+    font-weight: 500;
+}
+
+.history-page__timeline-section {
+    padding: 72px 0;
+}
+
+.history-page__timeline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+.history-page__timeline-card {
+    padding: 28px 28px 28px 24px;
+    border-left: 3px solid #d89b53;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.history-page__timeline-year {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #d89b53;
+    font-weight: 700;
+}
+
+.history-page__banner-section {
+    background-color: #551703;
+}
+
+.history-page__banner-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.history-page__venues-section {
+    padding: 72px 0;
+}
+
+.history-page__venues-header {
+    max-width: 820px;
+    margin: 0 auto 40px;
+    text-align: center;
+}
+
+.history-page__venues-header p {
+    font-size: 1.05rem;
+    line-height: 1.75;
+}
+
+.history-page__venues-list {
+    display: grid;
+    gap: 24px;
+}
+
+.history-page__venue-card {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    background-color: #b76a2d;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+}
+
+.history-page__venue-image {
+    width: 100%;
+    height: 100%;
+    min-height: 230px;
+    object-fit: cover;
+}
+
+.history-page__venue-content {
+    padding: 28px;
+}
+
+.history-page__venue-content h3 {
+    margin: 0 0 14px;
+    font-size: 1.8rem;
+}
+
+.history-page__secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 22px;
+    border-radius: 999px;
+    border: none;
+    background-color: #f7ddd5;
+    color: #5b1804;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.history-page__secondary-button--link {
+    border: 1px solid rgba(91, 24, 4, 0.2);
+}
+
+.history-page__bottom-section {
+    padding: 72px 0 90px;
+}
+
+.history-page__bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: start;
+}
+
+.history-page__schedule-block {
+    max-width: 560px;
+}
+
+.history-page__schedule-note {
+    margin: 16px 0 18px;
+    font-size: 0.98rem;
+    color: rgba(247, 221, 213, 0.9);
+}
+
+.history-page__schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0 30px;
+    color: #f7ddd5;
+    font-size: 1rem;
+}
+
+.history-page__schedule-table th,
+.history-page__schedule-table td {
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(247, 221, 213, 0.18);
+    vertical-align: top;
+}
+
+.history-page__schedule-table th {
+    font-weight: 700;
+}
+
+.history-page__schedule-table td:first-child {
+    width: 120px;
+}
+
+.history-page__schedule-table td:nth-child(2) {
+    width: 100px;
+}
+
+.history-page__nearby-card {
+    margin: 22px 0 26px;
+}
+
+.history-page__nearby-image {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 14px;
+    margin-bottom: 18px;
+}
+
+.history-page__nearby-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.history-booking {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 56px 24px 72px;
+}
+
+.history-booking__title {
+    font-size: clamp(2.2rem, 3vw, 3.2rem);
+    margin-bottom: 28px;
+}
+
+.history-booking__section {
+    margin-bottom: 30px;
+}
+
+.history-booking__heading {
+    margin-bottom: 14px;
+    font-size: 1.8rem;
+}
+
+.history-booking__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.history-booking__pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid #c9b2ab;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.history-booking__pill:hover {
+    border-color: #d88b2b;
+}
+
+.history-booking__pill--active {
+    background: #d88b2b;
+    color: #fff;
+    border-color: #d88b2b;
+}
+
+.history-booking__summary {
+    border: 1px solid #d8c5be;
+    padding: 16px 18px;
+    width: fit-content;
+    border-radius: 12px;
+    background-color: #fff;
+}
+
+.history-booking__form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 360px;
+}
+
+.history-booking__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-booking__field input {
+    padding: 12px 14px;
+    border: 1px solid #ccb8b1;
+    border-radius: 10px;
+}
+
+.history-booking__submit-btn {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 999px;
+    background-color: #5b1804;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+    .history-page__story-grid,
+    .history-page__tour-grid,
+    .history-page__bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .history-page__container {
+        width: min(1200px, calc(100% - 32px));
+    }
+
+    .history-page__timeline-grid,
+    .history-page__venue-card {
+        grid-template-columns: 1fr;
+    }
+
+    .history-page__venue-image {
+        min-height: 220px;
+    }
+
+    .history-page__banner-image {
+        height: 220px;
+    }
+
+    .history-page__hero,
+    .history-page__story-section,
+    .history-page__tour-section,
+    .history-page__timeline-section,
+    .history-page__venues-section,
+    .history-page__bottom-section {
+        padding-top: 52px;
+        padding-bottom: 52px;
+    }
+
+    .history-page__hero-title {
+        font-size: 3rem;
+    }
+}

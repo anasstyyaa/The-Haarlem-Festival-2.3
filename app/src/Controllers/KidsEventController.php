@@ -2,7 +2,6 @@
 namespace App\Controllers;
 
 use App\Services\KidsEventService;
-use App\Repositories\KidsEventRepository;
 use App\ViewModels\KidsEventViewModel;
 use App\Models\KidsEventModel;
 use App\Services\PageElementService;
@@ -19,7 +18,7 @@ class KidsEventController
     private ExtraKidsEventService $extraKidsService;
     public function __construct()
     {
-        $this->service = new KidsEventService(new KidsEventRepository);
+        $this->service = new KidsEventService();
        $this->pageService  = new PageElementService();
         $this->extraKidsService = new ExtraKidsEventService();
     }
@@ -80,13 +79,17 @@ public function save(): void
     $day       = $_POST['day'] ?? '';
     $startTime = $_POST['startTime'] ?? '';
     $endTime   = $_POST['endTime'] ?? '';
+    $limit = (int)($_POST['limit'] ?? 0);
 
-    $event = new KidsEventModel(
-        $id ? (int)$id : 0,
-        $day,
-        $startTime,
-        $endTime
-    );
+   $event = new KidsEventModel(
+    $id ? (int)$id : 0,
+    $day,
+    $startTime,
+    $endTime,
+    'Teylers Secret',
+    'Teylers Museum, Haarlem',
+    $limit
+);
 
     if ($id) {
         $this->service->update($event);

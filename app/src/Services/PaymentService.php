@@ -9,11 +9,13 @@ use App\Services\Interfaces\IJazzPassService;
 use App\Repositories\Interfaces\ITicketRepository;
 use App\Repositories\Interfaces\IEventRepository;
 use App\Repositories\Interfaces\IUserRepository;
+use App\Services\KidsEventService;
 use App\Models\PersonalProgram;
 use App\Models\TicketModel; 
 
 class PaymentService implements IPaymentService
 {
+    private KidsEventService $kidsService;
     public function __construct(
         private ITicketRepository $ticketRepository, 
         private IRestaurantSessionService $restaurantSessionService,
@@ -21,7 +23,9 @@ class PaymentService implements IPaymentService
         private IJazzPassService $jazzPassService,
         private IUserRepository $userRepository,
         private IEventRepository $eventRepository
-    ) {}
+    ) {
+        $this->kidsService = new KidsEventService();
+    }
 
     public function finalizeOrder(string $orderId, string $stripeId): array 
     {
@@ -45,6 +49,7 @@ class PaymentService implements IPaymentService
                 'jazz'        => $this->jazzService->decreaseTicketsLeft($targetId, $qty),
                 'jazzpass'    => $this->jazzPassService->decreaseTicketsLeft($targetId, $qty),
                 'reservation' => $this->restaurantSessionService->updateCapacity($targetId, -$qty),
+                 'kids'        => $this->kidsService->decreaseCapacity($targetId, $qty),
                 default       => null
             };
         }

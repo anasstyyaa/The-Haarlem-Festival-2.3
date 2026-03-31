@@ -3,13 +3,7 @@
 namespace App\Controllers;
 
 use App\Services\PageElementService;
-use App\Services\Interfaces\IPageElementService;
-use App\Repositories\TextRepository;
-use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
-use App\Services\ButtonService;
-
-  
 
 class HomeController
 {

@@ -10,8 +10,9 @@ class KidsEventModel
     private string $endTime;
 private string $type;
 private string $location;
+private int $limit;
 
-public function __construct(int $id, string $day, string $startTime, string $endTime, string $type = 'Teylers Secret', string $location = 'Teylers Museum, Haarlem')
+public function __construct(int $id, string $day, string $startTime, string $endTime, string $type = 'Teylers Secret', string $location = 'Teylers Museum, Haarlem',  int $limit)
 {
     $this->id = $id;
     $this->day = $day;
@@ -19,6 +20,15 @@ public function __construct(int $id, string $day, string $startTime, string $end
     $this->endTime = $endTime;
     $this->type = $type;
     $this->location = $location;
+     $this->limit = $limit;
+}
+public function getLimit(): int
+{
+    return $this->limit;
+}
+public function setLimit(int $limit): void
+{
+    $this->limit = $limit;
 }
 
 public function getType(): string

@@ -6,6 +6,7 @@ use App\Models\HistoryEventModel;
 use App\Framework\Repository;
 use App\Repositories\Interfaces\IHistoryEventRepository;
 use PDO;
+use Throwable;
 
 class HistoryEventRepository extends Repository implements IHistoryEventRepository
 {
@@ -85,51 +86,126 @@ class HistoryEventRepository extends Repository implements IHistoryEventReposito
         return $row ? (int)$row['eventId'] : null;
     }
 
-    /*
-    // Old booking methods.
-    // Not needed right now because the current History feature uses
-    // PersonalProgramService instead of writing to HistoryBooking tables.
-
-    public function createBooking(int $eventId, ?int $userId): int
+    public function create(HistoryEventModel $event): bool
     {
-        $sql = "
-            INSERT INTO dbo.HistoryBooking (eventId, userId, createdAt, status, totalAmount)
-            VALUES (:eventId, :userId, SYSDATETIME(), 'Pending', 0)
-        ";
+        try {
+            $this->connection->beginTransaction();
 
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute([
-            'eventId' => $eventId,
-            'userId' => $userId
-        ]);
+            $sqlHistory = "
+                INSERT INTO dbo.HistoryEvent
+                    (slotDate, startTime, language, duration, minAge, capacity, priceIndividual, priceFamily)
+                VALUES
+                    (:slotDate, :startTime, :language, :duration, :minAge, :capacity, :priceIndividual, :priceFamily)
+            ";
 
-        return (int)$this->connection->lastInsertId();
-    }
+            $stmtHistory = $this->connection->prepare($sqlHistory);
+            $stmtHistory->execute([
+                'slotDate' => $event->getSlotDate(),
+                'startTime' => $event->getStartTime(),
+                'language' => $event->getLanguage(),
+                'duration' => $event->getDuration(),
+                'minAge' => $event->getMinAge(),
+                'capacity' => $event->getCapacity(),
+                'priceIndividual' => $event->getPriceIndividual(),
+                'priceFamily' => $event->getPriceFamily()
+            ]);
 
-    public function addBookingItem(int $bookingId, string $ticketType, int $quantity): bool
-    {
-        $unitPrice = 0;
+            $historyEventId = (int)$this->connection->lastInsertId();
 
-        if ($ticketType === 'individual') {
-            $unitPrice = 17.50;
-        } elseif ($ticketType === 'family') {
-            $unitPrice = 60.00;
+            $sqlEvent = "
+                INSERT INTO dbo.Event (eventType, subEventId)
+                VALUES ('tour', :subEventId)
+            ";
+
+            $stmtEvent = $this->connection->prepare($sqlEvent);
+            $stmtEvent->execute([
+                'subEventId' => $historyEventId
+            ]);
+
+            $this->connection->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
+            return false;
         }
+    }
 
+    public function update(HistoryEventModel $event): bool
+    {
         $sql = "
-            INSERT INTO dbo.HistoryBookingItem (bookingId, ticketType, quantity, unitPrice)
-            VALUES (:bookingId, :ticketType, :quantity, :unitPrice)
+            UPDATE dbo.HistoryEvent
+            SET
+                slotDate = :slotDate,
+                startTime = :startTime,
+                language = :language,
+                duration = :duration,
+                minAge = :minAge,
+                capacity = :capacity,
+                priceIndividual = :priceIndividual,
+                priceFamily = :priceFamily
+            WHERE id = :historyEventId
         ";
 
         $stmt = $this->connection->prepare($sql);
+
         return $stmt->execute([
-            'bookingId' => $bookingId,
-            'ticketType' => ucfirst($ticketType),
-            'quantity' => $quantity,
-            'unitPrice' => $unitPrice
+            'historyEventId' => $event->getHistoryEventId(),
+            'slotDate' => $event->getSlotDate(),
+            'startTime' => $event->getStartTime(),
+            'language' => $event->getLanguage(),
+            'duration' => $event->getDuration(),
+            'minAge' => $event->getMinAge(),
+            'capacity' => $event->getCapacity(),
+            'priceIndividual' => $event->getPriceIndividual(),
+            'priceFamily' => $event->getPriceFamily()
         ]);
     }
-    */
+
+    public function delete(int $eventId): bool
+    {
+        try {
+            $this->connection->beginTransaction();
+
+            $sqlGetHistoryId = "
+                SELECT subEventId
+                FROM dbo.Event
+                WHERE id = :eventId
+                  AND eventType = 'tour'
+            ";
+
+            $stmtGet = $this->connection->prepare($sqlGetHistoryId);
+            $stmtGet->execute(['eventId' => $eventId]);
+            $historyEventId = $stmtGet->fetchColumn();
+
+            if (!$historyEventId) {
+                $this->connection->rollBack();
+                return false;
+            }
+
+            // Optional cleanup if stops exist for this event
+            $sqlStops = "DELETE FROM dbo.HistoryEventStop WHERE eventId = :eventId";
+            $stmtStops = $this->connection->prepare($sqlStops);
+            $stmtStops->execute(['eventId' => $eventId]);
+
+            $sqlEvent = "DELETE FROM dbo.Event WHERE id = :eventId";
+            $stmtEvent = $this->connection->prepare($sqlEvent);
+            $stmtEvent->execute(['eventId' => $eventId]);
+
+            $sqlHistory = "DELETE FROM dbo.HistoryEvent WHERE id = :historyEventId";
+            $stmtHistory = $this->connection->prepare($sqlHistory);
+            $stmtHistory->execute(['historyEventId' => $historyEventId]);
+
+            $this->connection->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
+            return false;
+        }
+    }
 
     private function mapToModel(array $row): HistoryEventModel
     {

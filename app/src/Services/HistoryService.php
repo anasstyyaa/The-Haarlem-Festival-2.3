@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+
 use App\Models\HistoryVenueModel;
 use App\Repositories\Interfaces\IHistoryEventRepository;
 use App\Repositories\Interfaces\IHistoryVenueRepository;
@@ -20,18 +21,31 @@ class HistoryService implements IHistoryService
         $this->historyVenueRepo = $historyVenueRepo;
     }
 
-    // Returns all history tour sessions
-    // Used by the History page to populate the day/time/language selector
     public function getAllSessions(): array
     {
         return $this->historyEventRepo->getAll();
     }
 
-
     public function getSessionByEventId(int $eventId): ?HistoryEventModel
     {
         return $this->historyEventRepo->getByEventId($eventId);
     }
+
+    public function createSession(HistoryEventModel $event): bool
+    {
+        return $this->historyEventRepo->create($event);
+    }
+
+    public function updateSession(HistoryEventModel $event): bool
+    {
+        return $this->historyEventRepo->update($event);
+    }
+
+    public function deleteSession(int $eventId): bool
+    {
+        return $this->historyEventRepo->delete($eventId);
+    }
+
     public function getAllVenues(): array
     {
         return $this->historyVenueRepo->getAll();

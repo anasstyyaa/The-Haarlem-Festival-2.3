@@ -122,6 +122,13 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
+    $r->addRoute('GET', '/admin/history/tours', ['App\Controllers\HistoryController', 'adminTours']);
+    $r->addRoute('GET', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'createTour']);
+    $r->addRoute('POST', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'storeTour']);
+    $r->addRoute('GET', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'editTour']);
+    $r->addRoute('POST', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'updateTour']);
+    $r->addRoute('POST', '/admin/history/tours/delete', ['App\Controllers\HistoryController', 'deleteTour']);
+
 
     // Checkout routes
     $r->addRoute('POST', '/checkout', ['App\Controllers\PaymentController', 'checkout']);

@@ -6,10 +6,7 @@ use App\Repositories\KidsEventRepository;
 use App\ViewModels\KidsEventViewModel;
 use App\Models\KidsEventModel;
 use App\Services\PageElementService;
-use App\Repositories\TextRepository;
-use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
-use App\Services\ButtonService;
 
 use App\Services\ExtraKidsEventService;
 use App\Models\ExtraKidsEventModel;

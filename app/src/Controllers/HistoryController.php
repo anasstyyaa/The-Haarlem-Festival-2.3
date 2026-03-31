@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\HistoryVenueModel;
 use App\Services\Interfaces\IHistoryService;
 use App\Services\Interfaces\IPersonalProgramService;
-use App\Repositories\PageElementRepository;
+use App\Services\PageElementService;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
@@ -16,7 +16,7 @@ class HistoryController
     private IHistoryService $service;
     private IPersonalProgramService $programService;
 
-    private PageElementRepository $pageRepo;
+    private PageElementService $pageService;
     private TextRepository $textRepo;
     private ImageRepository $imageRepo;
     private ButtonService $buttonService;
@@ -26,7 +26,7 @@ class HistoryController
         $this->service = $service;
         $this->programService = $programService;
 
-        $this->pageRepo = new PageElementRepository();
+        $this->pageService = new PageElementService();
         $this->textRepo = new TextRepository();
         $this->imageRepo = new ImageRepository();
         $this->buttonService = new ButtonService();
@@ -64,21 +64,18 @@ class HistoryController
 
     public function index(): void
     {
-        $elements = $this->pageRepo->getByPageName("history");
-
-        $vm = new PageElementViewModel(
-            $this->textRepo,
-            $this->imageRepo,
-            $this->buttonService
-        );
-
-        $vm->build($elements);
+         $vm = $this->buildPageVM('History');
 
         $sessions = $this->service->getAllSessions();
         $venues = $this->service->getAllVenues();
 
         require __DIR__ . '/../Views/event/historyEvent/index.php';
     }
+    private function buildPageVM(string $pageName): PageElementViewModel
+{
+    $sections = $this->pageService->getPageSections($pageName);
+    return new PageElementViewModel($sections);
+}
 
     public function booking(): void
     {

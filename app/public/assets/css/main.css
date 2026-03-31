@@ -1721,4 +1721,19 @@ body.admin-page #sidebar .nav-item {
     .history-section4 h1 {
         font-size: 3rem;
     }
+}.history-detail-tour-btn {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 999px;
+    background: #f7c9bc;
+    color: #4b1608;
+    text-decoration: none;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.history-detail-tour-btn:hover {
+    background: #f3b9a7;
+    color: #4b1608;
+    transform: translateY(-2px);
 }

@@ -1,6 +1,7 @@
 <?php require __DIR__ . '/../../partials/header.php'; ?>
 
 <?php
+
 use App\ViewModels\PageElementViewModel;
 
 /** @var PageElementViewModel $vm */
@@ -61,14 +62,13 @@ $heroElements = $sections[4] ?? [];
                         <img
                             src="<?= htmlspecialchars($venue->getImgURL() ?? '/assets/images/history/hero.png') ?>"
                             alt="<?= htmlspecialchars($venue->getAltText() ?? $venue->getVenueName()) ?>"
-                            class="history-page__venue-image"
-                        >
+                            class="history-page__venue-image">
 
                         <div class="history-page__venue-content">
                             <h3><?= htmlspecialchars($venue->getVenueName()) ?></h3>
                             <p><?= htmlspecialchars($venue->getDetails() ?? 'More info coming soon.') ?></p>
 
-                            <a href="/history/booking" class="history-page__secondary-button">
+                            <a href="/history/<?= $venue->getVenueId() ?>" class="history-page__secondary-button">
                                 More info
                             </a>
                         </div>
@@ -152,8 +152,7 @@ $heroElements = $sections[4] ?? [];
                 <img
                     src="/assets/images/history/grotemarkt.png"
                     alt="Grote Markt"
-                    class="history-page__nearby-image"
-                >
+                    class="history-page__nearby-image">
 
                 <p>
                     The history tour begins at the Grote Markt, where many other festival events take place nearby.

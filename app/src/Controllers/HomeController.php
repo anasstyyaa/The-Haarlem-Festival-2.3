@@ -2,7 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Repositories\PageElementRepository;
+use App\Services\PageElementService;
+use App\Services\Interfaces\IPageElementService;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
@@ -12,14 +13,14 @@ use App\Services\ButtonService;
 
 class HomeController
 {
-    private PageElementRepository $pageRepo;
+    private PageElementService $pageService;
     private TextRepository $textRepo;
     private ImageRepository $imageRepo;
     private ButtonService $buttonService;
 
     public function __construct()
 {
-    $this->pageRepo = new PageElementRepository();
+    $this->pageService = new IPageElementService();
     $this->textRepo = new TextRepository();
     $this->imageRepo = new ImageRepository();
     $this->buttonService = new ButtonService();
@@ -27,7 +28,7 @@ class HomeController
 
     public function index()
     {
-       $elements = $this->pageRepo->getByPageName("home");
+       $elements = $this->pageService->getByPageName("home");
 
          $vm = new PageElementViewModel(
            $this->textRepo,
@@ -40,7 +41,7 @@ class HomeController
     }
     public function adminIndex(): void
 {
-      $elements = $this->pageRepo->getByPageName("home");
+      $elements = $this->pageService->getByPageName("home");
 
         $vm = new PageElementViewModel(
             $this->textRepo,

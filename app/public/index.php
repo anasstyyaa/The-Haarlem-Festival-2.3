@@ -238,9 +238,11 @@ switch ($routeInfo[0]) {
 
             $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $jazzPassService, $ticketRepo);
         } elseif ($class === 'App\Controllers\HistoryController') {
-            $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
             $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
+            $kidsEventRepo = new \App\Repositories\KidsEventRepository();
+            $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
+            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $jazzPassService,$ticketRepo, $kidsEventService);
 
             $userRepo = new \App\Repositories\UserRepository();
             $eventRepo = new \App\Repositories\EventRepository();

@@ -4,8 +4,9 @@ namespace App\Services;
 
 use App\Repositories\KidsEventRepository;
 use App\Models\KidsEventModel;
+use App\Services\Interfaces\IKidsEventService;
 
-class KidsEventService
+class KidsEventService implements IKidsEventService
 {
     private KidsEventRepository $repository;
 

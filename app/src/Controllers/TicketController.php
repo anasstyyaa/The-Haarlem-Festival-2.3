@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Repositories\pository;
+use App\Repositories\Repository;
 
 use App\Models\PersonalProgram;
 use App\Services\Interfaces\IPersonalProgramService;
@@ -22,7 +22,7 @@ use App\Repositories\HistoryEventRepository;
 
 use App\Repositories\KidsEventRepository;
 use App\Repositories\TicketRepository;
-use App\Services\KidsEventService;
+use App\Services\Interfaces\IKidsEventService;
 
 
 class TicketController
@@ -38,14 +38,14 @@ class TicketController
     //private ICommunicationService $communicationService;
     //private IUserService $userService;
 
-    private KidsEventService $kidsEventService;
+    private IKidsEventService $kidsEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
     //private UserRepository $userRepository;
     private TicketRepository $ticketRepository;
     
 
-    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService, TicketRepository $ticketRepository)
+    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService, TicketRepository $ticketRepository, IKidsEventService $kidsEventService)
 
     {
         $this->programService = $programService; 
@@ -60,7 +60,7 @@ class TicketController
         $this->jazzPassService = $jazzPassService;
         //$this->userService = $userService; 
 
-        $this->kidsEventService = new KidsEventService(new KidsEventRepository());
+        $this->kidsEventService = $kidsEventService;
          $this->historyService = new HistoryService(
             new HistoryEventRepository(),
             new HistoryVenueRepository()

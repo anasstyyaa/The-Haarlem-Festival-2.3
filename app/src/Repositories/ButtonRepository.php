@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\ButtonModel;
+use App\Repositories\Interfaces\IButtonRepository;
 use PDO;
 
-class ButtonRepository extends Repository 
+class ButtonRepository extends Repository implements IButtonRepository
 {
     public function getById(int $id): ?ButtonModel
     {

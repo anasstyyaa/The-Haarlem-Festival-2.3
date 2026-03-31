@@ -18,32 +18,19 @@ use App\ViewModels\ExtraKidsEventViewModel;
 class KidsEventController
 {
     private PageElementService $pageService;
-    private TextRepository $textRepo;
-    private ImageRepository $imageRepo;
-    private ButtonService $buttonService;
     private KidsEventService $service;
     private ExtraKidsEventService $extraKidsService;
     public function __construct()
     {
         $this->service = new KidsEventService(new KidsEventRepository);
        $this->pageService  = new PageElementService();
-        $this->textRepo  = new TextRepository();
-        $this->imageRepo = new ImageRepository();
-        $this->buttonService = new ButtonService();
         $this->extraKidsService = new ExtraKidsEventService();
     }
 
    public function index(): void
 {
-      $elements = $this->pageService->getByPageName("kids");
+     $vm = $this->buildPageVM('kids');
 
-        $vm = new PageElementViewModel(
-            $this->textRepo,
-            $this->imageRepo, 
-            $this->buttonService
-        );
-
-        $vm->build($elements);
     $kidsEvents = $this->service->getAll();
    //  var_dump($kidsEvents);
 //    var_dump($elements);
@@ -63,17 +50,14 @@ class KidsEventController
         $extraViewModel = new ExtraKidsEventViewModel($extraEvents);
    require __DIR__ . '/../Views/event/kidsEvent.php';
 }
+private function buildPageVM(string $pageName): PageElementViewModel
+{
+    $sections = $this->pageService->getPageSections($pageName);
+    return new PageElementViewModel($sections);
+}
  public function adminIndex(): void
 {
-      $elements = $this->pageService->getByPageName("kids");
-
-        $vm = new PageElementViewModel(
-            $this->textRepo,
-            $this->imageRepo,
-            $this->buttonService
-        );
-
-        $vm->build($elements);
+    $vm = $this->buildPageVM('kids');
     $kidsEvents = $this->service->getAll();
     $vmKids = new KidsEventViewModel($kidsEvents);
    require __DIR__ . '/../Views/admin/kids/index.php';

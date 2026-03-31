@@ -70,7 +70,6 @@
     }, $sessions)) ?>;
 </script>
 
-<script src="/assets/js/history/history-booking.js"></script>
-
+<script src="/js/history/history-booking.js"></script>
 <?php include __DIR__ . '/../../partials/flashMessage.php'; ?>
 <?php require __DIR__ . '/../../partials/footer.php'; ?>

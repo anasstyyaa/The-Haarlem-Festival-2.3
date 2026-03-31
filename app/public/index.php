@@ -123,11 +123,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
     $r->addRoute('GET', '/admin/history/tours', ['App\Controllers\HistoryController', 'adminTours']);
-    $r->addRoute('GET', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'createTour']);
-    $r->addRoute('POST', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'storeTour']);
-    $r->addRoute('GET', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'editTour']);
-    $r->addRoute('POST', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'updateTour']);
-    $r->addRoute('POST', '/admin/history/tours/delete', ['App\Controllers\HistoryController', 'deleteTour']);
+$r->addRoute('GET', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'createTour']);
+$r->addRoute('POST', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'storeTour']);
+$r->addRoute('GET', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'editTour']);
+$r->addRoute('POST', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'updateTour']);
+$r->addRoute('POST', '/admin/history/tours/delete', ['App\Controllers\HistoryController', 'deleteTour']);
 
 
     // Checkout routes
@@ -238,11 +238,9 @@ switch ($routeInfo[0]) {
 
             $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $jazzPassService, $ticketRepo);
         } elseif ($class === 'App\Controllers\HistoryController') {
+            $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
             $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
-            $kidsEventRepo = new \App\Repositories\KidsEventRepository();
-            $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
-            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $jazzPassService,$ticketRepo, $kidsEventService);
 
             $userRepo = new \App\Repositories\UserRepository();
             $eventRepo = new \App\Repositories\EventRepository();

@@ -98,7 +98,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/admin/home/index', ['App\Controllers\HomeController', 'adminIndex']);
     $r->addRoute('GET',  '/admin/dashboard', ['App\Controllers\TicketController', 'adminIndex']);
     $r->addRoute('GET',  '/extrakids/{id:\d+}', ['App\Controllers\KidsEventController', 'detail']);
-
+    
     $r->addRoute('GET',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
 
     // Yummy / Restaurant Routes
@@ -109,12 +109,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET',  '/profile',       ['App\Controllers\UserController', 'profile']);
     $r->addRoute('GET',  '/profile/edit',  ['App\Controllers\UserController', 'editProfile']);
     $r->addRoute('POST', '/profile/edit',  ['App\Controllers\UserController', 'editProfile']); // same method handles POST like admin edit()
-    $r->addRoute('POST', '/profile/delete', ['App\Controllers\UserController', 'deleteSelf']);
+    $r->addRoute('POST', '/profile/delete',['App\Controllers\UserController', 'deleteSelf']);
     // History routes
     $r->addRoute('GET', '/history', ['App\Controllers\HistoryController', 'index']);
-    $r->addRoute('GET', '/history/booking', ['App\Controllers\HistoryController', 'booking']);
     $r->addRoute('POST', '/history/book', ['App\Controllers\HistoryController', 'book']);
-
     $r->addRoute('GET', '/admin/history/venues', ['App\Controllers\HistoryController', 'adminVenues']);
     $r->addRoute('GET', '/admin/history/venues/create', ['App\Controllers\HistoryController', 'createVenue']);
     $r->addRoute('POST', '/admin/history/venues/create', ['App\Controllers\HistoryController', 'storeVenue']);
@@ -122,21 +120,13 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
-    $r->addRoute('GET', '/admin/history/tours', ['App\Controllers\HistoryController', 'adminTours']);
-$r->addRoute('GET', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'createTour']);
-$r->addRoute('POST', '/admin/history/tours/create', ['App\Controllers\HistoryController', 'storeTour']);
-$r->addRoute('GET', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'editTour']);
-$r->addRoute('POST', '/admin/history/tours/edit', ['App\Controllers\HistoryController', 'updateTour']);
-$r->addRoute('POST', '/admin/history/tours/delete', ['App\Controllers\HistoryController', 'deleteTour']);
-
-
     // Checkout routes
     $r->addRoute('POST', '/checkout', ['App\Controllers\PaymentController', 'checkout']);
     $r->addRoute('GET', '/payment-success', ['App\Controllers\PaymentController', 'paymentSuccess']);
-    $r->addRoute('GET',  '/payment-failed', ['App\Controllers\PaymentController', 'paymentFailed']);
+    $r->addRoute('GET',  '/payment-failed', ['App\Controllers\PaymentController', 'paymentFailed']); 
     $r->addRoute('GET',  '/repay', ['App\Controllers\PaymentController', 'repay']);
-
-    //password reset
+         
+     //password reset
     $r->addRoute('GET', '/forgetPassword', ['App\Controllers\AuthController', 'showForgetPassword']);
     $r->addRoute('POST', '/forgetPassword', ['App\Controllers\AuthController', 'sendResetLink']);
     $r->addRoute('GET', '/resetPassword', ['App\Controllers\AuthController', 'showResetPassword']);
@@ -217,7 +207,7 @@ switch ($routeInfo[0]) {
         } elseif ($class === 'App\Controllers\TicketController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
-            $restaurantSessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
+            $restaurantSessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository(); 
             $restaurantSessionService = new \App\Services\Yummy\RestaurantSessionService($restaurantSessionRepo, $restaurantRepo);
 
             $artistRepository = new \App\Repositories\ArtistRepository();
@@ -230,32 +220,24 @@ switch ($routeInfo[0]) {
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
             $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
-
+            
             $userRepo = new App\Repositories\UserRepository();
             $eventRepo = new App\Repositories\EventRepository();
             $ticketRepo =  new \App\Repositories\TicketRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
+            $kidsEventRepo = new \App\Repositories\KidsEventRepository();
+            $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
+            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $jazzPassService,$ticketRepo, $kidsEventService);
 
-            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $jazzPassService, $ticketRepo);
-        } elseif ($class === 'App\Controllers\HistoryController') {
-            $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
-            $historyEventRepository = new \App\Repositories\HistoryEventRepository();
-            $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
-
-            $userRepo = new \App\Repositories\UserRepository();
-            $eventRepo = new \App\Repositories\EventRepository();
-            $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
-
-            $controller = new $class($historyService, $personalProgramService);
         } elseif ($class === 'App\Controllers\PaymentController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);
-            $restaurantSessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
+            $restaurantSessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository(); 
             $restaurantSessionService = new \App\Services\Yummy\RestaurantSessionService($restaurantSessionRepo, $restaurantRepo);
             $eventRepo = new \App\Repositories\EventRepository();
             $userRepo = new \App\Repositories\UserRepository();
 
-            $communicationService = new \App\Services\CommunicationService();
+            $communicationService = new \App\Services\CommunicationService(); 
             $ticketRepo =  new \App\Repositories\TicketRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
 
@@ -265,10 +247,10 @@ switch ($routeInfo[0]) {
             $jazzPassService = new \App\Services\JazzPassService($jazzPassRepository);
 
             $userService = new \App\Services\UserService($userRepo);
+         
+            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo); 
 
-            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo);
-
-            $controller = new $class($paymentService, $communicationService, $userService);
+            $controller = new $class($paymentService, $communicationService, $userService); 
         } else {
             $controller = new $class();
         }

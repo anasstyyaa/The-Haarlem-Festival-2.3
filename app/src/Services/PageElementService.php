@@ -4,12 +4,15 @@ namespace App\Services;
 use App\Services\Interfaces\IPageElementService;
 use App\Repositories\Interfaces\IPageElementRepository;
 use App\Models\PageElementModel;
+use App\Repositories\PageElementRepository;
 
 class PageElementService implements IPageElementService
 {
+    private IPageElementRepository $pageElementRepository;
     public function __construct(
-        private IPageElementRepository $pageElementRepository
-    ) {}
+    ) {
+       $this->pageElementRepository = new PageElementRepository();
+    }
    
      /**
      * @return PageElementModel[]

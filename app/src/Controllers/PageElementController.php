@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Repositories\PageElementRepository;
+use App\Services\PageElementService;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\Models\PageElementModel;
@@ -11,13 +11,13 @@ use App\Models\ImageModel;
 
 class PageElementController
 {
-    private PageElementRepository $service;
+    private PageElementService $service;
     private TextRepository $textService;
      private ImageRepository $imgService;
 
     public function __construct()
     {
-        $this->service = new PageElementRepository();
+        $this->service = new PageElementService();
          $this->textService = new TextRepository();
           $this->imgService = new ImageRepository();
     }

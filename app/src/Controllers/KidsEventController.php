@@ -5,7 +5,7 @@ use App\Services\KidsEventService;
 use App\Repositories\KidsEventRepository;
 use App\ViewModels\KidsEventViewModel;
 use App\Models\KidsEventModel;
-use App\Repositories\PageElementRepository;
+use App\Services\PageElementService;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
@@ -17,7 +17,7 @@ use App\ViewModels\ExtraKidsEventViewModel;
 
 class KidsEventController
 {
-    private PageElementRepository $pageRepo;
+    private PageElementService $pageService;
     private TextRepository $textRepo;
     private ImageRepository $imageRepo;
     private ButtonService $buttonService;
@@ -26,7 +26,7 @@ class KidsEventController
     public function __construct()
     {
         $this->service = new KidsEventService(new KidsEventRepository);
-         $this->pageRepo  = new PageElementRepository();
+       $this->pageService  = new PageElementService();
         $this->textRepo  = new TextRepository();
         $this->imageRepo = new ImageRepository();
         $this->buttonService = new ButtonService();
@@ -35,7 +35,7 @@ class KidsEventController
 
    public function index(): void
 {
-      $elements = $this->pageRepo->getByPageName("kids");
+      $elements = $this->pageService->getByPageName("kids");
 
         $vm = new PageElementViewModel(
             $this->textRepo,
@@ -65,7 +65,7 @@ class KidsEventController
 }
  public function adminIndex(): void
 {
-      $elements = $this->pageRepo->getByPageName("kids");
+      $elements = $this->pageService->getByPageName("kids");
 
         $vm = new PageElementViewModel(
             $this->textRepo,

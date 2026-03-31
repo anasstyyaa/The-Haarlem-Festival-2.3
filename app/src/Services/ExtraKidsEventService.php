@@ -3,8 +3,9 @@ namespace App\Services;
 
 use App\Repositories\ExtraKidsEventRepository;
 use App\Models\ExtraKidsEventModel;
+use App\Services\Interfaces\IExtraKidsEventService;
 
-class ExtraKidsEventService
+class ExtraKidsEventService implements IExtraKidsEventService
 {
     private ExtraKidsEventRepository $repository;
 

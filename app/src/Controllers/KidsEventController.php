@@ -56,11 +56,12 @@ private function buildPageVM(string $pageName): PageElementViewModel
     $vm = $this->buildPageVM('kids');
     $kidsEvents = $this->service->getAll();
     $vmKids = new KidsEventViewModel($kidsEvents);
+    $extraEvents = $this->extraKidsService->getAllEvents();
+    $extraViewModel = new ExtraKidsEventViewModel($extraEvents); 
    require __DIR__ . '/../Views/admin/kids/index.php';
 }
 public function create(): void
-{
-    $event = null; 
+{ 
     require __DIR__ . '/../Views/admin/kids/kidsEventForm.php';
 }
 
@@ -131,19 +132,40 @@ public function delete(): void
         include __DIR__ . '/../Views/event/extraKidsEventDetail.php';
     }
 
-    public function storeExtra()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $event = new ExtraKidsEventModel();
-            $event->setName($_POST['name'] ?? '');
-            $event->setDescription($_POST['description'] ?? '');
+    public function createExtra(): void
+{ 
+    require __DIR__ . '/../Views/admin/kids/extraKidsEventForm.php';
+}
 
-            if ($this->extraKidsService->createEvent($event)) {
-                header('Location: /extrakids');
-                exit;
+
+   public function storeExtra()
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $event = new ExtraKidsEventModel();
+        $event->setName($_POST['name'] ?? '');
+        $event->setDescription($_POST['description'] ?? '');
+
+        if (!empty($_FILES['image']['name'])) {
+            $uploadDir = __DIR__ . '/../../public/assets/images';
+            
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $fileName = time() . '_' . basename($_FILES['image']['name']);
+            $targetPath = $uploadDir . $fileName;
+
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
+                $event->setImageUrl('/uploads/' . $fileName);
             }
         }
+
+        if ($this->extraKidsService->createEvent($event)) {
+            header('Location: /extrakids');
+            exit;
+        }
     }
+}
 
     public function deleteExtra($vars)
     {

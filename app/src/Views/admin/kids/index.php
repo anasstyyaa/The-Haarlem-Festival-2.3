@@ -5,6 +5,8 @@ use App\Models\TextModel;
 use App\Models\ImageModel;
 /** @var KidsEventViewModel $vmKids */
 /** @var PageElementViewModel $vm */
+use App\ViewModels\ExtraKidsEventViewModel;
+/** @var ExtraKidsEventViewModel $extraViewModel */
 ?>
 <?php require __DIR__ . '/../../partials/adminHeader.php'; ?>
 
@@ -184,6 +186,64 @@ onsubmit="return confirm('Delete this event?')">
 <input type="hidden" name="id" value="<?= $event->getId() ?>">
 <button class="delete-btn">Delete</button>
 </form>
+
+</div>
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+</table>
+<h2 style="text-align:center;">Extra Kids Events</h2>
+
+<div class="edit-btn">
+   <a href="/admin/extrakids/create" class="edit-btn">
+        Add Extra Kids Event
+   </a>
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Image</th>
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+<?php foreach ($extraViewModel->events as $event): ?>
+
+<tr>
+<td><?= htmlspecialchars($event['id']) ?></td>
+<td><?= htmlspecialchars($event['name']) ?></td>
+<td><?= htmlspecialchars($event['description']) ?></td>
+
+<td>
+    <?php if (!empty($event['image'])): ?>
+        <img src="<?= htmlspecialchars($event['image']) ?>" alt="event image">
+    <?php else: ?>
+        No image
+    <?php endif; ?>
+</td>
+
+<td>
+<div class="actions">
+
+    <a href="/admin/extrakids/edit/<?= $event['id'] ?>" class="edit-btn">
+        Edit
+    </a>
+
+    <form method="POST" action="/admin/extrakids/delete"
+          onsubmit="return confirm('Delete this extra event?')">
+        <input type="hidden" name="id" value="<?= $event['id'] ?>">
+        <button class="delete-btn">Delete</button>
+    </form>
 
 </div>
 </td>

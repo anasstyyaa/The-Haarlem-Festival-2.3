@@ -54,4 +54,21 @@ class ExtraKidsEventRepository extends Repository implements IExtraKidsEventRepo
 
         return $stmt->execute(['id' => $id]);
     }
+    public function update(ExtraKidsEventModel $event): bool
+{
+    $stmt = $this->connection->prepare("
+        UPDATE ExtraKidsEvent
+        SET name = :name,
+            description = :description,
+            imageURL = :imageURL
+        WHERE id = :id
+    ");
+
+    return $stmt->execute([
+        'id' => $event->getId(),
+        'name' => $event->getName(),
+        'description' => $event->getDescription(),
+        'imageURL' => $event->getImageUrl()
+    ]);
+}
 }

@@ -2,6 +2,9 @@
 /** @var \App\Models\ExtraKidsEventModel|null $event */
 $isEdit = isset($event) && $event && $event->getId();
 ?>
+<?php if ($isEdit): ?>
+    <input type="hidden" name="id" value="<?= $event->getId() ?>">
+<?php endif; ?>
 
 <?php require __DIR__ . '/../../partials/adminHeader.php'; ?>
 

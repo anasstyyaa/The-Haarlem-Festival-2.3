@@ -33,4 +33,8 @@ class ExtraKidsEventService implements IExtraKidsEventService
     {
         return $this->repository->delete($id);
     }
+    public function updateEvent(ExtraKidsEventModel $event): bool
+{
+    return $this->repository->update($event);
+}
 }

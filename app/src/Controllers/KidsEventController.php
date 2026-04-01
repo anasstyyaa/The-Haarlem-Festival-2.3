@@ -141,13 +141,20 @@ public function delete(): void
    public function storeExtra()
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $event = new ExtraKidsEventModel();
+
+        $id = $_POST['id'] ?? null;
+
+        $event = $id 
+            ? $this->extraKidsService->getEventById((int)$id) 
+            : new ExtraKidsEventModel();
+
         $event->setName($_POST['name'] ?? '');
         $event->setDescription($_POST['description'] ?? '');
 
+        // 📸 HANDLE IMAGE UPLOAD
         if (!empty($_FILES['image']['name'])) {
-            $uploadDir = __DIR__ . '/../../public/assets/images';
-            
+            $uploadDir = __DIR__ . '/../../public/uploads/';
+
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
@@ -160,18 +167,31 @@ public function delete(): void
             }
         }
 
-        if ($this->extraKidsService->createEvent($event)) {
-            header('Location: /extrakids');
-            exit;
+        if ($id) {
+            $this->extraKidsService->updateEvent($event); 
+        } else {
+            $this->extraKidsService->createEvent($event); 
         }
+
+        header('Location: /admin/kidsPage');
+        exit;
     }
 }
 
-    public function deleteExtra($vars)
-    {
-        $this->extraKidsService->deleteEvent((int)$vars['id']);
-        header('Location: /extrakids');
-        exit;
-    }
+   public function deleteExtra(): void
+{
+    $id = (int)($_POST['id']);
+    $this->extraKidsService->deleteEvent($id);
+
+    header('Location: /admin/kidsPage');
+    exit;
+}
+    public function editExtra(array $vars): void
+{
+    $id = (int)$vars['id'];
+    $event = $this->extraKidsService->getEventById($id);
+
+    require __DIR__ . '/../Views/admin/kids/extraKidsEventForm.php';
+}
 
 }

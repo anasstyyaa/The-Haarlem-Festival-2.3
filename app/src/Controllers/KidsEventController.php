@@ -79,17 +79,19 @@ public function save(): void
     $day       = $_POST['day'] ?? '';
     $startTime = $_POST['startTime'] ?? '';
     $endTime   = $_POST['endTime'] ?? '';
+    $type = $_POST['type'] ?? '';
+    $location = $_POST['location'] ?? '';
     $limit = (int)($_POST['limit'] ?? 0);
 
-   $event = new KidsEventModel(
-    $id ? (int)$id : 0,
-    $day,
-    $startTime,
-    $endTime,
-    'Teylers Secret',
-    'Teylers Museum, Haarlem',
-    $limit
-);
+    $event = new KidsEventModel(
+       $id ? (int)$id : 0,
+       $day,
+       $startTime,
+       $endTime,
+       $type,
+       $location,
+       $limit
+          );
 
     if ($id) {
         $this->service->update($event);

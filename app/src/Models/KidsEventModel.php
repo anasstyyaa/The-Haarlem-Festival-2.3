@@ -8,11 +8,11 @@ class KidsEventModel
     private string $day;
     private string $startTime;
     private string $endTime;
-private string $type;
-private string $location;
-private int $limit;
+    private string $type;
+    private string $location;
+    private int $limit;
 
-public function __construct(int $id, string $day, string $startTime, string $endTime, string $type = 'Teylers Secret', string $location = 'Teylers Museum, Haarlem',  int $limit)
+public function __construct(int $id, string $day, string $startTime, string $endTime, string $type, string $location,  int $limit)
 {
     $this->id = $id;
     $this->day = $day;

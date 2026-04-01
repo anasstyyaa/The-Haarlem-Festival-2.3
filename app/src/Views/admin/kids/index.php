@@ -153,6 +153,9 @@ onsubmit="return confirm('Delete this element?')">
 <th>Day</th>
 <th>Start</th>
 <th>End</th>
+<th>Type</th>
+<th>Location</th>
+<th>Limit</th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -166,7 +169,9 @@ onsubmit="return confirm('Delete this element?')">
 <td><?= htmlspecialchars($event->getDay()) ?></td>
 <td><?= htmlspecialchars($event->getStartTime()) ?></td>
 <td><?= htmlspecialchars($event->getEndTime()) ?></td>
-
+<td><?= htmlspecialchars($event->getType()) ?></td>
+<td><?= htmlspecialchars($event->getLocation()) ?></td>
+<td><?= htmlspecialchars($event->getLimit()) ?></td>
 <td>
 <div class="actions">
 

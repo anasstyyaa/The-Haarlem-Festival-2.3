@@ -85,7 +85,6 @@ td img {
 <thead>
 <tr>
     <th>Element ID</th>
-    <th>Type</th>
     <th>Preview</th>
     <th>Actions</th>
 </tr>
@@ -98,7 +97,6 @@ td img {
 <tr>
 <td><?= htmlspecialchars($element->getId()) ?></td>
 
-<td><?= htmlspecialchars(get_class($element)) ?></td>
 
 <td>
     <?= $element->render(); ?>

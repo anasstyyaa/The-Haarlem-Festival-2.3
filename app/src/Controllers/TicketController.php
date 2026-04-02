@@ -322,19 +322,31 @@ public function scan(): void
 
         require __DIR__ . '/../Views/admin/dashboard.php';
     }
-    public function exportCsv(): void
+  public function exportCsv(): void
 {
     $tickets = $this->ticketRepository->getAllWithDetails();
+
+    $selectedColumns = array_intersect(
+        $_POST['columns'] ?? [],
+        array_keys($tickets[0] ?? [])
+    );
+    if (empty($selectedColumns)) {
+        header("Location: /admin");
+        exit;
+    }
 
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="tickets.csv"');
 
     $output = fopen('php://output', 'w');
 
-    fputcsv($output, array_keys($tickets[0]));
+    fputcsv($output, $selectedColumns);
 
     foreach ($tickets as $row) {
-        fputcsv($output, $row);
+        fputcsv(
+            $output,
+            array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+        );
     }
 
     fclose($output);

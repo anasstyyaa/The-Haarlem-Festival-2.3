@@ -103,7 +103,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/admin/extrakids/edit/{id:\d+}', ['App\Controllers\KidsEventController', 'editExtra']);
     $r->addRoute('POST', '/admin/extrakids/delete', ['App\Controllers\KidsEventController', 'deleteExtra']);
 
-    $r->addRoute('GET',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
+    $r->addRoute('POST',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);

@@ -102,6 +102,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/extrakids/save', ['App\Controllers\KidsEventController', 'storeExtra']);
     $r->addRoute('GET', '/admin/extrakids/edit/{id:\d+}', ['App\Controllers\KidsEventController', 'editExtra']);
     $r->addRoute('POST', '/admin/extrakids/delete', ['App\Controllers\KidsEventController', 'deleteExtra']);
+    $r->addRoute('GET',  '/admin/elements/createForm', ['App\Controllers\PageElementController', 'createForm']);
+    $r->addRoute('POST',  '/admin/elements/store', ['App\Controllers\PageElementController', 'store']);
 
     $r->addRoute('POST',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
 

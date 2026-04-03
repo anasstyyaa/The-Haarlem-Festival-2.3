@@ -1,4 +1,89 @@
+<?php 
+use App\ViewModels\PageElementViewModel;
+use App\Models\TextModel;
+use App\Models\ImageModel;
+use App\Models\ButtonModel;
+/** @var PageElementViewModel $vm */
+?>
+
+
 <?php require __DIR__ . '/../../partials/adminHeader.php'; ?>
+
+
+<?php foreach ($vm->getSections() as $section => $elements): ?>
+
+<h2 class="section-title">
+    Section: <?= htmlspecialchars($section) ?>
+</h2>
+
+<table>
+<thead>
+<tr>
+    <th>Element ID</th>
+    <th>Preview</th>
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+
+<?php foreach ($elements as $element): ?>
+
+<tr>
+<td><?= htmlspecialchars($element->getId()) ?></td>
+
+
+<td>
+    <?= $element->render(); ?>
+</td>
+
+<td>
+<div class="actions">
+<?php if($element instanceof TextModel){ ?>
+ <a href="/admin/elements/edit/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <?php } elseif($element instanceof ImageModel){?>
+                                   <a href="/admin/elements/editImg/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>  <?php } elseif($element instanceof ButtonModel){?>
+                                   <a href="/admin/elements/editButton/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a> <?php } ?>
+
+<form method="POST" action="/admin/elements/delete"
+onsubmit="return confirm('Delete this element?')">
+<input type="hidden" name="id" value="<?= $element->getId() ?>">
+<button class="delete-btn">Delete</button>
+</form>
+
+</div>
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+</table>
+
+<div style="text-align:center;">
+<form method="GET" action="/admin/elements/createForm">
+     <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
+    <input type="hidden" name="pageName" value="<?= htmlspecialchars($pageName) ?>">
+    
+    <select name="type">
+        <option value="text">Text</option>
+        <option value="image">Image</option>
+        <option value="button">Button</option>
+    </select>
+
+    <button>Create</button>
+</form>
+</div>
+
+<?php endforeach; ?>
+
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-cup-hot-fill me-2"></i>Manage Restaurants</h2>

@@ -7,18 +7,24 @@ use App\Services\Interfaces\Yummy\IRestaurantSessionService;
 use App\Models\Yummy\RestaurantModel;
 use App\Models\Yummy\RestaurantSessionModel;
 
+use App\Services\PageElementService;
+use App\ViewModels\PageElementViewModel;
+
 class RestaurantController {
     private IRestaurantService $service;
     private IChefService $chefService;
     private IRestaurantSessionService $sessionService;
+    private PageElementService $pageElementService;
 
-    public function __construct(IRestaurantService $service, IChefService $chefService, IRestaurantSessionService $sessionService) {
+    public function __construct(IRestaurantService $service, IChefService $chefService, IRestaurantSessionService $sessionService, PageElementService $pageElementService) {
         $this->service = $service;
         $this->chefService = $chefService;
         $this->sessionService = $sessionService;
+        $this->pageElementService = $pageElementService;
     }
 
     public function index() {
+        $vm = $this->buildPageVM('yummy');
         $restaurants = $this->service->getAllRestaurants();
         include __DIR__ . '/../Views/event/yummyEvent/index.php';
     }
@@ -29,6 +35,7 @@ class RestaurantController {
             exit;
         }
 
+        $vm = $this->buildPageVM('yummy');
         $restaurants = $this->service->getAllRestaurants();
         $chefs = $this->chefService->getAllChefs();
         include __DIR__ . '/../Views/admin/yummy/index.php';
@@ -255,6 +262,12 @@ class RestaurantController {
             return $newFileName;
         }
         return null;
+    }
+
+    private function buildPageVM(string $pageName): PageElementViewModel
+    {
+        $sections = $this->pageElementService->getPageSections($pageName);
+        return new PageElementViewModel($sections);
     }
 
 }

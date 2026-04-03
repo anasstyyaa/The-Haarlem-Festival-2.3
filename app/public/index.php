@@ -222,13 +222,14 @@ switch ($routeInfo[0]) {
             $service = new \App\Services\UserService($repository, $authService);
             $controller = new $class($service, $authService, $ticketService);
         } elseif ($class === 'App\Controllers\RestaurantController') {
+            $pageElementService = new \App\Services\PageElementService(new \App\Repositories\PageElementRepository());
             $repository = new \App\Repositories\Yummy\RestaurantRepository();
             $chefRepo = new \App\Repositories\Yummy\ChefRepository();
             $sessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
             $service = new \App\Services\Yummy\RestaurantService($repository);
             $chefService = new \App\Services\Yummy\ChefService($chefRepo);
             $sessionService = new \App\Services\Yummy\RestaurantSessionService($sessionRepo, $repository);
-            $controller = new $class($service, $chefService, $sessionService);
+            $controller = new $class($service, $chefService, $sessionService, $pageElementService);
         } elseif ($class === 'App\Controllers\JazzController') {
             $artistRepository = new \App\Repositories\ArtistRepository();
             $artistService = new \App\Services\ArtistService($artistRepository);

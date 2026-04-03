@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\TextModel;
+use App\Repositories\Interfaces\ITextRepository;
 use PDO;
 
-class TextRepository extends Repository 
+class TextRepository extends Repository implements ITextRepository
 {
     public function getById(int $id): ?TextModel
     {
@@ -34,4 +35,12 @@ class TextRepository extends Repository
             'content' => $newText
         ]);
     }
+    public function create(string $content): int
+{
+    $sql = "INSERT INTO text (content) VALUES (:content)";
+    $stmt = $this->connection->prepare($sql);
+    $stmt->execute(['content' => $content]);
+
+    return (int)$this->connection->lastInsertId();
+}
 }

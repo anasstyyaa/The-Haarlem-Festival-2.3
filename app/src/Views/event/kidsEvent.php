@@ -145,6 +145,9 @@ use App\ViewModels\ExtraKidsEventViewModel;
                 <th>Day</th>
                 <th>Start Time</th>
                 <th>End Time</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Spots Left</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -156,16 +159,29 @@ use App\ViewModels\ExtraKidsEventViewModel;
                     <td><?= htmlspecialchars($event->getDay()) ?></td>
                     <td><?= htmlspecialchars($event->getStartTime()) ?></td>
                     <td><?= htmlspecialchars($event->getEndTime()) ?></td>
+                    <td><?= htmlspecialchars($event->getType()) ?></td>
+                    <td><?= htmlspecialchars($event->getLocation()) ?></td>
+                    <td><?= htmlspecialchars($event->getLimit()) ?></td>
                     <td>
-                        <form method="POST" action="/addTicket">
-                           
-    <input type="hidden" name="event_id" value="<?= $event->getId() ?>">
-       <input type="hidden" name="event_type" value="kids">
-    <input type="number" name="number_of_people" value="1" min="1" style="width:50px;">
+                         <form method="POST" action="/addTicket">
+            <input type="hidden" name="event_id" value="<?= $event->getId() ?>">
+            <input type="hidden" name="event_type" value="kids">
 
+            <input 
+                type="number" 
+                name="number_of_people" 
+                value="1" 
+                min="1" 
+                max="<?= $event->getLimit() ?>" 
+                style="width:50px;"
+            >
 
-                            <button type="submit">Add Ticket</button>
-                        </form>
+            <?php if ($event->getLimit() > 0): ?>
+                <button type="submit">Add Ticket</button>
+            <?php else: ?>
+                <button type="button" disabled>Sold Out</button>
+            <?php endif; ?>
+        </form>
                     </td>
                 </tr>
             <?php endforeach; ?>

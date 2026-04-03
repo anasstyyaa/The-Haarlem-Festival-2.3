@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Repositories\PageElementRepository;
+use App\Services\PageElementService;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
 use App\Models\PageElementModel;
@@ -11,13 +11,13 @@ use App\Models\ImageModel;
 
 class PageElementController
 {
-    private PageElementRepository $service;
+    private PageElementService $service;
     private TextRepository $textService;
      private ImageRepository $imgService;
 
     public function __construct()
     {
-        $this->service = new PageElementRepository();
+        $this->service = new PageElementService();
          $this->textService = new TextRepository();
           $this->imgService = new ImageRepository();
     }
@@ -129,4 +129,32 @@ class PageElementController
     header('Location: /admin/kidsPage');
     exit;
 }
+public function createForm(): void
+{
+    $type = $_GET['type'] ?? null;
+    $section = $_GET['section'] ?? null;
+
+    if (!$type || !$section) {
+        echo "Invalid request";
+        return;
+    }
+
+    require __DIR__ . "/../Views/admin/elements/create_" . $type . ".php";
+}
+  public function store()
+    {
+        $type = $_POST['type'];
+        $section = (int)$_POST['section'];
+        $pageName = $_POST['pageName'];
+
+        $this->service->createElement(
+            $type,
+            $section,
+            $pageName, 
+            $_POST
+        );
+
+        header("Location: /admin/home");
+        exit;
+    }
 }

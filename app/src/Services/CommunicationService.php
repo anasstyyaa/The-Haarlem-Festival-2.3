@@ -7,6 +7,11 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
+use chillerlan\QRCode\Common\EccLevel;
+//use chillerlan\QRCode\Output\QROutputInterface;
+
 
 class CommunicationService implements ICommunicationService
 {
@@ -14,7 +19,7 @@ class CommunicationService implements ICommunicationService
     {
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true); // may be useful if we want to add logos via URL
+        $options->set('isRemoteEnabled', true); // helpful for loading external images (like QR codes)
         return new Dompdf($options);
     }
 
@@ -70,7 +75,7 @@ class CommunicationService implements ICommunicationService
         foreach ($tickets as $ticket) {
             $details = $ticket->getEvent()->getDetails();
             
-            $qty = $ticket->getNumberOfPeople();
+            $qty = $ticket->getNumberOfPeople() ?: 1;
             $unitPriceIncl = $ticket->getUnitPrice();
             $lineTotalIncl = $ticket->getTotalPrice();
 
@@ -83,15 +88,20 @@ class CommunicationService implements ICommunicationService
             $totalVat += $vatAmount;
 
             $eventName = $this->getEventNameFromTicket($ticket);
+            $location = $this->getEventAddress($ticket);
 
             $rows .= "
-                <tr>
-                    <td style='padding: 8px; border-bottom: 1px solid #eee;'>{$eventName}</td>
-                    <td style='padding: 8px; border-bottom: 1px solid #eee;'>{$qty}</td>
-                    <td style='padding: 8px; border-bottom: 1px solid #eee;'>&euro;" . number_format($unitPriceIncl, 2) . "</td>
-                    <td style='padding: 8px; border-bottom: 1px solid #eee; text-align:right;'>&euro;" . number_format($lineTotalIncl, 2) . " <br><small>(" . ($vatRate * 100) . "% VAT)</small></td>
-                </tr>";
-        }
+            <tr>
+                <td style='padding: 10px; border-bottom: 1px solid #eee;'>
+                    <div style='font-weight: bold;'>{$eventName}</div>
+                    <div style='font-size: 0.85em; color: #666;'>Loc: {$location}</div>
+                </td>
+                <td style='padding: 10px; border-bottom: 1px solid #eee;'>{$qty}</td>
+                <td style='padding: 10px; border-bottom: 1px solid #eee;'>&euro;" . number_format($lineExcl / $qty, 2) . "</td>
+                <td style='padding: 10px; border-bottom: 1px solid #eee;'>&euro;" . number_format($lineExcl, 2) . "</td>
+                <td style='padding: 10px; border-bottom: 1px solid #eee; text-align:right;'>" . ($vatRate * 100) . "%</td>
+            </tr>";
+            }
 
         $grandTotal = $totalExclVat + $totalVat;
 
@@ -161,21 +171,44 @@ class CommunicationService implements ICommunicationService
     {
         $ticketSections = "";
         
+        // configuring QR options for high-quality PDF output
+        $options = new QROptions([
+        'version'             => 5,
+        'outputType'          => 'gdimage_png',
+        'eccLevel'            => EccLevel::L, 
+        'addQuietzone'        => true,
+        'imageBase64'         => true, 
+    ]);
+
         foreach ($tickets as $ticket) {
-            $details = $ticket->getEvent()->getDetails();
-            
             $eventName = $this->getEventNameFromTicket($ticket);
+            $token = $ticket->getUniqueTicketToken();
+            $eventDate = $this->getEventDateDisplay($ticket);
+
+            // generating the secure URL data
+            $qrData = "https://yourdomain.com/scan?token=" . $token;
+
+            // generating the QR code as an SVG string directly
+            $qrcode = new QRCode($options);
+            $qrCodeMarkup = $qrcode->render($qrData);
 
             $ticketSections .= "
-                <div style='border: 2px solid #333; padding: 30px; margin-bottom: 50px; font-family: sans-serif;'>
-                    <h1 style='background: #333; color: white; padding: 10px; margin-top: 0;'>HAARLEM FESTIVAL TICKET</h1>
-                    <p style='font-size: 20px;'><strong>Event:</strong> {$eventName}</p>
-                    <p><strong>Order ID:</strong> #{$orderId}</p>
-                    <p><strong>Attendee:</strong> {$user['full_name']}</p>
-                    <p><strong>Quantity:</strong> {$ticket->getNumberOfPeople()} Person(s)</p>
-                    <hr>
-                    <p style='text-align: center; color: #888;'>Scan this ticket at the entrance</p>
-                    <div style='height: 100px; background: #eee; text-align: center; line-height: 100px; color: #aaa;'>[ UNIQUE TICKET CODE: " . strtoupper(uniqid()) . " ]</div>
+                <div style='border: 2px dashed #444; padding: 20px; margin-bottom: 30px; font-family: sans-serif;'>
+                    <table style='width: 100%;'>
+                        <tr>
+                            <td style='vertical-align: top; width: 70%;'>
+                                <h2 style='margin: 0; color: #d32f2f;'>HAARLEM FESTIVAL</h2>
+                                <p style='font-size: 18px; margin: 10px 0;'><strong>Event:</strong> {$eventName}</p>
+                                <p><strong>Date/Time:</strong> {$eventDate}</p>
+                                <p><strong>Attendee:</strong> {$user['full_name']}</p>
+                                <p><strong>Quantity:</strong> {$ticket->getNumberOfPeople()} Person(s)</p>
+                            </td>
+                            <td style='text-align: right; width: 30%;'>
+                                <img src='{$qrCodeMarkup}' width='150' height='150' />
+                                <div style='font-size: 9px; color: #666; margin-top: 5px;'>Scan to Validate</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
                 <div style='page-break-after: always;'></div>";
         }
@@ -227,27 +260,111 @@ class CommunicationService implements ICommunicationService
         }
     }
 
-    private function getEventNameFromTicket($ticket): string
+    // private function getEventNameFromTicket($ticket): string
+    // {
+    //     $details = $ticket->getEvent()->getDetails();
+        
+    //     if (is_array($details)) {
+    //         if (isset($details['artist']) && is_object($details['artist'])) {
+    //             return "Jazz: " . $details['artist']->getName();
+    //         }
+    //         return $details['name'] ?? ($details['title'] ?? 'Festival Event');
+    //     }
+
+    //     if (is_object($details)) {
+    //         if (method_exists($details, 'getName')) {
+    //             return $details->getName();
+    //         }
+    //         if (method_exists($details, 'getType')) {
+    //             return $details->getType();
+    //         }
+    //     }
+
+    //     return $ticket->getEvent()->getEventType()->value . " Ticket";
+    // }
+
+    private function getEventNameFromTicket($ticket): string 
+    {
+        $event = $ticket->getEvent();
+        $details = $event->getDetails();
+        $type = strtolower($event->getEventType()->value);
+
+        // 1. Handle Restaurant Reservations
+        if (($type === 'reservation') && is_object($details)) {
+            $restaurantName = $details->getName() ?? 'Restaurant';
+            $session = $details->getSessionData(); 
+            
+            if ($session && method_exists($session, 'getStartTime')) {
+                $startStr = $session->getStartTime();
+                $duration = $details->getSessionDuration() ?: 90;
+
+                $startTimeObj = new \DateTime($startStr);
+                $endTimeObj = clone $startTimeObj;
+                $endTimeObj->modify("+{$duration} minutes");
+
+                return "Reservation: {$restaurantName} (" . $startTimeObj->format('H:i') . " - " . $endTimeObj->format('H:i') . ")";
+            }
+            return "Reservation: {$restaurantName}";
+        }
+        
+        // 2. Handle Jazz Events
+        // if ($type === 'jazz') {
+        //     // Based on your populateTicketDetails, Jazz details is an array ['artist' => ..., 'jazzEvent' => ...]
+        //     if (is_array($details) && isset($details['artist'])) {
+        //         $artistName = $details['artist']->getName();
+        //         $jazzEvent = $details['jazzEvent']; // This is your JazzEventModel
+                
+        //         if ($jazzEvent && method_exists($jazzEvent, 'getStartTime')) {
+        //             $time = (new \DateTime($jazzEvent->getStartTime()))->format('H:i');
+        //             return "Jazz: {$artistName} at {$time}";
+        //         }
+        //         return "Jazz: {$artistName}";
+        //     }
+        // }
+
+        // 3. Fallback for JazzPass or unknown types
+        return ucfirst($type) . " Ticket";
+    }
+
+    private function getEventAddress($ticket): string 
     {
         $details = $ticket->getEvent()->getDetails();
-        
-        if (is_array($details)) {
-            if (isset($details['artist']) && is_object($details['artist'])) {
-                return "Jazz: " . $details['artist']->getName();
-            }
-            return $details['name'] ?? ($details['title'] ?? 'Festival Event');
-        }
+        $type = $ticket->getEvent()->getEventType()->value;
 
-        if (is_object($details)) {
-            if (method_exists($details, 'getName')) {
-                return $details->getName();
+        if ($type === 'reservation' || $type === 'food') {
+
+            if (is_object($details) && method_exists($details, 'getLocation')) {
+                return $details->getLocation() ?? 'Haarlem Restaurant';
             }
-            if (method_exists($details, 'getType')) {
-                return $details->getType();
+            
+            if (is_array($details) && isset($details['location'])) {
+                return $details['location'];
             }
         }
 
-        return $ticket->getEvent()->getEventType()->value . " Ticket";
+        return match($type) {
+            'jazz'     => 'Grote Markt, 2011 RD Haarlem',
+            'jazzpass' => 'Festival Access - Various Locations',
+            'history'  => 'Church of St. Bavo (Meeting Point)',
+            default    => 'Haarlem Festival Venue'
+        };
+    }
+
+    private function getEventDateDisplay($ticket): string
+    {
+        $details = $ticket->getEvent()->getDetails();
+        $type = strtolower($ticket->getEvent()->getEventType()->value);
+
+        if ($type === 'reservation' && is_object($details)) {
+            $session = $details->getSessionData();
+            return $session ? (new \DateTime($session->getStartTime()))->format('l, d F Y') : 'Date TBD';
+        }
+
+        if ($type === 'jazz' && is_array($details) && isset($details['jazzEvent'])) {
+            return (new \DateTime($details['jazzEvent']->getStartDateTime()))->format('l, d F Y');
+        }
+
+        return "Check Schedule for Details";
     }
 
 }

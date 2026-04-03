@@ -128,15 +128,16 @@ class JazzPassRepository extends Repository implements IJazzPassRepository
     {
         $stmt = $this->connection->prepare("
             UPDATE JazzPass
-            SET TicketsLeft = TicketsLeft - :quantity
+            SET TicketsLeft = TicketsLeft - :quantityToSubtract
             WHERE JazzPassID = :id
-            AND TicketsLeft >= :quantity
+            AND TicketsLeft >= :minimumRequired
             AND Deleted_At IS NULL
         ");
 
         $stmt->execute([
             'id' => $jazzPassId,
-            'quantity' => $quantity
+            'quantityToSubtract' => $quantity,
+            'minimumRequired' => $quantity
         ]);
 
         return $stmt->rowCount() > 0;

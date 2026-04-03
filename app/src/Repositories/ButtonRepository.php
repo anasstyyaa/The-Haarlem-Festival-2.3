@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\ButtonModel;
+use App\Repositories\Interfaces\IButtonRepository;
 use PDO;
 
-class ButtonRepository extends Repository 
+class ButtonRepository extends Repository implements IButtonRepository
 {
     public function getById(int $id): ?ButtonModel
     {
@@ -29,7 +30,7 @@ class ButtonRepository extends Repository
         );
     }
     public function saveButtonTextChanges($id, $newText){
-        $sql = "UPDATE text SET text = :text WHERE id = :id";
+        $sql = "UPDATE button SET text = :text WHERE id = :id";
         return $this->connection->prepare($sql)->execute([
             'id'   => $id,
             'text' => $newText

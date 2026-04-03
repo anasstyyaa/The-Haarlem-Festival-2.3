@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\ImageModel;
+use App\Repositories\Interfaces\IImageRepository;
 use PDO;
 
-class ImageRepository extends Repository
+class ImageRepository extends Repository implements IImageRepository
 {
     public function getById(int $id): ?ImageModel
     {
@@ -27,6 +28,18 @@ class ImageRepository extends Repository
             $row['imgURL'] ?? '',
             $row['altText'] ?? ''
         );
+    }
+    public function createImage(string $imgURL, string $altText): int
+    {
+        $sql = "INSERT INTO image (imgURL, altText) VALUES (:imgURL, :altText)";
+        $stmt = $this->connection->prepare($sql);
+
+        $stmt->execute([
+            'imgURL' => $imgURL,
+            'altText' => $altText
+        ]);
+
+        return (int)$this->connection->lastInsertId();
     }
     public function updateImage(int $id, string $imgURL, string $altText): bool
 {

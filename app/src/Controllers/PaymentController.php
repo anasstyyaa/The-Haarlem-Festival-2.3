@@ -6,6 +6,7 @@ use App\Services\Interfaces\IPaymentService;
 use App\Services\Interfaces\ICommunicationService;
 use App\Services\Interfaces\IUserService;
 use App\Framework\Controller;
+use App\Config\AppConfig;
 
 class PaymentController extends Controller
 {
@@ -105,10 +106,11 @@ class PaymentController extends Controller
     private function redirectToStripe(array $ticketsData, string $orderId, array $customNames = []): void //customNmaes may be empty
     {
         $apiKey = getenv('STRIPE_SECRET_KEY');
+        $baseUrl = AppConfig::getBaseUrl();
 
         $data = [
-            'success_url' => "http://localhost/payment-success?orderId=$orderId&session_id={CHECKOUT_SESSION_ID}",
-            'cancel_url' => "http://localhost/payment-failed?orderId=$orderId",
+            'success_url' => "{$baseUrl}/payment-success?orderId=$orderId&session_id={CHECKOUT_SESSION_ID}",
+            'cancel_url' => "{$baseUrl}/payment-failed?orderId=$orderId",
             'mode' => 'payment',
             'payment_method_types[0]' => 'card',
             'payment_method_types[1]' => 'ideal',
@@ -143,7 +145,26 @@ class PaymentController extends Controller
 
     private function getDisplayName($event): string {
         $details = $event->getDetails();
-        if (is_array($details)) return $details['artist']->getName() ?? ($details['name'] ?? "Festival Ticket");
-        return (is_object($details) && method_exists($details, 'getName')) ? $details->getName() : "Festival Ticket";
+        //if (is_array($details)) return $details['artist']->getName() ?? ($details['name'] ?? "Festival Ticket");
+        //return (is_object($details) && method_exists($details, 'getName')) ? $details->getName() : "Festival Ticket";
+        if (is_array($details)) {
+        if (isset($details['artist']) && $details['artist']) {
+            return $details['artist']->getName();
+        }
+
+        if (isset($details['name'])) {
+            return $details['name'];
+        }
+        }
+
+        if (is_object($details) && method_exists($details, 'getTitle')) {
+            return $details->getTitle();
+        }
+
+        if (is_object($details) && method_exists($details, 'getName')) {
+            return $details->getName();
+        }
+
+        return "Festival Ticket";
     }
 }

@@ -3,9 +3,10 @@ namespace App\Repositories;
 
 use App\Framework\Repository;
 use App\Models\ExtraKidsEventModel;
+use App\Repositories\Interfaces\IExtraKidsEventRepository;
 use PDO;
 
-class ExtraKidsEventRepository extends Repository
+class ExtraKidsEventRepository extends Repository implements IExtraKidsEventRepository
 {
     public function getAll(): array
     {
@@ -53,4 +54,21 @@ class ExtraKidsEventRepository extends Repository
 
         return $stmt->execute(['id' => $id]);
     }
+    public function update(ExtraKidsEventModel $event): bool
+{
+    $stmt = $this->connection->prepare("
+        UPDATE ExtraKidsEvent
+        SET name = :name,
+            description = :description,
+            imageURL = :imageURL
+        WHERE id = :id
+    ");
+
+    return $stmt->execute([
+        'id' => $event->getId(),
+        'name' => $event->getName(),
+        'description' => $event->getDescription(),
+        'imageURL' => $event->getImageUrl()
+    ]);
+}
 }

@@ -85,7 +85,7 @@
                                                         </div>
                                                         <div class="mb-3">
                                                             <label class="form-label fw-bold">Available Slots</label>
-                                                            <input type="number" name="available_slots" class="form-control" value="<?= $session->getAvailableSlots() ?>" required>
+                                                            <input type="number" name="available_slots" class="form-control" value="<?= $session->getAvailableSlots() ?>" max="<?= $restaurant->getTotalSlots() ?>" min="0" required>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer bg-light">

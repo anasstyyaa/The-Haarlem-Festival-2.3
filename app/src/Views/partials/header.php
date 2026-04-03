@@ -2,29 +2,33 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 ?>
 
 <?php if (!empty($_SESSION['flash_success'])): ?>
-    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow-lg border-0"
          role="alert"
          style="z-index: 9999; min-width: 300px;">
-        <?= htmlspecialchars($_SESSION['flash_success']) ?>
+        <div class="d-flex align-items-center">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <div><?= htmlspecialchars($_SESSION['flash_success']) ?></div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <?php unset($_SESSION['flash_success']); ?>
 <?php endif; ?>
 
 <?php if (!empty($_SESSION['error'])): ?>
-    <div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow"
+    <div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 shadow-lg border-0"
          role="alert"
          style="z-index: 9999; min-width: 300px;">
-        <?= htmlspecialchars($_SESSION['error']) ?>
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <div><?= htmlspecialchars($_SESSION['error']) ?></div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
-
+<?php endif; ?> 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -40,11 +44,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <body class="<?= isset($bodyClass) ? htmlspecialchars($bodyClass) : '' ?>">
 
-
-
 <header class="main-header">
-
-<link rel="stylesheet" href="/assets/css/dance.css">
+  <link rel="stylesheet" href="/assets/css/dance.css">
 
   <div class="logo">Haarlem Festival</div>
 
@@ -61,25 +62,29 @@ if (session_status() === PHP_SESSION_NONE) {
         <i class="bi bi-shield-lock me-1"></i> CMS
       </a>
     <?php endif; ?>
-
   </nav>
 
   <div class="nav-icons">
-    <span>🔍</span>
-    <span>🌐</span>
+    <a href="#" class="icon-link" title="Language">
+        <i class="bi bi-globe"></i>
+    </a>
 
-    <a href="/personalProgram" class="icon-link" title="Personal Program">🎟️</a>
+    <a href="#" class="icon-link" title="Search">
+        <i class="bi bi-search"></i>
+    </a>
+    
+    <a href="/personalProgram" class="icon-link" title="Personal Program">
+        <i class="bi bi-ticket-perforated"></i>
+    </a>
 
-    <a href="/profile" class="icon-link" title="Profile">👤</a>
+    <a href="/profile" class="icon-link" title="Profile">
+        <i class="bi bi-person-circle"></i>
+    </a>
 
     <?php if (!isset($_SESSION['user'])): ?>
         <a href="/login" class="login-btn">Login</a>
-    <?php endif; ?>
-
-    <?php if (isset($_SESSION['user'])): ?>
+    <?php else: ?>
         <a href="/logout" class="login-btn">Logout</a>
     <?php endif; ?>
 </div>
 </header>
-
-

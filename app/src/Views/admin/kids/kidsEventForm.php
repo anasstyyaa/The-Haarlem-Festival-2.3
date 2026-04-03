@@ -16,8 +16,15 @@ $isEdit = $event && $event->getId();
     <?php endif; ?>
 
     <label>Day:</label>
-    <input type="text" name="day" required
-        value="<?= $isEdit ? htmlspecialchars($event->getDay()) : '' ?>">
+    <select name="day">
+       <option value="Monday">Monday</option>
+       <option value="Tuesday">Tuesday</option>
+       <option value="Wednesday">Wednesday</option>
+       <option value="Thursday">Thursday</option>
+       <option value="Friday">Friday</option>
+       <option value="Saturday">Saturday</option>
+       <option value="Sunday">Sunday</option>
+     </select>
 
     <br><br>
 
@@ -30,6 +37,26 @@ $isEdit = $event && $event->getId();
     <label>End Time:</label>
     <input type="time" name="endTime" required
         value="<?= $isEdit ? htmlspecialchars($event->getEndTime()) : '' ?>">
+
+        <br><br>
+
+   <label>Type:</label>
+     <select name="type">
+       <option value="Teylers Secret">Teylers Secret</option>
+       <option value="Lorentz Formula">Lorentz Formula</option>
+     </select>
+
+       <br><br>
+
+    <label>Location:</label>
+    <input type="text" name="location" required
+       value="<?= $isEdit ? htmlspecialchars($event->getLocation()) : '' ?>">
+
+    <br><br>
+
+    <label>Limit:</label>
+      <input type="number" name="limit" required min="0"
+        value="<?= $isEdit ? $event->getLimit() : 0 ?>">
 
     <br><br>
 

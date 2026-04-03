@@ -9,11 +9,13 @@ use App\Services\Interfaces\IJazzPassService;
 use App\Repositories\Interfaces\ITicketRepository;
 use App\Repositories\Interfaces\IEventRepository;
 use App\Repositories\Interfaces\IUserRepository;
+use App\Services\KidsEventService;
 use App\Models\PersonalProgram;
 use App\Models\TicketModel; 
 
 class PaymentService implements IPaymentService
 {
+    private KidsEventService $kidsService;
     public function __construct(
         private ITicketRepository $ticketRepository, 
         private IRestaurantSessionService $restaurantSessionService,
@@ -21,7 +23,9 @@ class PaymentService implements IPaymentService
         private IJazzPassService $jazzPassService,
         private IUserRepository $userRepository,
         private IEventRepository $eventRepository
-    ) {}
+    ) {
+        $this->kidsService = new KidsEventService();
+    }
 
     public function finalizeOrder(string $orderId, string $stripeId): array 
     {
@@ -35,15 +39,17 @@ class PaymentService implements IPaymentService
         foreach ($tickets as $ticket) {
             $event = $ticket->getEvent();
             $qty = $ticket->getNumberOfPeople();
-            $targetId = $ticket->getProgramItemId();
+            //$targetId = $ticket->getProgramItemId();
+            $targetId = $event->getSubEventId() ?: $ticket->getProgramItemId(); // fallback to program item id if sub event id is not set
 
             // Ensure targetId exists before trying to update capacity
             if (!$targetId) continue;
 
-            match ($event->getEventType()->value) {
+            match (strtolower($event->getEventType()->value)) {
                 'jazz'        => $this->jazzService->decreaseTicketsLeft($targetId, $qty),
                 'jazzpass'    => $this->jazzPassService->decreaseTicketsLeft($targetId, $qty),
                 'reservation' => $this->restaurantSessionService->updateCapacity($targetId, -$qty),
+                 'kids'        => $this->kidsService->decreaseCapacity($targetId, $qty),
                 default       => null
             };
         }
@@ -131,11 +137,11 @@ class PaymentService implements IPaymentService
                 (int)$row['id'],
                 $event,
                 $user,
-                (int)$row['number_of_people']
+                (int)$row['number_of_people'],
+                $row['unique_ticket_token'] 
             );
             $ticket->setProgramItemId((int)$row['program_item_id']);
 
-            // IMPORTANT: We must populate the details here so the Invoice isn't empty!
             $this->populateTicketDetails($ticket);
 
             $populatedTickets[] = $ticket;
@@ -143,18 +149,14 @@ class PaymentService implements IPaymentService
         return $populatedTickets;
     }
 
-    /**
-     * This replaces the messy logic that was in your Controller's index()
-     */
     private function populateTicketDetails(TicketModel $ticket): void
     {
         $event = $ticket->getEvent();
-        $subId = $ticket->getProgramItemId() ?: $event->getSubEventId();
+        //$subId = $ticket->getProgramItemId() ?: $event->getSubEventId();
+        $subId = $event->getSubEventId() ?: $ticket->getProgramItemId(); // fallback to program item id if sub event id is not set
         $type = strtolower($event->getEventType()->value);
 
-        // This logic matches your old Controller index() exactly, but it's now reusable
         if ($type === 'reservation') {
-            // You'll need to inject RestaurantServices into this class or use Repos directly
             $repo = new \App\Repositories\Yummy\RestaurantRepository();
             $sessRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
             $session = $sessRepo->getSessionById($subId);
@@ -175,7 +177,7 @@ class PaymentService implements IPaymentService
                 ]);
             }
         }
-        // ... Add similar blocks for 'tour' and 'kids'
+        // add similar blocks for 'tour' and 'kids'
     }
 
 }

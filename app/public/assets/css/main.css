@@ -51,19 +51,23 @@ body {
 
 .nav-icons {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   align-items: center;
 }
 
 .icon-link {
   text-decoration: none;
-  color: #f4d9c6;
-  font-size: 18px;
-  transition: 0.3s ease;
+  color: #f4d9c6; /* Your light peach color */
+  font-size: 20px; /* Adjusted size */
+  transition: all 0.3s ease; /* Smooth transition for color and transform */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-link:hover {
-  transform: scale(1.2);
+  color: #ffc107; /* Bootstrap Gold/Warning color */
+  transform: translateY(-3px) scale(1.2); /* Lifts up and grows */
 }
 
 .login-btn {
@@ -1224,4 +1228,512 @@ body.admin-page #sidebar .nav-item {
     width: 120px;
     height: 120px;
   }
+}
+
+
+
+
+  /* YUMMY PAGE */
+
+
+
+
+/* Styling the 'View Restaurant' button specifically */
+/* Base style - added !important to text-decoration to beat Bootstrap */
+/* Universal 'More' and 'Confirm' Button style */
+.more-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: transparent !important; /* Forces transparency on <button> tags */
+    border: 1px solid #f5c5ba !important;
+    color: #f4d9c6 !important; 
+    padding: 12px 20px;
+    border-radius: 25px;
+    text-decoration: none !important;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Hover effect for all .more-btn instances */
+.more-btn:hover {
+    background-color: #f5c5ba !important;
+    color: #3a0d00 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(245, 197, 186, 0.4);
+}
+
+/* Specific fix for inputs inside the form to match the peach/brown theme */
+.input-group-text.custom-dark-input {
+    background-color: rgba(245, 197, 186, 0.1) !important;
+    border-right: none !important;
+}
+
+.custom-dark-input {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(245, 197, 186, 0.3) !important;
+    color: #f4d9c6 !important;
+    padding: 12px;
+}
+
+.custom-dark-input:focus {
+    border-color: #f5c5ba !important;
+    box-shadow: 0 0 8px rgba(245, 197, 186, 0.2) !important;
+}
+
+/* Fix for the Date dropdown and Number input icon colors */
+.custom-dark-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.8) sepia(1) saturate(5) hue-rotate(320deg);
+}
+
+/* Base State for the Time Buttons */
+#timeSlotButtons .btn-outline-dark.time-slot-btn {
+    border: 1px solid #f5c5ba !important;
+    background-color: transparent !important;
+    color: #f4d9c6 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* HOVER State - This will now work */
+#timeSlotButtons .btn-outline-dark.time-slot-btn:hover {
+    background-color: rgba(245, 197, 186, 0.2) !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+}
+
+/* SELECTED/ACTIVE State */
+#timeSlotButtons .btn-dark.time-slot-btn {
+    background-color: #f5c5ba !important;
+    border-color: #f5c5ba !important;
+    color: #3a0d00 !important;
+}
+
+/* =========================
+   HISTORY PAGE
+========================= */
+
+.history-page {
+    background-color: #efcfc7;
+    color: #2f1208;
+}
+
+.history-page__container {
+    width: min(1200px, calc(100% - 64px));
+    margin: 0 auto;
+}
+
+.history-page img {
+    display: block;
+    max-width: 100%;
+}
+
+/* HERO FROM CMS SECTION 4 */
+.history-section4 {
+    position: relative;
+    min-height: 75vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8%;
+    color: white;
+    overflow: hidden;
+}
+
+.history-section4 img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.history-section4::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(60, 15, 0, 0.7), rgba(60, 15, 0, 0.2));
+    z-index: 1;
+}
+
+.history-section4 h1,
+.history-section4 p,
+.history-section4 a {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+}
+
+.history-section4 h1 {
+    font-size: clamp(3rem, 5vw, 5rem);
+    margin-bottom: 16px;
+    line-height: 1.05;
+}
+
+.history-section4 p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    max-width: 560px;
+}
+
+.history-section4__button {
+    display: inline-block;
+    width: fit-content;
+    padding: 14px 26px;
+    border-radius: 999px;
+    background: #f7c9bc;
+    color: #4b1608;
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    z-index: 2;
+    transition: 0.2s ease;
+}
+
+.history-section4__button:hover {
+    background: #f3b9a7;
+}
+
+/* TOUR */
+.history-page__tour-section {
+    padding: 72px 0;
+    background-color: #efcfc7;
+    color: #2f1208;
+}
+
+.history-page__tour-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    gap: 72px;
+    align-items: start;
+}
+
+.history-page__section-title {
+    font-size: clamp(2rem, 3vw, 3.2rem);
+    line-height: 1.15;
+    margin: 0 0 20px;
+    font-weight: 700;
+}
+
+.history-page__tour-text p,
+.history-page__venue-content p,
+.history-page__nearby p {
+    font-size: 1.08rem;
+    line-height: 1.75;
+}
+
+.history-page__primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    margin-top: 20px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 999px;
+    background: #f7c9bc;
+    color: #4b1608;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.history-page__primary-button:hover {
+    background: #f3b9a7;
+    transform: translateY(-2px);
+}
+
+.history-page__tour-details {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+}
+
+.history-page__detail-item {
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(91, 24, 4, 0.08);
+    font-weight: 500;
+}
+
+/* VENUES */
+.history-page__venues-section {
+    padding: 72px 0;
+    background-color: #551703;
+    color: #f7ddd5;
+}
+
+.history-page__venues-list {
+    display: grid;
+    gap: 24px;
+    margin-top: 28px;
+}
+
+.history-page__venue-card {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    background-color: #b76a2d;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+}
+
+.history-page__venue-image {
+    width: 100%;
+    height: 100%;
+    min-height: 230px;
+    object-fit: cover;
+}
+
+.history-page__venue-content {
+    padding: 28px;
+}
+
+.history-page__venue-content h3 {
+    margin: 0 0 14px;
+    font-size: 1.8rem;
+}
+
+.history-page__secondary-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 18px;
+    border-radius: 20px;
+    background-color: #f7ddd5;
+    color: #5b1804;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.history-page__secondary-button:hover {
+    background-color: #eecfc6;
+    transform: translateY(-2px);
+}
+
+/* BOTTOM SECTION */
+.history-page__bottom-section {
+    padding: 72px 0 90px;
+    background-color: #551703;
+    color: #f7ddd5;
+}
+
+.history-page__bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+}
+
+/* LEFT SIDE */
+.history-page__schedule-block {
+    max-width: 420px;
+}
+
+.history-page__schedule-block h2 {
+    margin-bottom: 10px;
+}
+
+.history-page__schedule-note {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-bottom: 20px;
+}
+
+/* TABLE */
+.history-page__schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0 25px;
+    color: #f7ddd5;
+    font-size: 0.95rem;
+}
+
+.history-page__schedule-table th,
+.history-page__schedule-table td {
+    text-align: left;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    vertical-align: top;
+}
+
+.history-page__schedule-table th {
+    font-weight: 700;
+    opacity: 0.85;
+}
+
+.history-page__schedule-table td:first-child {
+    width: 120px;
+    font-weight: 600;
+}
+
+.history-page__schedule-table td:nth-child(2) {
+    width: 100px;
+}
+
+.schedule-spacer td {
+    padding: 10px 0;
+    border: none !important;
+}
+
+/* RIGHT SIDE */
+.history-page__nearby-image {
+    width: 100%;
+    border-radius: 16px;
+    margin: 15px 0;
+}
+
+.history-page__nearby-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.history-page__nearby-buttons .history-page__secondary-button {
+    text-align: center;
+    margin-top: 0;
+}
+
+/* BOOKING */
+.history-booking {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 56px 24px 72px;
+}
+
+.history-booking__title {
+    font-size: clamp(2.2rem, 3vw, 3.2rem);
+    margin-bottom: 28px;
+}
+
+.history-booking__section {
+    margin-bottom: 30px;
+}
+
+.history-booking__heading {
+    margin-bottom: 14px;
+    font-size: 1.8rem;
+}
+
+.history-booking__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.history-booking__pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid #c9b2ab;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.history-booking__pill:hover {
+    border-color: #d88b2b;
+}
+
+.history-booking__pill--active {
+    background: #d88b2b;
+    color: #fff;
+    border-color: #d88b2b;
+}
+
+.history-booking__summary {
+    border: 1px solid #d8c5be;
+    padding: 16px 18px;
+    width: fit-content;
+    border-radius: 12px;
+    background-color: #fff;
+}
+
+.history-booking__form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 360px;
+}
+
+.history-booking__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-booking__field input {
+    padding: 12px 14px;
+    border: 1px solid #ccb8b1;
+    border-radius: 10px;
+}
+
+.history-booking__submit-btn {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 999px;
+    background-color: #5b1804;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+    .history-page__tour-grid,
+    .history-page__bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .history-page__container {
+        width: min(1200px, calc(100% - 32px));
+    }
+
+    .history-page__venue-card {
+        grid-template-columns: 1fr;
+    }
+
+    .history-page__venue-image {
+        min-height: 220px;
+    }
+
+    .history-page__nearby-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .history-page__tour-section,
+    .history-page__venues-section,
+    .history-page__bottom-section {
+        padding-top: 52px;
+        padding-bottom: 52px;
+    }
+
+    .history-section4 h1 {
+        font-size: 3rem;
+    }
+}.history-detail-tour-btn {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 999px;
+    background: #f7c9bc;
+    color: #4b1608;
+    text-decoration: none;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.history-detail-tour-btn:hover {
+    background: #f3b9a7;
+    color: #4b1608;
+    transform: translateY(-2px);
 }

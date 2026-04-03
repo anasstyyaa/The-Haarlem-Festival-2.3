@@ -2,14 +2,10 @@
 namespace App\Controllers;
 
 use App\Services\KidsEventService;
-use App\Repositories\KidsEventRepository;
 use App\ViewModels\KidsEventViewModel;
 use App\Models\KidsEventModel;
-use App\Repositories\PageElementRepository;
-use App\Repositories\TextRepository;
-use App\Repositories\ImageRepository;
+use App\Services\PageElementService;
 use App\ViewModels\PageElementViewModel;
-use App\Services\ButtonService;
 
 use App\Services\ExtraKidsEventService;
 use App\Models\ExtraKidsEventModel;
@@ -17,33 +13,20 @@ use App\ViewModels\ExtraKidsEventViewModel;
 
 class KidsEventController
 {
-    private PageElementRepository $pageRepo;
-    private TextRepository $textRepo;
-    private ImageRepository $imageRepo;
-    private ButtonService $buttonService;
+    private PageElementService $pageService;
     private KidsEventService $service;
     private ExtraKidsEventService $extraKidsService;
     public function __construct()
     {
-        $this->service = new KidsEventService(new KidsEventRepository);
-         $this->pageRepo  = new PageElementRepository();
-        $this->textRepo  = new TextRepository();
-        $this->imageRepo = new ImageRepository();
-        $this->buttonService = new ButtonService();
+        $this->service = new KidsEventService();
+       $this->pageService  = new PageElementService();
         $this->extraKidsService = new ExtraKidsEventService();
     }
 
    public function index(): void
 {
-      $elements = $this->pageRepo->getByPageName("kids");
+     $vm = $this->buildPageVM('kids');
 
-        $vm = new PageElementViewModel(
-            $this->textRepo,
-            $this->imageRepo, 
-            $this->buttonService
-        );
-
-        $vm->build($elements);
     $kidsEvents = $this->service->getAll();
    //  var_dump($kidsEvents);
 //    var_dump($elements);
@@ -63,24 +46,22 @@ class KidsEventController
         $extraViewModel = new ExtraKidsEventViewModel($extraEvents);
    require __DIR__ . '/../Views/event/kidsEvent.php';
 }
+private function buildPageVM(string $pageName): PageElementViewModel
+{
+    $sections = $this->pageService->getPageSections($pageName);
+    return new PageElementViewModel($sections);
+}
  public function adminIndex(): void
 {
-      $elements = $this->pageRepo->getByPageName("kids");
-
-        $vm = new PageElementViewModel(
-            $this->textRepo,
-            $this->imageRepo,
-            $this->buttonService
-        );
-
-        $vm->build($elements);
+    $vm = $this->buildPageVM('kids');
     $kidsEvents = $this->service->getAll();
     $vmKids = new KidsEventViewModel($kidsEvents);
+    $extraEvents = $this->extraKidsService->getAllEvents();
+    $extraViewModel = new ExtraKidsEventViewModel($extraEvents); 
    require __DIR__ . '/../Views/admin/kids/index.php';
 }
 public function create(): void
-{
-    $event = null; 
+{ 
     require __DIR__ . '/../Views/admin/kids/kidsEventForm.php';
 }
 
@@ -99,13 +80,19 @@ public function save(): void
     $day       = $_POST['day'] ?? '';
     $startTime = $_POST['startTime'] ?? '';
     $endTime   = $_POST['endTime'] ?? '';
+    $type = $_POST['type'] ?? '';
+    $location = $_POST['location'] ?? '';
+    $limit = (int)($_POST['limit'] ?? 0);
 
     $event = new KidsEventModel(
-        $id ? (int)$id : 0,
-        $day,
-        $startTime,
-        $endTime
-    );
+       $id ? (int)$id : 0,
+       $day,
+       $startTime,
+       $endTime,
+       $type,
+       $location,
+       $limit
+          );
 
     if ($id) {
         $this->service->update($event);
@@ -145,25 +132,66 @@ public function delete(): void
         include __DIR__ . '/../Views/event/extraKidsEventDetail.php';
     }
 
-    public function storeExtra()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $event = new ExtraKidsEventModel();
-            $event->setName($_POST['name'] ?? '');
-            $event->setDescription($_POST['description'] ?? '');
+    public function createExtra(): void
+{ 
+    require __DIR__ . '/../Views/admin/kids/extraKidsEventForm.php';
+}
 
-            if ($this->extraKidsService->createEvent($event)) {
-                header('Location: /extrakids');
-                exit;
+
+   public function storeExtra()
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $id = $_POST['id'] ?? null;
+
+        $event = $id 
+            ? $this->extraKidsService->getEventById((int)$id) 
+            : new ExtraKidsEventModel();
+
+        $event->setName($_POST['name'] ?? '');
+        $event->setDescription($_POST['description'] ?? '');
+
+        // 📸 HANDLE IMAGE UPLOAD
+        if (!empty($_FILES['image']['name'])) {
+            $uploadDir = __DIR__ . '/../../public/uploads/';
+
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $fileName = time() . '_' . basename($_FILES['image']['name']);
+            $targetPath = $uploadDir . $fileName;
+
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
+                $event->setImageUrl('/uploads/' . $fileName);
             }
         }
-    }
 
-    public function deleteExtra($vars)
-    {
-        $this->extraKidsService->deleteEvent((int)$vars['id']);
-        header('Location: /extrakids');
+        if ($id) {
+            $this->extraKidsService->updateEvent($event); 
+        } else {
+            $this->extraKidsService->createEvent($event); 
+        }
+
+        header('Location: /admin/kidsPage');
         exit;
     }
+}
+
+   public function deleteExtra(): void
+{
+    $id = (int)($_POST['id']);
+    $this->extraKidsService->deleteEvent($id);
+
+    header('Location: /admin/kidsPage');
+    exit;
+}
+    public function editExtra(array $vars): void
+{
+    $id = (int)$vars['id'];
+    $event = $this->extraKidsService->getEventById($id);
+
+    require __DIR__ . '/../Views/admin/kids/extraKidsEventForm.php';
+}
 
 }

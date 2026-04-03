@@ -5,19 +5,17 @@ namespace App\Controllers;
 use App\Repositories\UserRepository;
 use App\Repositories\PasswordResetRepository;
 use App\Services\AuthService;
-use App\Repositories\PageElementRepository;
-use App\Repositories\TextRepository;
-use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
-use App\Services\ButtonService;
 use App\Services\PasswordResetService;
 use App\Services\Mailer;
 use App\Services\Interfaces\IPasswordResetService;
+use App\Services\PageElementService;
 
 class AuthController
 {
     private AuthService $auth;
     private IPasswordResetService $passwordReset;
+    private PageElementService $pageService;
 
     public function __construct()
     {
@@ -35,6 +33,7 @@ class AuthController
             $mailer,
             $appUrl
         );
+         $this->pageService = new PageElementService();
     }
 
 
@@ -51,26 +50,17 @@ class AuthController
     // GET 
     public function index(): string
     {
-        $vm = $this->buildPageVM('home');
+      $vm = $this->buildPageVM('home');
 
     return $this->render('home/index', [
         'vm' => $vm
     ]);
-    }
+     }
     //build VM
     private function buildPageVM(string $pageName): PageElementViewModel
 {
-    $pageRepo  = new PageElementRepository();
-    $textRepo  = new TextRepository();
-    $imageRepo = new ImageRepository();
-    $buttonService = new BUttonService();
-
-    $elements = $pageRepo->getByPageName($pageName);
-
-    $vm = new PageElementViewModel($textRepo, $imageRepo, $buttonService);
-    $vm->build($elements);
-
-    return $vm;
+    $sections = $this->pageService->getPageSections($pageName);
+    return new PageElementViewModel($sections);
 }
 
     // GET /register

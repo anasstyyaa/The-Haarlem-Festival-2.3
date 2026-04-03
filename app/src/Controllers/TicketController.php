@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Repositories\pository;
-
 use App\Models\PersonalProgram;
 use App\Services\Interfaces\IPersonalProgramService;
 use App\Services\Interfaces\Yummy\IRestaurantService;
@@ -22,7 +20,9 @@ use App\Repositories\HistoryEventRepository;
 
 use App\Repositories\KidsEventRepository;
 use App\Repositories\TicketRepository;
-use App\Services\KidsEventService;
+use App\Services\Interfaces\IKidsEventService;
+
+use App\Services\Interfaces\ITicketService;
 
 
 class TicketController
@@ -38,19 +38,21 @@ class TicketController
     //private ICommunicationService $communicationService;
     //private IUserService $userService;
 
-    private KidsEventService $kidsEventService;
+    private IKidsEventService $kidsEventService;
     private HistoryService $historyService;
     private HistoryVenueRepository $historyVenueRepository;
     //private UserRepository $userRepository;
     private TicketRepository $ticketRepository;
+    private ITicketService $ticketService;
     
 
-    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService, TicketRepository $ticketRepository)
+    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService, TicketRepository $ticketRepository, IKidsEventService $kidsEventService, ITicketService $ticketService)
 
     {
         $this->programService = $programService; 
         $this->eventRepo = new EventRepository();
         $this->ticketRepository = $ticketRepository;
+        $this->ticketService = $ticketService;
         $this->restaurantService = $restaurantService; 
         $this->restaurantSessionService = $restaurantSessionService; 
         $this->artistService = $artistService; 
@@ -60,7 +62,7 @@ class TicketController
         $this->jazzPassService = $jazzPassService;
         //$this->userService = $userService; 
 
-        $this->kidsEventService = new KidsEventService(new KidsEventRepository());
+        $this->kidsEventService = $kidsEventService;
          $this->historyService = new HistoryService(
             new HistoryEventRepository(),
             new HistoryVenueRepository()
@@ -73,82 +75,8 @@ class TicketController
         $program = $_SESSION['program'] ?? new PersonalProgram();
         $tickets = $program->getTickets();
 
-        foreach ($tickets as $ticket) {
-            $event = $ticket->getEvent();
-            $subId = $event->getSubEventId();
+        $tickets = $this->ticketService->hydrateTickets($tickets);
 
-            if (strcasecmp($event->getEventType()->value, 'reservation') === 0) {
-                $session = $this->restaurantSessionService->getSessionById($subId);
-
-                if ($session) {
-                    $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
-
-                    if ($restaurant) {
-                        $restaurant->setSessionData($session);
-                        $event->setDetails($restaurant);
-                    }
-                }
-            }
-
-            if (strcasecmp($event->getEventType()->value, 'jazz') === 0) {
-                $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
-
-                if ($jazzEvent) {
-                    $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-                    $venueInfo = ($this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId()));
-
-                    $event->setDetails([
-                        'artist' => $artist,
-                        'venueInfo' => $venueInfo, 
-                        'jazzEvent' => $jazzEvent
-                    ]);
-                }
-            }
-
-            if (strcasecmp($event->getEventType()->value, 'jazzpass') === 0) {
-                $jazzPass = $this->jazzPassService->getPassById($subId);
-
-                if ($jazzPass) {
-                    $event->setDetails($jazzPass);
-                }
-            }
-
-            if (strcasecmp($event->getEventType()->value, 'tour') === 0) {
-                $historyEvent = $this->historyService->getSessionByEventId($event->getId());
-
-                if ($historyEvent) {
-                    $stops = $this->historyVenueRepository->getStopsByEventId($event->getId());
-
-                    if (!empty($stops)) {
-                        $firstStop = $stops[0];
-
-                        $venue = new HistoryVenueModel(
-                            (int)($firstStop['venueId'] ?? 0),
-                            $firstStop['venueName'] ?? '',
-                            $firstStop['details'] ?? null,
-                            $firstStop['location'] ?? null,
-                            isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null
-                        );
-
-                        $historyEvent->setVenue($venue);
-                    }
-
-                    $event->setDetails($historyEvent);
-                }
-            }
-            
-            if (strcasecmp($event->getEventType()->value, 'kids') === 0) {
-                $kidsEvent = $this->kidsEventService->getEventById($subId);
-                if ($kidsEvent) {
-                    $event->setDetails([
-                        'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
-                        'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
-                        'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
-                        'startTime' => $kidsEvent->getStartTime() ?? '10:00'
-                    ]);
-                }
-            }
-        }
         require __DIR__ . '/../Views/personalProgram/personalProgram.php';
     
     }
@@ -163,19 +91,41 @@ class TicketController
 
         // capacity check 
         if (strcasecmp($eventType, 'reservation') === 0) {
-            $targetId = $programItemId ? (int)$programItemId : (int)$subEventId; 
-            $session = $this->restaurantSessionService->getSessionById($targetId);
-            
-            if (!$session || $session->getAvailableSlots() < $numberOfPeople) {
-                $remaining = $session ? $session->getAvailableSlots() : 0;
-                $_SESSION['flash_error'] = "Sorry, there are only $remaining spots left for this session.";
-                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/yummy'));
+            if ($programItemId) {
+                // overriding the Restaurant ID with the Session ID
+                $subEventId = $programItemId; 
+            } else {
+                // If no session ID is found, i can't create a valid ticket
+                $_SESSION['error'] = "Please select a specific time slot.";
+                header("Location: " . $_SERVER['HTTP_REFERER']);
+                exit;
+            }
+        }
+
+        if (strcasecmp($eventType, 'jazz') === 0) {
+            $jazzEvent = $this->jazzEventService->getJazzEventById((int)$subEventId);
+
+            if (!$jazzEvent || $jazzEvent->getTicketsLeft() < $numberOfPeople) {
+                $remaining = $jazzEvent ? $jazzEvent->getTicketsLeft() : 0;
+                $_SESSION['flash_error'] = "Sorry, there are only $remaining tickets left for this jazz event.";
+                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/jazz'));
+                exit;
+            }
+        }
+
+        if (strcasecmp($eventType, 'jazzpass') === 0) {
+            $jazzPass = $this->jazzPassService->getPassById((int)$subEventId);
+
+            if (!$jazzPass || $jazzPass->getTicketsLeft() < $numberOfPeople) {
+                $remaining = $jazzPass ? $jazzPass->getTicketsLeft() : 0;
+                $_SESSION['flash_error'] = "Sorry, there are only $remaining passes left.";
+                header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/jazz'));
                 exit;
             }
         }
         // add similar checks for other events 
 
-        $eventId = $this->eventRepo->checkEventType($subEventId, $eventType);
+        $eventId = $this->eventRepo->checkEventType((int)$subEventId, $eventType);
 
         if ($eventId === 0) {
             $_SESSION['error'] = "Configuration Error: No Event found! (Type: $eventType, ID: $subEventId).";
@@ -300,19 +250,31 @@ public function scan(): void
 
         require __DIR__ . '/../Views/admin/dashboard.php';
     }
-    public function exportCsv(): void
+  public function exportCsv(): void
 {
     $tickets = $this->ticketRepository->getAllWithDetails();
+
+    $selectedColumns = array_intersect(
+        $_POST['columns'] ?? [],
+        array_keys($tickets[0] ?? [])
+    );
+    if (empty($selectedColumns)) {
+        header("Location: /admin");
+        exit;
+    }
 
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="tickets.csv"');
 
     $output = fopen('php://output', 'w');
 
-    fputcsv($output, array_keys($tickets[0]));
+    fputcsv($output, $selectedColumns);
 
     foreach ($tickets as $row) {
-        fputcsv($output, $row);
+        fputcsv(
+            $output,
+            array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+        );
     }
 
     fclose($output);

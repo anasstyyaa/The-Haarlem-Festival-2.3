@@ -4,14 +4,15 @@ namespace App\Services;
 
 use App\Repositories\KidsEventRepository;
 use App\Models\KidsEventModel;
+use App\Services\Interfaces\IKidsEventService;
 
-class KidsEventService
+class KidsEventService implements IKidsEventService
 {
     private KidsEventRepository $repository;
 
-    public function __construct(KidsEventRepository $repository)
+    public function __construct()
     {
-        $this->repository = $repository;
+        $this->repository = new KidsEventRepository();
     }
 
     
@@ -64,5 +65,16 @@ public function mapDayToDate(string $dayName): ?string
     $diff = $diff === 0 ? 7 : $diff; 
 
     return date('Y-m-d', strtotime("+$diff days"));
+}
+public function decreaseCapacity(int $id, int $qty): void
+{
+    $event = $this->repository->getById($id);
+
+    if (!$event) return;
+
+    $newLimit = max(0, $event->getLimit() - $qty);
+    $event->setLimit($newLimit);
+
+    $this->repository->update($event);
 }
 }

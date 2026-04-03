@@ -120,12 +120,6 @@ class RestaurantSessionRepository extends Repository implements IRestaurantSessi
         
         return (int)$stmt->fetchColumn() > 0;
     }
-
-    // helpers for transaction management in the service layer
-
-    public function beginTransaction() { $this->connection->beginTransaction(); }
-    public function commit() { $this->connection->commit(); }
-    public function rollBack() { $this->connection->rollBack(); }
     
     public function saveSingleSession(RestaurantSessionModel $session) {
         $query = "INSERT INTO RestaurantSessions (restaurant_id, [date], startTime, available_slots) 

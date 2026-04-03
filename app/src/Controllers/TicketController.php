@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Repositories\Repository;
-
 use App\Models\PersonalProgram;
 use App\Services\Interfaces\IPersonalProgramService;
 use App\Services\Interfaces\Yummy\IRestaurantService;
@@ -24,6 +22,8 @@ use App\Repositories\KidsEventRepository;
 use App\Repositories\TicketRepository;
 use App\Services\Interfaces\IKidsEventService;
 
+use App\Services\Interfaces\ITicketService;
+
 
 class TicketController
 {
@@ -43,14 +43,16 @@ class TicketController
     private HistoryVenueRepository $historyVenueRepository;
     //private UserRepository $userRepository;
     private TicketRepository $ticketRepository;
+    private ITicketService $ticketService;
     
 
-    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService, TicketRepository $ticketRepository, IKidsEventService $kidsEventService)
+    public function __construct(IPersonalProgramService $programService, IRestaurantService $restaurantService, IRestaurantSessionService $restaurantSessionService, IArtistService $artistService, IJazzEventService $jazzEventService, IJazzPassService $jazzPassService, TicketRepository $ticketRepository, IKidsEventService $kidsEventService, ITicketService $ticketService)
 
     {
         $this->programService = $programService; 
         $this->eventRepo = new EventRepository();
         $this->ticketRepository = $ticketRepository;
+        $this->ticketService = $ticketService;
         $this->restaurantService = $restaurantService; 
         $this->restaurantSessionService = $restaurantSessionService; 
         $this->artistService = $artistService; 
@@ -73,82 +75,8 @@ class TicketController
         $program = $_SESSION['program'] ?? new PersonalProgram();
         $tickets = $program->getTickets();
 
-        foreach ($tickets as $ticket) {
-            $event = $ticket->getEvent();
-            $subId = $event->getSubEventId();
+        $tickets = $this->ticketService->hydrateTickets($tickets);
 
-            if (strcasecmp($event->getEventType()->value, 'reservation') === 0) {
-                $session = $this->restaurantSessionService->getSessionById($subId);
-
-                if ($session) {
-                    $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
-
-                    if ($restaurant) {
-                        $restaurant->setSessionData($session);
-                        $event->setDetails($restaurant);
-                    }
-                }
-            }
-
-            if (strcasecmp($event->getEventType()->value, 'jazz') === 0) {
-                $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
-
-                if ($jazzEvent) {
-                    $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-                    $venueInfo = ($this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId()));
-
-                    $event->setDetails([
-                        'artist' => $artist,
-                        'venueInfo' => $venueInfo, 
-                        'jazzEvent' => $jazzEvent
-                    ]);
-                }
-            }
-
-            if (strcasecmp($event->getEventType()->value, 'jazzpass') === 0) {
-                $jazzPass = $this->jazzPassService->getPassById($subId);
-
-                if ($jazzPass) {
-                    $event->setDetails($jazzPass);
-                }
-            }
-
-            if (strcasecmp($event->getEventType()->value, 'tour') === 0) {
-                $historyEvent = $this->historyService->getSessionByEventId($event->getId());
-
-                if ($historyEvent) {
-                    $stops = $this->historyVenueRepository->getStopsByEventId($event->getId());
-
-                    if (!empty($stops)) {
-                        $firstStop = $stops[0];
-
-                        $venue = new HistoryVenueModel(
-                            (int)($firstStop['venueId'] ?? 0),
-                            $firstStop['venueName'] ?? '',
-                            $firstStop['details'] ?? null,
-                            $firstStop['location'] ?? null,
-                            isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null
-                        );
-
-                        $historyEvent->setVenue($venue);
-                    }
-
-                    $event->setDetails($historyEvent);
-                }
-            }
-            
-            if (strcasecmp($event->getEventType()->value, 'kids') === 0) {
-                $kidsEvent = $this->kidsEventService->getEventById($subId);
-                if ($kidsEvent) {
-                    $event->setDetails([
-                        'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
-                        'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
-                        'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
-                        'startTime' => $kidsEvent->getStartTime() ?? '10:00'
-                    ]);
-                }
-            }
-        }
         require __DIR__ . '/../Views/personalProgram/personalProgram.php';
     
     }

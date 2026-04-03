@@ -186,5 +186,5 @@ public function scan(): void
 
     fclose($output);
     exit;
-}
+}//import to excel
 }

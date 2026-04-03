@@ -1,8 +1,7 @@
-/* =========================================================
-   🎧 DANCE PAGE STYLES (Haarlem Festival - Dance Page)
-   ========================================================= */
+/* DANCE PAGE STYLES (Haarlem Festival - Dance Page)*/
+  
 
-/* ========== GLOBAL PAGE ========== */
+
 .dance-page {
     background: #f0d1cd;
     color: #fff;
@@ -71,7 +70,7 @@
  
 
 
-/* ========== SECTION BACKGROUNDS ========== */
+/*  SECTION BACKGROUNDS  */
 .dance-about-section,
 .dance-featured-section,
 .dance-schedule-section {
@@ -79,7 +78,7 @@
 }
 
 
-/* ========== ABOUT SECTION ========== */
+/*  ABOUT SECTION  */
 .dance-about-section {
     position: relative;
     padding: 82px 0 34px;
@@ -133,7 +132,7 @@
 }
 
 
-/* ========== FEATURED DJs SECTION ========== */
+/*  FEATURED DJs SECTION  */
 .dance-featured-section {
     padding: 22px 0 30px;
 }
@@ -191,9 +190,9 @@
 }
 
 
-/* =========================================================
-   🎨 GLOBAL BUTTON STYLE (MATCH FIGMA)
-   ========================================================= */
+/* 
+   GLOBAL BUTTON STYLE */
+  
 
 .dance-small-btn,
 .dance-filter-chip,
@@ -228,7 +227,7 @@
 }
 
 
-/* ========== SCHEDULE SECTION ========== */
+/*  SCHEDULE SECTION  */
 .dance-schedule-section {
     padding: 24px 0 36px;
 }
@@ -244,7 +243,7 @@
 }
 
 
-/* ========== FILTER CHIPS (TOP) ========== */
+/*  FILTER CHIPS */
 .dance-filter-row {
     display: flex;
     gap: 10px;
@@ -269,7 +268,7 @@
 }
 
 
-/* ========== DJ & VENUE FILTER BOX ========== */
+/* DJ & VENUE FILTER BOX  */
 .dance-filter-form {
     margin-bottom: 28px;
 }
@@ -334,7 +333,7 @@
 }
 
 
-/* ========== DAY BLOCKS ========== */
+/* DAY BLOCKS */
 .dance-day-block {
     margin-bottom: 34px;
 }
@@ -353,7 +352,7 @@
 }
 
 
-/* ========== EVENT CARDS ========== */
+/*  EVENT CARDS  */
 .dance-events-column {
     display: flex;
     flex-direction: column;
@@ -403,7 +402,7 @@
 }
 
 
-/* ========== PASS CARDS ========== */
+/*  PASS CARDS  */
 .dance-pass-column {
     display: flex;
     flex-direction: column;
@@ -435,13 +434,13 @@
 }
 
 
-/* ========== EMPTY STATES ========== */
+/*  EMPTY STATES */
 .dance-empty-text {
     color: #f6dfd6;
 }
 
 
-/* ========== RESPONSIVE ========== */
+/*  RESPONSIVE= */
 @media (max-width: 900px) {
     .dance-hero-grid,
     .dance-about-grid,
@@ -473,9 +472,9 @@
     margin: 0;
 }
 
-/* =========================================================
-   🎟 DANCE TICKET QUANTITY CONTROLS
-   ========================================================= */
+/* 
+    DANCE TICKET QUANTITY CONTROLS
+    */
 
 .dance-program-form {
     margin: 0;
@@ -524,9 +523,9 @@
 
 
 
-/* =========================================================
-   🎧 DANCE DETAIL PAGE - FIGMA STYLE
-   ========================================================= */
+/* 
+   DANCE DETAIL PAGE 
+    */
 
 .dance-detail-page {
     background: #f0d1cd;

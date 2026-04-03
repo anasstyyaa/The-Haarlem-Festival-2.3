@@ -1938,7 +1938,11 @@ body.admin-page #sidebar .nav-item {
 }
 
 
+
+
 /* section CMS */
+
+
 
 .admin-element-preview img {
     width: 100% !important;
@@ -1953,3 +1957,5 @@ body.admin-page #sidebar .nav-item {
 .admin-element-preview .section4 h1 {
     font-size: 1.2rem !important;
 }
+
+

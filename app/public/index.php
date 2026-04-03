@@ -239,8 +239,13 @@ switch ($routeInfo[0]) {
 
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
+
+          
+            $eventRepo = new App\Repositories\EventRepository();
+            $eventService = new App\Services\EventService($eventRepo);
+            $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $repository);
             
-            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService);
+            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService);
             $service = new \App\Services\UserService($repository, $authService);
             $controller = new $class($service, $authService, $ticketService);
         } elseif ($class === 'App\Controllers\RestaurantController') {
@@ -282,12 +287,13 @@ switch ($routeInfo[0]) {
 
             $userRepo = new App\Repositories\UserRepository();
             $eventRepo = new App\Repositories\EventRepository();
+            $eventService = new App\Services\EventService($eventRepo);
             $ticketRepo =  new \App\Repositories\TicketRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
-            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService);
-            $controller = new $class($personalProgramService, $restaurantService, $restaurantSessionService, $artistService, $jazzEventService, $jazzPassService, $ticketRepo, $kidsEventService, $ticketService);
+            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService);
+            $controller = new $class($ticketRepo, $ticketService);
         } elseif ($class === 'App\Controllers\PaymentController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
             $restaurantService = new \App\Services\Yummy\RestaurantService($restaurantRepo);

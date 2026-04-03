@@ -17,5 +17,6 @@ interface ITicketService
     public function getTicketsByOrderId(string $orderId): array;
     public function getUserTickets(int $userId): array;
     public function hydrateTickets(array $tickets): array;
+    public function addToProgram(array $data, ?int $userId): void; 
     
 }

@@ -100,7 +100,7 @@
                                             $venue = $details->getVenue()->getLocation();
                                             $title = "History Tour";
                                             $icon = 'bi-map';
-                                        } elseif ($type === 'kids' && $details instanceof \App\Models\KidsEventModel) {
+                                        } elseif ($type === 'kids' && $details instanceof \App\Models\KidsEventModel) { // fix details
                                             $title = $details->getType(); 
                                             $venue = $details->getLocation();                                                                               
                                             $startTime = $details->getDay() . ' ' . $details->getStartTime();

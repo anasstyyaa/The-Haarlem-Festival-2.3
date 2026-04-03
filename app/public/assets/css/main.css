@@ -1937,3 +1937,19 @@ body.admin-page #sidebar .nav-item {
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);      /* Red glow */
 }
 
+
+/* section CMS */
+
+.admin-element-preview img {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: cover;
+}
+/* This resets the 'Hero' height just for the admin preview box */
+.admin-element-preview .section4 {
+    height: 120px !important;
+    padding: 10px !important;
+}
+.admin-element-preview .section4 h1 {
+    font-size: 1.2rem !important;
+}

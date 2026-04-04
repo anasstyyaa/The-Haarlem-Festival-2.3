@@ -216,5 +216,29 @@ class TicketService implements ITicketService
       );
    }
 
+   public function updateProgramQuantity(int $itemId, string $action): void {
+      if (!isset($_SESSION['program'])) return;
+
+      /** @var \App\Models\PersonalProgram $program */
+      $program = $_SESSION['program'];
+      $tickets = $program->getTickets();
+
+      foreach ($tickets as $ticket) {
+         if ($ticket->getProgramItemId() === $itemId) {
+               $currentQty = $ticket->getNumberOfPeople();
+               
+               if ($action === 'increase') {
+                  $ticket->setNumberOfPeople($currentQty + 1);
+               } elseif ($action === 'decrease' && $currentQty > 1) {
+                  $ticket->setNumberOfPeople($currentQty - 1);
+               }
+               break;
+         }
+      }
+      
+      // saving back to session
+      $_SESSION['program'] = $program;
+   }
+
     
 }

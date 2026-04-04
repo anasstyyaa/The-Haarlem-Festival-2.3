@@ -74,6 +74,18 @@ class TicketController
         exit;
     }
 
+    public function updateQuantity() {
+        $itemId = $_POST['program_item_id'] ?? null;
+        $action = $_POST['action'] ?? null;
+
+        if ($itemId && $action) {
+            $this->ticketService->updateProgramQuantity($itemId, $action);
+        }
+
+        header('Location: /personalProgram');
+        exit;
+    }
+
     /**
  * Simple ticket scan method for employees
  */

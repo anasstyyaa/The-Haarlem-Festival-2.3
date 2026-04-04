@@ -36,9 +36,8 @@ $grandTotal = 0.0;
                             <th>Date</th>
                             <th>Time</th>
                             <th>Language</th>
-                            <th class="text-center">Guests</th>
                             <th class="text-center">Price</th>
-                            <th class="text-end pe-4">Action</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -159,12 +158,6 @@ $grandTotal = 0.0;
                                 <td><?= htmlspecialchars($startTime) ?></td>
                                 <td><?= htmlspecialchars($language) ?></td>
                                 <td class="text-center">
-                                    <span class="badge rounded-pill bg-light text-dark border px-3">
-                                        <i class="bi bi-people-fill me-1"></i>
-                                        <?= htmlspecialchars((string)$guestCount) ?>
-                                    </span>
-                                </td>
-                                <td class="text-center">
                                     <div class="fw-bold">€<?= number_format($ticket->getTotalPrice(), 2) ?></div>
                                     <?php if ($ticket->getNumberOfPeople() > 1): ?>
                                         <small class="text-muted">
@@ -173,13 +166,37 @@ $grandTotal = 0.0;
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <form method="POST" action="/removeTicket" onsubmit="return confirm('Remove this item from your Personal Program?');">
-                                        <input type="hidden" name="ticket_id" value="<?= $ticket->getProgramItemId() ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-1">
-                                            Delete
-                                            <i class="bi bi-trash3"></i>
-                                        </button>
-                                    </form>
+                                    <div class="d-flex align-items-center justify-content-end gap-3">
+                                        <div class="d-flex align-items-center bg-light border rounded-pill px-2 py-1">
+                                            <form method="POST" action="/updateTicketQuantity" class="m-0">
+                                                <input type="hidden" name="program_item_id" value="<?= $ticket->getProgramItemId() ?>">
+                                                <input type="hidden" name="action" value="decrease">
+                                                <button type="submit" class="btn btn-link btn-sm p-0 qty-hover-btn" 
+                                                        <?= $guestCount <= 1 ? 'disabled' : '' ?>>
+                                                    <i class="bi bi-dash-circle fs-5"></i>
+                                                </button>
+                                            </form>
+
+                                            <span class="mx-2 fw-bold" style="min-width: 20px; text-align: center; color: #000000;">
+                                                <?= htmlspecialchars((string)$guestCount) ?>
+                                            </span>
+
+                                            <form method="POST" action="/updateTicketQuantity" class="m-0">
+                                                <input type="hidden" name="program_item_id" value="<?= $ticket->getProgramItemId() ?>">
+                                                <input type="hidden" name="action" value="increase">
+                                                <button type="submit" class="btn btn-link btn-sm p-0 qty-hover-btn">
+                                                    <i class="bi bi-plus-circle-fill fs-5"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <form method="POST" action="/removeTicket" class="m-0" onsubmit="return confirm('Remove this item?');">
+                                            <input type="hidden" name="ticket_id" value="<?= $ticket->getProgramItemId() ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0">
+                                                <i class="bi bi-trash3 fs-5"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

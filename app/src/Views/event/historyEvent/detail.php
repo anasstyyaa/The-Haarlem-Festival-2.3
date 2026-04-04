@@ -1,4 +1,8 @@
 <?php
+use App\Models\HistoryVenueModel;
+
+/** @var HistoryVenueModel $venue */
+
 $bodyClass = 'history-detail';
 require __DIR__ . '/../../partials/header.php';
 ?>
@@ -6,7 +10,10 @@ require __DIR__ . '/../../partials/header.php';
 <div style="background-color: #3a0d00; min-height: 100vh; color: #f4d9c6;">
 
     <section class="jazz-hero">
-        <img src="<?= htmlspecialchars($venue->getImgURL()) ?>" alt="<?= htmlspecialchars($venue->getVenueName()) ?>">
+        <img
+    src="<?= htmlspecialchars($venue->getDetailImgURL() ?? $venue->getImgURL() ?? '/assets/images/history/hero.png') ?>"
+    alt="<?= htmlspecialchars($venue->getDetailAltText() ?? $venue->getVenueName()) ?>"
+>
 
         <div class="hero-overlay">
             <a href="/history" class="jazz-back mb-3">

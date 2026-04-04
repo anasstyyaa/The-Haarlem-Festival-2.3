@@ -121,6 +121,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('GET', '/history/booking', ['App\Controllers\HistoryController', 'booking']);
     $r->addRoute('POST', '/history/book', ['App\Controllers\HistoryController', 'book']);
 
+    $r->addRoute('GET', '/admin/history', ['App\Controllers\HistoryController', 'adminIndex']);
     $r->addRoute('GET', '/admin/history/venues', ['App\Controllers\HistoryController', 'adminVenues']);
     $r->addRoute('GET', '/admin/history/venues/create', ['App\Controllers\HistoryController', 'createVenue']);
     $r->addRoute('POST', '/admin/history/venues/create', ['App\Controllers\HistoryController', 'storeVenue']);

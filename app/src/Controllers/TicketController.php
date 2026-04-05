@@ -279,5 +279,35 @@ public function scan(): void
 
     fclose($output);
     exit;
-}//import to excel
+}
+ public function exportExcel(): void
+{
+    $tickets = $this->ticketRepository->getAllWithDetails();
+
+    $selectedColumns = array_intersect(
+        $_POST['columns'] ?? [],
+        array_keys($tickets[0] ?? [])
+    );
+    if (empty($selectedColumns)) {
+        header("Location: /admin");
+        exit;
+    }
+
+   header('Content-Type: application/vnd.ms-excel');
+header('Content-Disposition: attachment; filename="tickets.xls"');
+
+    $output = fopen('php://output', 'w');
+
+    fputcsv($output, $selectedColumns);
+
+    foreach ($tickets as $row) {
+        fputcsv(
+            $output,
+            array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+        );
+    }
+
+    fclose($output);
+    exit;
+}
 }

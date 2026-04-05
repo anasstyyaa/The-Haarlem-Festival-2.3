@@ -106,6 +106,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST',  '/admin/elements/store', ['App\Controllers\PageElementController', 'store']);
 
     $r->addRoute('POST',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
+    $r->addRoute('POST',  '/admin/export-excel', ['App\Controllers\TicketController', 'exportExcel']);
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);

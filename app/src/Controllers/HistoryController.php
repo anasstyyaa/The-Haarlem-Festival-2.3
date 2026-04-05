@@ -87,11 +87,21 @@ class HistoryController
     }
 
     public function booking(): void
-    {
-        $sessions = $this->service->getAllSessions();
+{
+    $sessions = $this->service->getAllSessions();
+    $stops = [];
 
-        require __DIR__ . '/../Views/event/historyEvent/booking.php';
+    foreach ($sessions as $session) {
+        $candidateStops = $this->service->getStopsByEventId($session->getEventId());
+        if (!empty($candidateStops)) {
+            $stops = $candidateStops;
+            break;
+        }
+
     }
+
+    require __DIR__ . '/../Views/event/historyEvent/booking.php';
+}
 
     public function book(): void
     {
@@ -444,5 +454,20 @@ class HistoryController
         }
 
         require __DIR__ . '/../Views/event/historyEvent/detail.php';
+    }
+    public function getStops($vars): void
+    {
+        $eventId = (int)($vars['id'] ?? 0);
+
+        if ($eventId <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid event id']);
+            return;
+        }
+
+        $stops = $this->service->getStopsByEventId($eventId);
+
+        header('Content-Type: application/json');
+        echo json_encode($stops);
     }
 }

@@ -19,4 +19,8 @@ interface IHistoryService
     public function createVenue(HistoryVenueModel $venue): bool;
     public function updateVenue(HistoryVenueModel $venue): bool;
     public function deleteVenue(int $venueId): bool;
-}
+    public function getStopsByEventId(int $eventId): array;
+        
+    }
+
+    

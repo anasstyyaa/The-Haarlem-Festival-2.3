@@ -131,6 +131,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
     $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
 
+    $r->addRoute('GET', '/history/stops/{id:\d+}', ['App\Controllers\HistoryController', 'getStops']);
 
     // Public Dance routes
     $r->addRoute('GET', '/dance', ['App\Controllers\DanceController', 'index']);

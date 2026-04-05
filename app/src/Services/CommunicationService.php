@@ -366,5 +366,44 @@ class CommunicationService implements ICommunicationService
 
         return "Check Schedule for Details";
     }
+    public function sendAccountChangeNotification(array $userData, array $changedFields): bool
+{
+    try {
+        $mail = new PHPMailer(true);
+
+        $mail->isSMTP();
+        $mail->Host = 'mailpit';
+        $mail->Port = 1025;
+        $mail->SMTPAuth = false;
+
+        $mail->setFrom('noreply@haarlemfestival.com', 'Haarlem Festival');
+        $mail->addAddress($userData['email'], $userData['full_name']);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Your Haarlem Festival account details were changed';
+
+        $changesHtml = '<ul style="margin: 10px 0 20px 20px;">';
+        foreach ($changedFields as $field) {
+            $changesHtml .= '<li>' . htmlspecialchars($field) . '</li>';
+        }
+        $changesHtml .= '</ul>';
+
+        $mail->Body = "
+            <div style='font-family: sans-serif; line-height: 1.6; color: #333;'>
+                <h2>Hello {$userData['full_name']},</h2>
+                <p>The following account details were recently updated:</p>
+                {$changesHtml}
+                <p>If you made this change, you do not need to do anything.</p>
+                <p>If you did <strong>not</strong> make this change, please reset your password immediately and contact support.</p>
+                <p>Regards,<br>Haarlem Festival</p>
+            </div>
+        ";
+
+        return $mail->send();
+    } catch (Exception $e) {
+        error_log("Account Change Email Error: " . $e->getMessage());
+        return false;
+    }
+}
 
 }

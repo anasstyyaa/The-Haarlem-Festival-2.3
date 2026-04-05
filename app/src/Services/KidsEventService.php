@@ -45,18 +45,18 @@ class KidsEventService implements IKidsEventService
 }
 public function mapDayToDate(string $dayName): ?string
 {
-    $dayName = strtolower(trim($dayName));
+  //  $dayName = strtolower(trim($dayName));
     $daysMap = [
-        'monday'    => 1,
-        'tuesday'   => 2,
-        'wednesday' => 3,
-        'thursday'  => 4,
-        'friday'    => 5,
-        'saturday'  => 6,
-        'sunday'    => 7,
+        'Monday'    => 1,
+        'Tuesday'   => 2,
+        'Wednesday' => 3,
+        'Thursday'  => 4,
+        'Friday'    => 5,
+        'Saturday'  => 6,
+        'Sunday'    => 7,
     ];
 
-    if (!isset($daysMap[$dayName])) return null;
+    //if (!isset($daysMap[$dayName])) return null;
 
     $today = (int)date('N'); 
     $targetDay = $daysMap[$dayName];

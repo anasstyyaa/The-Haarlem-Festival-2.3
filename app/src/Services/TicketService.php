@@ -37,7 +37,7 @@ class TicketService implements ITicketService
 
    public function getByToken(string $token): ?array 
    {
-   return $this->getByToken($token);
+   return $this->ticketRepository->getByToken($token);
    }
    
    public function markAsScanned(string $token): bool  
@@ -153,8 +153,8 @@ class TicketService implements ITicketService
                   $event->setDetails([
                      'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
                      'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
-                     'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
-                     'startTime' => $kidsEvent->getStartTime() ?? '10:00'
+                     'date' => $kidsEvent->getEventDate(),
+                     'startTime' => $kidsEvent->getStartTime() ?? '17:00'
                   ]);
                }
          }

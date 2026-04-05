@@ -43,8 +43,8 @@ class KidsEventRepository extends Repository implements IKidsEventRepository
 
     public function create(KidsEventModel $event): bool
     {
-        $sql = "INSERT INTO KidsEvent (day, startTime, endTime, type, location, [limit]) 
-        VALUES (:day, :startTime, :endTime, :type, :location, :limit)";
+        $sql = "INSERT INTO KidsEvent (day, startTime, endTime, type, location, [limit], eventDate) 
+                VALUES (:day, :startTime, :endTime, :type, :location, :limit, :eventDate)";
 
         $stmt = $this->connection->prepare($sql);
        return $stmt->execute([
@@ -53,16 +53,18 @@ class KidsEventRepository extends Repository implements IKidsEventRepository
     'endTime'   => $event->getEndTime(),
     'type'      => $event->getType(),
     'location'  => $event->getLocation(),
-    'limit'     => $event->getLimit()
+    'limit'     => $event->getLimit(),
+    'eventDate' => $event->getEventDate()
       ]);
     }
 
     public function update(KidsEventModel $event): bool
     {
-       $sql = "UPDATE KidsEvent 
-        SET day = :day, startTime = :startTime, endTime = :endTime, 
-            type = :type, location = :location, [limit] = :limit
-        WHERE id = :id";
+      $sql = "UPDATE KidsEvent 
+              SET day = :day, startTime = :startTime, endTime = :endTime, 
+              type = :type, location = :location, [limit] = :limit,
+              eventDate = :eventDate
+              WHERE id = :id";
 
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
@@ -72,7 +74,8 @@ class KidsEventRepository extends Repository implements IKidsEventRepository
             'type'      => $event->getType(),
             'location'  => $event->getLocation(),
             'id'        => $event->getId(),
-            'limit' => $event->getLimit()
+            'limit' => $event->getLimit(), 
+             'eventDate' => $event->getEventDate()
         ]);
     }
 
@@ -85,14 +88,15 @@ class KidsEventRepository extends Repository implements IKidsEventRepository
 
     private function mapToModel(array $row): KidsEventModel
     {
-       return new KidsEventModel(
-    (int)($row['id'] ?? 0),
-    $row['day'] ?? '',
-    $row['startTime'] ?? '',
-    $row['endTime'] ?? '',
-    $row['type'] ?? 'Teylers Secret',
-    $row['location'] ?? 'Teylers Museum, Haarlem',
-    (int)($row['limit'] ?? 0)
-     );
+    return new KidsEventModel(
+    (int)$row['id'],
+    $row['day'],
+    $row['startTime'],
+    $row['endTime'],
+    $row['type'],
+    $row['location'],
+    (int)$row['limit'],
+    $row['eventDate'] 
+);
     }
 }

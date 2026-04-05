@@ -100,11 +100,13 @@
                                             $venue = $details->getVenue()->getLocation();
                                             $title = "History Tour";
                                             $icon = 'bi-map';
-                                        } elseif ($type === 'kids' && $details instanceof \App\Models\KidsEventModel) { // fix details
-                                            $title = $details->getType(); 
-                                            $venue = $details->getLocation();                                                                               
-                                            $startTime = $details->getDay() . ' ' . $details->getStartTime();
-                                            $icon = 'bi-balloon-heart';
+                                        } elseif ($type === 'kids' && is_array($details)) {
+    $title = $details['name'];
+    $venue = $details['location'];
+    //$startTime = $details['startTime'];
+    $startTime = $details['date'] . ' ' . $details['startTime'];
+    $icon = 'bi-balloon-heart';
+
                                         }
                                     ?>
                                     <tr class="ticket-row-styled">

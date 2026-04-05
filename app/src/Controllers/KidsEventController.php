@@ -77,12 +77,13 @@ public function edit(array $vars): void
 public function save(): void
 {
     $id        = $_POST['id'] ?? null;
-    $day       = $_POST['day'] ?? '';
     $startTime = $_POST['startTime'] ?? '';
     $endTime   = $_POST['endTime'] ?? '';
     $type = $_POST['type'] ?? '';
     $location = $_POST['location'] ?? '';
     $limit = (int)($_POST['limit'] ?? 0);
+    $eventDate = $_POST['eventDate'] ?? '';
+   $day = date('l', strtotime($eventDate));
 
     $event = new KidsEventModel(
        $id ? (int)$id : 0,
@@ -91,7 +92,8 @@ public function save(): void
        $endTime,
        $type,
        $location,
-       $limit
+       $limit,
+    $eventDate
           );
 
     if ($id) {
@@ -153,7 +155,7 @@ public function delete(): void
 
         // 📸 HANDLE IMAGE UPLOAD
         if (!empty($_FILES['image']['name'])) {
-            $uploadDir = __DIR__ . '/../../public/uploads/';
+            $uploadDir = __DIR__ . '/../../public/assets/images';
 
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
@@ -163,7 +165,7 @@ public function delete(): void
             $targetPath = $uploadDir . $fileName;
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                $event->setImageUrl('/uploads/' . $fileName);
+                $event->setImageUrl('/assets/images/' . $fileName);
             }
         }
 

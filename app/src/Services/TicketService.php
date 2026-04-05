@@ -42,7 +42,7 @@ class TicketService implements ITicketService
 
    public function getByToken(string $token): ?array 
    {
-   return $this->getByToken($token);
+   return $this->ticketRepository->getByToken($token);
    }
    
    public function markAsScanned(string $token): bool  
@@ -158,8 +158,8 @@ class TicketService implements ITicketService
                   $event->setDetails([
                      'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
                      'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
-                     'date'      => $this->kidsEventService->mapDayToDate($kidsEvent->getDay() ?? ''), 
-                     'startTime' => $kidsEvent->getStartTime() ?? '10:00'
+                     'date' => $kidsEvent->getEventDate(),
+                     'startTime' => $kidsEvent->getStartTime() ?? '17:00'
                   ]);
                }
          }
@@ -214,6 +214,30 @@ class TicketService implements ITicketService
          $userId,
          $programItemId
       );
+   }
+
+   public function updateProgramQuantity(int $itemId, string $action): void {
+      if (!isset($_SESSION['program'])) return;
+
+      /** @var \App\Models\PersonalProgram $program */
+      $program = $_SESSION['program'];
+      $tickets = $program->getTickets();
+
+      foreach ($tickets as $ticket) {
+         if ($ticket->getProgramItemId() === $itemId) {
+               $currentQty = $ticket->getNumberOfPeople();
+               
+               if ($action === 'increase') {
+                  $ticket->setNumberOfPeople($currentQty + 1);
+               } elseif ($action === 'decrease' && $currentQty > 1) {
+                  $ticket->setNumberOfPeople($currentQty - 1);
+               }
+               break;
+         }
+      }
+      
+      // saving back to session
+      $_SESSION['program'] = $program;
    }
 
     

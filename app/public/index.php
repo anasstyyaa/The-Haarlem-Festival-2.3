@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 session_start();
 error_reporting(E_ALL);
@@ -84,6 +84,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // Ticket and Personal Program + Kids Event routes
     $r->addRoute('POST',  '/addTicket', ['App\Controllers\TicketController', 'addTicket']);
     $r->addRoute('POST', '/removeTicket', ['App\Controllers\TicketController', 'removeTicket']);
+    $r->addRoute('POST', '/updateTicketQuantity', ['App\Controllers\TicketController', 'updateQuantity']);
     $r->addRoute('GET',  '/kidsEvent', ['App\Controllers\KidsEventController', 'index']);
     $r->addRoute('GET',  '/personalProgram', ['App\Controllers\TicketController', 'index']);
     $r->addRoute('GET',  '/admin/kidsPage', ['App\Controllers\KidsEventController', 'adminIndex']);
@@ -106,6 +107,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST',  '/admin/elements/store', ['App\Controllers\PageElementController', 'store']);
 
     $r->addRoute('POST',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
+    $r->addRoute('POST',  '/admin/export-excel', ['App\Controllers\TicketController', 'exportExcel']);
 
     // Yummy / Restaurant Routes
     $r->addRoute('GET', '/yummy', ['App\Controllers\RestaurantController', 'index']);

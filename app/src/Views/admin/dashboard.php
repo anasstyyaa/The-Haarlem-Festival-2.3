@@ -50,8 +50,24 @@
 <div class="top-bar">
     <h1>Tickets Dashboard</h1>
 
-    <a href="/admin/export-csv" class="export-btn">⬇ Export CSV</a>
+    <a href="/admin/export-csv" class="export-btn">Export CSV</a>
+     <a href="/admin/export-excel" class="export-btn">Export Excel</a>
 </div>
+<form method="POST" action="/admin/export-excel">
+    <div style="margin-bottom:10px;">
+        <label><input type="checkbox" name="columns[]" value="id" checked> ID</label>
+        <label><input type="checkbox" name="columns[]" value="FullName" checked> User</label>
+        <label><input type="checkbox" name="columns[]" value="Email" checked> Email</label>
+        <label><input type="checkbox" name="columns[]" value="eventType" checked> Event Type</label>
+        <label><input type="checkbox" name="columns[]" value="number_of_people"> People</label>
+        <label><input type="checkbox" name="columns[]" value="unit_price"> Unit Price</label>
+        <label><input type="checkbox" name="columns[]" value="total_price" checked> Total</label>
+        <label><input type="checkbox" name="columns[]" value="status" checked> Status</label>
+        <label><input type="checkbox" name="columns[]" value="is_scanned"> Scanned</label>
+        <label><input type="checkbox" name="columns[]" value="created_at"> Created</label>
+    </div>
+    <button type="submit" class="export-btn">Export Selected to Excel</button>
+</form>
 <form method="POST" action="/admin/export-csv">
     <div style="margin-bottom:10px;">
         <label><input type="checkbox" name="columns[]" value="id" checked> ID</label>
@@ -66,7 +82,7 @@
         <label><input type="checkbox" name="columns[]" value="created_at"> Created</label>
     </div>
 
-    <button type="submit" class="export-btn">⬇ Export Selected</button>
+    <button type="submit" class="export-btn">Export Selected to CSV</button>
 </form>
 
 <table class="admin-table">

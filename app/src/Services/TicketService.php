@@ -15,6 +15,9 @@ use App\Services\Interfaces\IArtistService;
 use App\Services\Interfaces\IJazzPassService;
 use App\Models\HistoryVenueModel;
 
+use App\Services\Interfaces\IEventService;
+use App\Services\Interfaces\IPersonalProgramService;
+
 
 class TicketService implements ITicketService
 {
@@ -27,7 +30,9 @@ class TicketService implements ITicketService
       private IKidsEventService $kidsEventService,
       private IHistoryVenueRepository $historyVenueRepository,
       private IArtistService $artistService,
-      private IJazzPassService $jazzPassService
+      private IJazzPassService $jazzPassService,
+      private IEventService $eventService, 
+      private IPersonalProgramService $programService 
     ) {}
 
    public function savePaidTicket(TicketModel $ticket, string $stripeId): bool
@@ -161,6 +166,78 @@ class TicketService implements ITicketService
       }
 
       return $tickets;
+   }
+
+   public function addToProgram(array $data, ?int $userId): void
+   {
+      $subEventId = (int)($data['event_id'] ?? 0);
+      $numberOfPeople = (int)($data['number_of_people'] ?? 1);
+      $eventType = $data['event_type'] ?? '';
+      $programItemId = $data['program_item_id'] ?? null;
+
+      // yummy 
+      if (strcasecmp($eventType, 'reservation') === 0) {
+         if ($programItemId) {
+               $subEventId = (int)$programItemId; 
+         } else {
+               throw new \Exception("Please select a specific time slot.");
+         }
+      }
+
+      // jazz
+      if (strcasecmp($eventType, 'jazz') === 0) {
+         $jazzEvent = $this->jazzEventService->getJazzEventById($subEventId);
+         if (!$jazzEvent || $jazzEvent->getTicketsLeft() < $numberOfPeople) {
+               $remaining = $jazzEvent ? $jazzEvent->getTicketsLeft() : 0;
+               throw new \Exception("Sorry, there are only $remaining tickets left for this jazz event.");
+         }
+      }
+
+      // jazz pass
+      if (strcasecmp($eventType, 'jazzpass') === 0) {
+         $jazzPass = $this->jazzPassService->getPassById($subEventId);
+         if (!$jazzPass || $jazzPass->getTicketsLeft() < $numberOfPeople) {
+               $remaining = $jazzPass ? $jazzPass->getTicketsLeft() : 0;
+               throw new \Exception("Sorry, there are only $remaining passes left.");
+         }
+      }
+
+      $eventId = $this->eventService->checkEventType($subEventId, $eventType);
+
+      if ($eventId === 0) {
+         throw new \Exception("Configuration Error: No Event found for Type: $eventType.");
+      }
+     
+      $this->programService->addTicketToProgram(
+         $eventId,
+         $numberOfPeople,
+         $userId,
+         $programItemId
+      );
+   }
+
+   public function updateProgramQuantity(int $itemId, string $action): void {
+      if (!isset($_SESSION['program'])) return;
+
+      /** @var \App\Models\PersonalProgram $program */
+      $program = $_SESSION['program'];
+      $tickets = $program->getTickets();
+
+      foreach ($tickets as $ticket) {
+         if ($ticket->getProgramItemId() === $itemId) {
+               $currentQty = $ticket->getNumberOfPeople();
+               
+               if ($action === 'increase') {
+                  $ticket->setNumberOfPeople($currentQty + 1);
+               } elseif ($action === 'decrease' && $currentQty > 1) {
+                  $ticket->setNumberOfPeople($currentQty - 1);
+               }
+               break;
+         }
+      }
+      
+      // saving back to session
+      $_SESSION['program'] = $program;
    }
 
     

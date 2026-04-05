@@ -85,10 +85,13 @@
                                         } elseif ($type === 'jazz' && is_array($details)) {
                                             $jazzEvent = $details['jazzEvent'] ?? null;
                                             $artist = $details['artist'] ?? null;
-                                            $venueInfo = $details['venueInfo'] ?? $details['venue'] ?? null;
-                                            $startTime = $jazzEvent instanceof \App\Models\JazzEventModel ? $jazzEvent->getStartDateTime() : 'TBD';
-                                            $title = $artist instanceof \App\Models\ArtistModel ? $artist->getName() : 'Jazz Artist';
-                                            $venue = is_array($venueInfo) ? ($venueInfo['name'] ?? 'Jazz Venue') : 'Jazz Venue';
+                                            $venueInfo = $details['venueInfo'] ?? null;
+                                            $startTime = $jazzEvent ? $jazzEvent->getStartDateTime() : 'TBD';
+                                            $title = $artist ? $artist->getName() : 'Jazz Artist';
+                                            $venue = $venueInfo['VenueName'] ?? 'Jazz Venue';
+                                            if (!empty($venueInfo['HallName'])) {
+                                                $venue .= " - " . $venueInfo['HallName'];
+                                            }
                                             $icon = 'bi-music-note-beamed';
                                         } elseif ($type === 'reservation' && $details instanceof \App\Models\Yummy\RestaurantModel) {
                                             $startTime = $details->getSessionData()->getStartTime();

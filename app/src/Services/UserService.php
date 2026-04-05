@@ -33,7 +33,7 @@ class UserService implements IUserService
 
     public function createUser(UserModel $user, string $password, ?array $file): void
     {
-        $this->validateUser($user, $password, true);
+        $this->authService->validateUser($user, $password, true);
 
         if ($file && $file['error'] === UPLOAD_ERR_OK) {
             $imgName = $this->handleSecureUpload($file, 'user'); 
@@ -54,7 +54,7 @@ class UserService implements IUserService
 
     public function updateUser(UserModel $user, ?array $file = null): void
     {
-        $this->validateUser($user, '', false);
+        $this->authService->validateUser($user, '', false);
 
         if ($file && $file['error'] === UPLOAD_ERR_OK) {
             $imgName = $this->handleSecureUpload($file, 'user');
@@ -75,7 +75,7 @@ class UserService implements IUserService
         $user->setFullName(trim($data['fullName'] ?? $user->getFullName()));
         $user->setPhoneNumber(trim($data['phoneNumber'] ?? $user->getPhoneNumber()));
 
-        $this->validateUser($user, '', false);
+        $this->authService->validateUser($user, '', false);
 
         // checking if the email changed, and if so, if it's taken by someone else
         if (strtolower($data['email']) !== strtolower($user->getEmail()) && 
@@ -126,33 +126,6 @@ class UserService implements IUserService
     public function getFilteredUsers(string $search = '', string $role = '', string $sort = ''): array
     {
         return $this->userRepository->getAllFiltered($search, $role, $sort);
-    }
-
-    private function validateUser(UserModel $user, string $password, bool $isNew): void
-    {
-
-        if (!filter_var($user->getEmail(), FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException("Invalid email format.");
-        }
-
-        if ($isNew && $this->authService->emailExists($user->getEmail())) {
-            throw new InvalidArgumentException("Email is already in use.");
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $user->getUserName())) {
-            throw new InvalidArgumentException("Username must be 3-20 alphanumeric characters.");
-        }
-
-        if ($isNew) {
-            if (strlen($password) < 8 || !preg_match('/[0-9]/', $password)) {
-                throw new InvalidArgumentException("Password must be at least 8 characters and include a number.");
-            }
-        }
-
-        $allowedRoles = ['Admin', 'User', 'Editor'];
-        if (!in_array($user->getRole(), $allowedRoles)) {
-            throw new InvalidArgumentException("Invalid role assigned.");
-        }
     }
 
     private function handleSecureUpload(array $file, string $prefix): ?string

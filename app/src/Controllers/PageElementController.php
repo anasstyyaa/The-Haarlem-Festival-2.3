@@ -66,7 +66,7 @@ class PageElementController
        $id = (int)$vars['id'];
        $newText = $_POST['newText'];
        $this->textService->saveTextChanges($id, $newText);
-      header('Location: /admin/kidsPage');
+      header('Location: /admin/home/index');
     }
 
     // public function update(array $vars): void
@@ -91,17 +91,18 @@ class PageElementController
     //     exit;
     // }
 
-    // public function delete(array $vars): void
-    // {
-    //     $id = (int)$vars['id'];
+    public function delete(array $vars): void
+    {
+        $id = (int)$vars['id'];
+        $type = $vars['type'];
 
-    //     if ($this->service->deleteElement($id)) {
-    //         header('Location: /admin/page-elements');
-    //         exit;
-    //     }
+        if ($this->service->delete($id, $type)) {
+            header('Location: /admin/home/index');
+            exit;
+        }
 
-    //     echo "Error deleting element.";
-    // }
+        echo "Error deleting element.";
+    }
     public function saveImgChanges(array $vars): void
 {
     $id = (int)$vars['id'];
@@ -114,19 +115,19 @@ class PageElementController
     $file = $_FILES['image'];
 
     $fileName = uniqid() . '_' . basename($file['name']);
-    $targetPath = __DIR__ . '/../../public/assets/images' . $fileName;
+    $targetPath = __DIR__ . '/../../public/assets/images/' . $fileName;
 
     if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
         echo "Failed to move uploaded file.";
         return;
     }
 
-    $imgURL = '/assets/images' . $fileName;
+    $imgURL = '/assets/images/' . $fileName;
     $altText = $_POST['altText'] ?? '';
 
     $this->imgService->updateImage($id, $imgURL, $altText);
 
-    header('Location: /admin/kidsPage');
+    header('Location: /admin/home/index');
     exit;
 }
 public function createForm(): void
@@ -155,7 +156,7 @@ public function createForm(): void
             $_POST
         );
 
-        header("Location: /admin/home");
+        header("Location: /admin/home/index");
         exit;
     }
 }

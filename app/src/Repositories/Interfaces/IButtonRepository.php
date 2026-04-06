@@ -10,5 +10,6 @@ interface IButtonRepository
 
     public function mapToModel(array $row): ButtonModel;
     public function saveButtonTextChanges($id, $newText);
+    public function delete(int $id):bool;
 
 }

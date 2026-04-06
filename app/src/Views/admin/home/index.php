@@ -114,11 +114,18 @@ foreach ($vm->getSections() as $section => $elements): ?>
                                         <i class="bi bi-pencil"></i> Edit
                                     </a> <?php } ?>
 
-<form method="POST" action="/admin/elements/delete"
-onsubmit="return confirm('Delete this element?')">
-<input type="hidden" name="id" value="<?= $element->getId() ?>">
-<button class="delete-btn">Delete</button>
-</form>
+
+<?php if($element instanceof TextModel){ ?>
+ <a href="/admin/elements/delete/text/<?= $element->getId() ?>" class="delete-btn">
+                                         Delete Text
+                                    </a>
+                                    <?php } elseif($element instanceof ImageModel){?>
+                                   <a href="/admin/elements/delete/image/<?= $element->getId() ?>" class="delete-btn">
+                                        Delete Image
+                                    </a>  <?php } elseif($element instanceof ButtonModel){?>
+                                   <a href="/admin/elements/delete/button/<?= $element->getId() ?>" class="delete-btn">
+                                         Delete Button
+                                    </a> <?php } ?>
 
 </div>
 </td>
@@ -133,7 +140,7 @@ onsubmit="return confirm('Delete this element?')">
 <div style="text-align:center;">
 <form method="GET" action="/admin/elements/createForm">
      <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
-    <input type="hidden" name="pageName" value="<?= htmlspecialchars($pageName) ?>">
+    <input type="hidden" name="pageName" value="home">
     
     <select name="type">
         <option value="text">Text</option>

@@ -36,4 +36,12 @@ class ButtonRepository extends Repository implements IButtonRepository
             'text' => $newText
         ]);
     }
+    public function delete(int $id):bool
+    {
+        $sql = "DELETE FROM button WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+
+        return $stmt->execute(['id' => $id]);
+    }
 }

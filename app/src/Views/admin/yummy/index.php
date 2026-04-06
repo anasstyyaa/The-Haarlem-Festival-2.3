@@ -69,7 +69,7 @@ use App\Models\ButtonModel;
     <div class="card-footer bg-white py-3">
         <form method="GET" action="/admin/elements/createForm" class="row g-2 align-items-center justify-content-center">
             <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
-            <input type="hidden" name="pageName" value="<?= htmlspecialchars($pageName) ?>">
+            <input type="hidden" name="pageName" value="yummy">
             
             <div class="col-auto">
                 <label class="small fw-bold text-muted">Add New:</label>

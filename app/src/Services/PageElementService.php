@@ -96,4 +96,18 @@ public function createElement(string $type,int $section,string $pageName,array $
         $position
     );
 }
+ public function delete(int $id, $type):bool{
+    switch ($type) {
+    case 'text':
+        $this->textRepo->delete($id);
+        break;
+     case 'image':
+        $this->imageRepo->delete($id);
+        break;
+     case 'button':
+        $this->buttonRepo->delete($id);
+        break;
+}
+    return $this->pageElementRepository->delete($id, $type);
+ }
 }

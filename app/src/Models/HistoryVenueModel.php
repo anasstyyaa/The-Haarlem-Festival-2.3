@@ -90,4 +90,5 @@ class HistoryVenueModel
     {
         return $this->detailAltText;
     }
+    
 }

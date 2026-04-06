@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Services;
 
 use App\Services\Interfaces\ITicketService;
@@ -31,36 +32,36 @@ class TicketService implements ITicketService
       private IHistoryVenueRepository $historyVenueRepository,
       private IArtistService $artistService,
       private IJazzPassService $jazzPassService,
-      private IEventService $eventService, 
-      private IPersonalProgramService $programService 
-    ) {}
+      private IEventService $eventService,
+      private IPersonalProgramService $programService
+   ) {}
 
    public function savePaidTicket(TicketModel $ticket, string $stripeId): bool
    {
       return $this->ticketRepository->savePaidTicket($ticket, $stripeId);
    }
 
-   public function getByToken(string $token): ?array 
+   public function getByToken(string $token): ?array
    {
-   return $this->ticketRepository->getByToken($token);
+      return $this->ticketRepository->getByToken($token);
    }
-   
-   public function markAsScanned(string $token): bool  
+
+   public function markAsScanned(string $token): bool
    {
       return $this->ticketRepository->markAsScanned($token);
    }
 
-   public function savePendingTicket(TicketModel $ticket, string $tempOrderId): bool 
+   public function savePendingTicket(TicketModel $ticket, string $tempOrderId): bool
    {
       return $this->ticketRepository->savePendingTicket($ticket, $tempOrderId);
    }
 
-   public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool 
+   public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool
    {
-      return $this->ticketRepository->updateTicketsToPaid($orderId,$actualStripeId);
+      return $this->ticketRepository->updateTicketsToPaid($orderId, $actualStripeId);
    }
 
-   public function markAsExpired(string $orderId): bool 
+   public function markAsExpired(string $orderId): bool
    {
       return $this->ticketRepository->markAsExpired($orderId);
    }
@@ -75,9 +76,9 @@ class TicketService implements ITicketService
       return $this->ticketRepository->getAllWithDetails();
    }
 
-   public function getTicketsByOrderId(string $orderId): array 
+   public function getTicketsByOrderId(string $orderId): array
    {
-   return $this->ticketRepository->getTicketsByOrderId($orderId);
+      return $this->ticketRepository->getTicketsByOrderId($orderId);
    }
 
    public function getUserTickets(int $userId): array
@@ -93,75 +94,79 @@ class TicketService implements ITicketService
          $subId = $event->getSubEventId();
 
          if (strcasecmp($event->getEventType()->value, 'reservation') === 0) {
-               $session = $this->restaurantSessionService->getSessionById($subId);
+            $session = $this->restaurantSessionService->getSessionById($subId);
 
-               if ($session) {
-                  $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
+            if ($session) {
+               $restaurant = $this->restaurantService->getRestaurantById($session->getRestaurantId());
 
-                  if ($restaurant) {
-                     $restaurant->setSessionData($session);
-                     $event->setDetails($restaurant);
-                  }
+               if ($restaurant) {
+                  $restaurant->setSessionData($session);
+                  $event->setDetails($restaurant);
                }
+            }
          }
 
          if (strcasecmp($event->getEventType()->value, 'jazz') === 0) {
-               $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
+            $jazzEvent = $this->jazzEventService->getJazzEventById($subId);
 
-               if ($jazzEvent) {
-                  $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-                  $venueInfo = ($this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId()));
+            if ($jazzEvent) {
+               $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
+               $venueInfo = ($this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId()));
 
-                  $event->setDetails([
-                     'artist' => $artist,
-                     'venueInfo' => $venueInfo, 
-                     'jazzEvent' => $jazzEvent
-                  ]);
-               }
+               $event->setDetails([
+                  'artist' => $artist,
+                  'venueInfo' => $venueInfo,
+                  'jazzEvent' => $jazzEvent
+               ]);
+            }
          }
 
          if (strcasecmp($event->getEventType()->value, 'jazzpass') === 0) {
-               $jazzPass = $this->jazzPassService->getPassById($subId);
+            $jazzPass = $this->jazzPassService->getPassById($subId);
 
-               if ($jazzPass) {
-                  $event->setDetails($jazzPass);
-               }
+            if ($jazzPass) {
+               $event->setDetails($jazzPass);
+            }
          }
 
          if (strcasecmp($event->getEventType()->value, 'tour') === 0) {
-               $historyEvent = $this->historyService->getSessionByEventId($event->getId());
+            $historyEventId = $event->getSubEventId();
 
-               if ($historyEvent) {
-                  $stops = $this->historyVenueRepository->getStopsByEventId($event->getId());
+            $historyEvent = $this->historyService->getSessionByEventId($historyEventId);
 
-                  if (!empty($stops)) {
-                     $firstStop = $stops[0];
+            if ($historyEvent) {
+               $stops = $this->historyVenueRepository->getStopsByEventId($historyEventId);
 
-                     $venue = new HistoryVenueModel(
-                           (int)($firstStop['venueId'] ?? 0),
-                           $firstStop['venueName'] ?? '',
-                           $firstStop['details'] ?? null,
-                           $firstStop['location'] ?? null,
-                           isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null
-                     );
+               if (!empty($stops)) {
+                  $firstStop = $stops[0];
 
-                     $historyEvent->setVenue($venue);
-                  }
+                  $venue = new HistoryVenueModel(
+                     (int)($firstStop['venueId'] ?? 0),
+                     $firstStop['venueName'] ?? '',
+                     $firstStop['details'] ?? null,
+                     $firstStop['location'] ?? null,
+                     isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null,
+                     $firstStop['imgURL'] ?? null,
+                     $firstStop['altText'] ?? null
+                  );
 
-                  $event->setDetails($historyEvent);
+                  $historyEvent->setVenue($venue);
                }
+
+               $event->setDetails($historyEvent);
+            }
          }
-         
+
          if (strcasecmp($event->getEventType()->value, 'kids') === 0) {
-               $kidsEvent = $this->kidsEventService->getEventById($subId);
-               if ($kidsEvent) {
-                  $event->setDetails([
-                     'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
-                     'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
-                     'date' => $kidsEvent->getEventDate(),
-                     'startTime' => $kidsEvent->getStartTime() ?? '17:00'
-                  ]);
-               }
+            $kidsEvent = $this->kidsEventService->getEventById($subId);
+            if ($kidsEvent) {
+               $event->setDetails([
+                  'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
+                  'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
+                  'date' => $kidsEvent->getEventDate(),
+                  'startTime' => $kidsEvent->getStartTime() ?? '17:00'
+               ]);
+            }
          }
       }
 
@@ -178,9 +183,9 @@ class TicketService implements ITicketService
       // yummy 
       if (strcasecmp($eventType, 'reservation') === 0) {
          if ($programItemId) {
-               $subEventId = (int)$programItemId; 
+            $subEventId = (int)$programItemId;
          } else {
-               throw new \Exception("Please select a specific time slot.");
+            throw new \Exception("Please select a specific time slot.");
          }
       }
 
@@ -188,8 +193,8 @@ class TicketService implements ITicketService
       if (strcasecmp($eventType, 'jazz') === 0) {
          $jazzEvent = $this->jazzEventService->getJazzEventById($subEventId);
          if (!$jazzEvent || $jazzEvent->getTicketsLeft() < $numberOfPeople) {
-               $remaining = $jazzEvent ? $jazzEvent->getTicketsLeft() : 0;
-               throw new \Exception("Sorry, there are only $remaining tickets left for this jazz event.");
+            $remaining = $jazzEvent ? $jazzEvent->getTicketsLeft() : 0;
+            throw new \Exception("Sorry, there are only $remaining tickets left for this jazz event.");
          }
       }
 
@@ -197,8 +202,8 @@ class TicketService implements ITicketService
       if (strcasecmp($eventType, 'jazzpass') === 0) {
          $jazzPass = $this->jazzPassService->getPassById($subEventId);
          if (!$jazzPass || $jazzPass->getTicketsLeft() < $numberOfPeople) {
-               $remaining = $jazzPass ? $jazzPass->getTicketsLeft() : 0;
-               throw new \Exception("Sorry, there are only $remaining passes left.");
+            $remaining = $jazzPass ? $jazzPass->getTicketsLeft() : 0;
+            throw new \Exception("Sorry, there are only $remaining passes left.");
          }
       }
 
@@ -207,7 +212,7 @@ class TicketService implements ITicketService
       if ($eventId === 0) {
          throw new \Exception("Configuration Error: No Event found for Type: $eventType.");
       }
-     
+
       $this->programService->addTicketToProgram(
          $eventId,
          $numberOfPeople,
@@ -216,7 +221,8 @@ class TicketService implements ITicketService
       );
    }
 
-   public function updateProgramQuantity(int $itemId, string $action): void {
+   public function updateProgramQuantity(int $itemId, string $action): void
+   {
       if (!isset($_SESSION['program'])) return;
 
       /** @var \App\Models\PersonalProgram $program */
@@ -225,20 +231,18 @@ class TicketService implements ITicketService
 
       foreach ($tickets as $ticket) {
          if ($ticket->getProgramItemId() === $itemId) {
-               $currentQty = $ticket->getNumberOfPeople();
-               
-               if ($action === 'increase') {
-                  $ticket->setNumberOfPeople($currentQty + 1);
-               } elseif ($action === 'decrease' && $currentQty > 1) {
-                  $ticket->setNumberOfPeople($currentQty - 1);
-               }
-               break;
+            $currentQty = $ticket->getNumberOfPeople();
+
+            if ($action === 'increase') {
+               $ticket->setNumberOfPeople($currentQty + 1);
+            } elseif ($action === 'decrease' && $currentQty > 1) {
+               $ticket->setNumberOfPeople($currentQty - 1);
+            }
+            break;
          }
       }
-      
+
       // saving back to session
       $_SESSION['program'] = $program;
    }
-
-    
 }

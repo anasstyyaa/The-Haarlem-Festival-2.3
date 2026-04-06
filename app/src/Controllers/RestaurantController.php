@@ -44,15 +44,14 @@ class RestaurantController extends Controller {
     }
 
     public function store() {
+        $this->requireAdmin();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $fileName = $this->service->uploadImage($_FILES['image_file'] ?? null);
-    
                 if ($this->service->processNewRestaurant($_POST, $fileName)) {
-                    header('Location: /admin/yummy?status=created');
-                    exit;
+                    $this->redirect('/admin/yummy', 'Restaurant created successfully!');
                 }
-                throw new Exception("Could not save restaurant to database.");
             } catch (Exception $e) {
                 error_log("Store Restaurant Error: " . $e->getMessage());
                 $error = $e->getMessage();
@@ -67,6 +66,7 @@ class RestaurantController extends Controller {
 
 
     public function update($vars) {
+        $this->requireAdmin();
         $id = (int)$vars['id'];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -74,10 +74,8 @@ class RestaurantController extends Controller {
                 $newImage = $this->service->uploadImage($_FILES['image_file'] ?? null);
                     
                 if ($this->service->processUpdateRestaurant($id, $_POST, $newImage)) {
-                    header('Location: /admin/yummy?status=updated');
-                    exit;
+                    $this->redirect('/admin/yummy', 'Restaurant updated successfully!');
                 }
-                throw new Exception("Update failed.");
             } catch (Exception $e) {
                 error_log("Update Restaurant Error: " . $e->getMessage());
                 $error = $e->getMessage();
@@ -87,31 +85,31 @@ class RestaurantController extends Controller {
         // preparing data for the edit form
         $restaurant = $this->service->getRestaurantById($id);
         if (!$restaurant) {
-            header('Location: /admin/yummy?error=notfound');
-            exit;
+            $this->redirect('/admin/yummy', 'Restaurant not found.', 'error');
         }
-        $chefs = $this->chefService->getAllChefs();
-        $sessions = $this->sessionService->getAvailableSessions($id);
-        include __DIR__ . '/../Views/admin/yummy/editRestaurant.php';
+        $this->render('admin/yummy/editRestaurant', [
+            'restaurant' => $restaurant,
+            'chefs' => $this->chefService->getAllChefs(),
+            'sessions' => $this->sessionService->getAvailableSessions($id),
+            'error' => $error ?? null
+        ]);
     }
 
     public function delete($vars) {
+        $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
             if ($this->service->deleteRestaurant($id)) {
-                header('Location: /admin/yummy?status=deleted');
-                exit;
+                $this->redirect('/admin/yummy', 'Restaurant deleted successfully.');
             }
         } catch (Exception $e) {
-            header('Location: /admin/yummy?status=error&message=' . urlencode($e->getMessage()));
-            exit;
+            $this->redirect('/admin/yummy', $e->getMessage(), 'error');
         }
     }
 
     public function showDetails($vars) {
         $id = (int)$vars['id'];
         $restaurant = $this->service->getRestaurantById($id);
-        $groupedSessions = $this->sessionService->getSessionsGroupedByDate($id);
 
         if (!$restaurant) {
             http_response_code(404);
@@ -119,50 +117,51 @@ class RestaurantController extends Controller {
             return;
         }
 
-        $chef = null;
-        if ($restaurant->getChefId()) {
-            $chef = $this->chefService->getChefById($restaurant->getChefId());
-        }
-
-        include __DIR__ . '/../Views/event/yummyEvent/restaurant.php';
+        $this->render('event/yummyEvent/restaurant', [
+            'restaurant' => $restaurant,
+            'groupedSessions' => $this->sessionService->getSessionsGroupedByDate($id),
+            'chef' => $restaurant->getChefId() ? $this->chefService->getChefById($restaurant->getChefId()) : null
+        ]);
     }
 
     public function showCreateForm() {
-        $chefs = $this->chefService->getAllChefs();
-        $restaurant = new RestaurantModel();
-        include __DIR__ . '/../Views/admin/yummy/createRestaurant.php';
+        $this->requireAdmin();
+        $this->render('admin/yummy/createRestaurant', [
+            'chefs' => $this->chefService->getAllChefs(),
+            'restaurant' => new RestaurantModel()
+        ]);
     }
 
     public function showEditForm($vars) {
+        $this->requireAdmin();
         $id = (int)$vars['id'];
         $restaurant = $this->service->getRestaurantById($id);
-        $chefs = $this->chefService->getAllChefs();
-        $sessions = $this->sessionService->getAvailableSessions($id);
-
         if (!$restaurant) {
-            header('Location: /admin/yummy?error=notfound');
-            exit;
+            $this->redirect('/admin/yummy', 'Restaurant not found.', 'error');
         }
 
-        include __DIR__ . '/../Views/admin/yummy/editRestaurant.php';
+        $this->render('admin/yummy/editRestaurant', [
+            'restaurant' => $restaurant,
+            'chefs' => $this->chefService->getAllChefs(),
+            'sessions' => $this->sessionService->getAvailableSessions($id)
+        ]);
     }
 
 
     // Reservation handling
 
     public function addSessions() {
+        $this->requireAdmin();
         $restaurantId = (int)$_POST['restaurant_id'];
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($this->sessionService->processAddSessions($_POST)) {
-                    $this->redirect("/admin/yummy/edit/$restaurantId?status=sessions_added");
+                    $this->redirect("/admin/yummy/edit/$restaurantId", "Sessions added successfully.");
                 }
             }
         } catch (\Exception $e) {
-            $this->redirect("/admin/yummy/edit/$restaurantId?status=error&message=" . urlencode($e->getMessage()) . "&open_modal=add");
-            exit;
-    }
-        
+            $this->redirect("/admin/yummy/edit/$restaurantId?open_modal=add", $e->getMessage(), 'error');
+        }
     }
 
     public function deleteSession() {
@@ -171,42 +170,39 @@ class RestaurantController extends Controller {
             $sessionId = (int)$_POST['id'];
             $restaurantId = (int)$_POST['restaurant_id'];
             $this->sessionService->deleteSession($sessionId);
-            $this->redirect("/admin/yummy/edit/" . (int)$_POST['restaurant_id'] . "?status=session_deleted");
+            $this->redirect("/admin/yummy/edit/$restaurantId", "Session deleted successfully.");
         }
     }
 
     public function updateSession() {
+        $this->requireAdmin();
         $restaurantId = isset($_POST['restaurant_id']) ? (int)$_POST['restaurant_id'] : null;
         $sessionId = isset($_POST['session_id']) ? (int)$_POST['session_id'] : null;
 
         if (!$restaurantId) {
-            header("Location: /admin/yummy?status=error");
-            exit();
+            $this->redirect('/admin/yummy', 'Invalid request.', 'error');
         }
         try {
             if ($this->sessionService->processUpdateSession($_POST)) {
-                header("Location: /admin/yummy/edit/$restaurantId?status=session_updated");
-            } else {
-                throw new \Exception("Update failed in database");
+                $this->redirect("/admin/yummy/edit/$restaurantId", "Session updated successfully.");
             }
         } catch (\Exception $e) {
-            header("Location: /admin/yummy/edit/$restaurantId?status=error&message=" . urlencode($e->getMessage()) . "&session_id=$sessionId");
+            $this->redirect("/admin/yummy/edit/$restaurantId?session_id=$sessionId", $e->getMessage(), 'error');
         }
-        exit();
     }
     
     public function showReservationForm($vars) {
-        $restaurantId = (int)$vars['id'];
-        $restaurant = $this->service->getRestaurantById($restaurantId);
+        $id = (int)$vars['id'];
+        $restaurant = $this->service->getRestaurantById($id);
 
         if (!$restaurant) {
-            header('Location: /yummy');
-            exit;
+            $this->redirect('/yummy', 'Restaurant not found.', 'error');
         }
 
-        $groupedSessions = $this->sessionService->getSessionsGroupedByDate($restaurantId);
-
-        include __DIR__ . '/../Views/event/yummyEvent/reservation.php';
+        $this->render('event/yummyEvent/reservation', [
+            'restaurant' => $restaurant,
+            'groupedSessions' => $this->sessionService->getSessionsGroupedByDate($id)
+        ]);
     }
 
 

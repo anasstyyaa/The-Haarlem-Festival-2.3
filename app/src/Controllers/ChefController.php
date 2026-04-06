@@ -2,11 +2,11 @@
 
 namespace App\Controllers;
 
+use App\Framework\Controller;
+use Exception;
 use App\Services\Interfaces\Yummy\IChefService;
-use App\Models\Yummy\ChefModel;
 
-class ChefController {
-
+class ChefController extends Controller {
     private IChefService $service;
 
     public function __construct(IChefService $service) {
@@ -14,93 +14,65 @@ class ChefController {
     }
 
     public function index(): void {
-        $chefs = $this->service->getAllChefs();
-        include __DIR__ . '/../Views/admin/yummy/index.php';
+        $this->render('admin/yummy/index', [
+            'chefs' => $this->service->getAllChefs()
+        ]);
     }
 
     public function showCreateForm(): void {
-        include __DIR__ . '/../Views/admin/yummy/createChef.php';
+        $this->requireAdmin();
+        $this->render('admin/yummy/createChef');
     }
 
     public function store(): void {
-        $imageName = $this->handleImageUpload('image_file', 'chef');
-        
-        $chef = new ChefModel();
-        $chef->setName($_POST['name']);
-        $chef->setExperienceYears((int)$_POST['experience_years']);
-        $chef->setDescription($_POST['description']);
-        $chef->setImageUrl($imageName ? '/assets/uploads/chefs/' . $imageName : null);
-        
-        $this->service->createChef($chef);
-        
-        header('Location: /admin/yummy');
-        exit;
+        $this->requireAdmin();
+
+        try {
+            $this->service->processCreateChef($_POST, $_FILES['image_file'] ?? null);
+            $this->redirect('/admin/yummy', 'Chef created successfully!');
+        } catch (Exception $e) {
+            // serivce validation or upload errors end up here
+            $this->redirect('/admin/chefs/create', $e->getMessage(), 'error');
+        }
     }
 
     public function showEditForm(array $vars): void {
+        $this->requireAdmin();
         $id = (int)$vars['id'];
         $chef = $this->service->getChefById($id);
 
         if (!$chef) {
-            header('Location: /admin/yummy');
-            exit;
+            $this->redirect('/admin/yummy', 'Chef not found.', 'error');
         }
 
-        include __DIR__ . '/../Views/admin/yummy/editChef.php';
+        $this->render('admin/yummy/editChef', [
+            'chef' => $chef
+        ]);
     }
 
     public function update(array $vars): void {
+        $this->requireAdmin();
         $id = (int)$vars['id'];
-        $existingChef = $this->service->getChefById($id);
-        
-        if (!$existingChef) {
-            header('Location: /admin/yummy');
-            exit;
-        }
 
-        $imageName = $this->handleImageUpload('image_file', 'chef');
-        
-        $existingChef->setName($_POST['name']);
-        $existingChef->setExperienceYears((int)$_POST['experience_years']);
-        $existingChef->setDescription($_POST['description']);
-        
-        if ($imageName) {
-            $existingChef->setImageUrl('/assets/uploads/chefs/' . $imageName);
+        try {
+            $this->service->processUpdateChef($id, $_POST, $_FILES['image_file'] ?? null);
+            $this->redirect('/admin/yummy', 'Chef updated successfully!');
+        } catch (Exception $e) {
+            $this->redirect("/admin/yummy/editChef/$id", $e->getMessage(), 'error');
         }
-
-        $this->service->updateChef($existingChef);
-        
-        header('Location: /admin/yummy');
-        exit;
     }
 
     public function delete(array $vars): void {
+        $this->requireAdmin();
         $id = (int)$vars['id'];
-        if ($this->service->deleteChef($id)) {
-            header('Location: /admin/yummy');
-            exit;
-        } else {
-            echo "Error deleting chef.";
-        }
-    }
 
-    private function handleImageUpload(string $inputName, string $prefix): ?string
-    {
-        if (!isset($_FILES[$inputName]) || $_FILES[$inputName]['error'] !== UPLOAD_ERR_OK) {
-            return null;
+        try {
+            if ($this->service->deleteChef($id)) {
+                $this->redirect('/admin/yummy', 'Chef deleted successfully.');
+            }
+            throw new Exception("The chef could not be deleted.");
+        } catch (Exception $e) {
+            $this->redirect('/admin/yummy', $e->getMessage(), 'error');
         }
-
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/chefs/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $extension = strtolower(pathinfo($_FILES[$inputName]['name'], PATHINFO_EXTENSION));
-        $newFileName = uniqid($prefix . '_', true) . '.' . $extension;
-
-        if (move_uploaded_file($_FILES[$inputName]['tmp_name'], $uploadDir . $newFileName)) {
-            return $newFileName;
-        }
-        return null;
     }
 }

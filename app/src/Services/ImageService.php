@@ -5,7 +5,7 @@ use App\Services\Interfaces\IImageService;
 use App\Repositories\Interfaces\IImageRepository;
 use App\Models\ImageModel;
 
-class TextService implements IImageService
+class ImageService implements IImageService
 {
     public function __construct(
         private IImageRepository $imageRepository
@@ -18,5 +18,9 @@ class TextService implements IImageService
 {
   return $this->imageRepository->updateImage($id, $imgURL, $altText);
 }
+public function createImage(string $imgURL, string $altText): int
+    {
+        return $this->imageRepository->createImage($imgURL, $altText);
+    }
     
 }

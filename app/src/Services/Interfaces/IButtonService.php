@@ -9,5 +9,5 @@ interface IButtonService
 
     public function mapToModel(array $row): ButtonModel;
 
-    public function saveButtonTextChanges($id, $newText);
+     public function saveButtonChanges($id, $newText, $newPAth);
 }

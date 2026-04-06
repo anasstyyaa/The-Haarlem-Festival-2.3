@@ -29,12 +29,25 @@ class ButtonRepository extends Repository implements IButtonRepository
             $row['text'] ?? ''
         );
     }
-    public function saveButtonTextChanges($id, $newText){
-        $sql = "UPDATE button SET text = :text WHERE id = :id";
+    public function saveButtonChanges($id, $newText, $newPAth){
+        $sql = "UPDATE button SET text = :text, path = :path WHERE id = :id";
         return $this->connection->prepare($sql)->execute([
             'id'   => $id,
-            'text' => $newText
+            'text' => $newText,
+            'path' => $newPAth
         ]);
+    }
+     public function create(string $text, string $path): int
+    {
+        $sql = "INSERT INTO button (text, path) VALUES (:text, :path)";
+        $stmt = $this->connection->prepare($sql);
+
+        $stmt->execute([
+            'text' => $text,
+            'path' => $path
+        ]);
+
+        return (int)$this->connection->lastInsertId();
     }
     public function delete(int $id):bool
     {

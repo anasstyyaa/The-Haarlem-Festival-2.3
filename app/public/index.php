@@ -107,6 +107,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST',  '/admin/elements/store', ['App\Controllers\PageElementController', 'store']);
     $r->addRoute('GET', '/admin/elements/delete/{type}/{id:\d+}', ['App\Controllers\PageElementController', 'delete']);
 
+     $r->addRoute('GET',  '/admin/elements/editButton/{id:\d+}', ['App\Controllers\PageElementController', 'showButtonEditForm']);
+    $r->addRoute('POST',  '/admin/elements/editButton/{id:\d+}', ['App\Controllers\PageElementController', 'saveButtonChanges']);
+
 
     $r->addRoute('POST',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
     $r->addRoute('POST',  '/admin/export-excel', ['App\Controllers\TicketController', 'exportExcel']);

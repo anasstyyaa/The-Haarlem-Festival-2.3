@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Services\PageElementService;
 use App\Repositories\TextRepository;
 use App\Repositories\ImageRepository;
+use App\Services\ButtonService;
+use App\Models\ButtonModel;
 use App\Models\PageElementModel;
 use App\Models\TextModel;
 use App\Models\ImageModel;
@@ -14,12 +16,14 @@ class PageElementController
     private PageElementService $service;
     private TextRepository $textService;
      private ImageRepository $imgService;
+     private ButtonService $buttonService;
 
     public function __construct()
     {
         $this->service = new PageElementService();
          $this->textService = new TextRepository();
           $this->imgService = new ImageRepository();
+          $this->buttonService = new ButtonService();
     }
 
 
@@ -126,6 +130,25 @@ class PageElementController
     $altText = $_POST['altText'] ?? '';
 
     $this->imgService->updateImage($id, $imgURL, $altText);
+
+    header('Location: /admin/home/index');
+    exit;
+}
+public function showButtonEditForm(array $vars): void
+{
+    $id = (int)$vars['id'];
+    $button = $this->buttonService->getById($id);
+
+    include __DIR__ . '/../Views/admin/button/buttonEditForm.php';
+}
+public function saveButtonChanges(array $vars): void
+{
+    $id = (int)$vars['id'];
+
+    $text = $_POST['text'] ?? '';
+    $path = $_POST['path'] ?? '';
+
+    $this->buttonService->saveButtonChanges($id, $text, $path);
 
     header('Location: /admin/home/index');
     exit;

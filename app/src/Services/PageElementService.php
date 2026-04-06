@@ -74,12 +74,12 @@ public function createElement(string $type,int $section,string $pageName,array $
             );
             break;
 
-        // case 'button':
-        //     $subId = $this->buttonRepo->createButton(
-        //         $data['text'],
-        //         $data['path']
-        //     );
-        //     break;
+        case 'button':
+            $subId = $this->buttonRepo->create(
+                $data['text'],
+                $data['path']
+            );
+            break;
 
         default:
             throw new \Exception("Invalid type");

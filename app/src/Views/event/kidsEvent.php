@@ -104,7 +104,73 @@ use App\ViewModels\ExtraKidsEventViewModel;
 .kids-card a:hover {
     background: #e56710;
 }
+.section3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
+    background-color: #FEDBCE;
+    color: #4b1608; 
+
+    padding: 20px;
+    gap: 20px;
+}
+
+/* TEXT */
+.section3 p {
+     order: 1;
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* IMAGE */
+.section3 img {
+     order: 2;
+    width: 600px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    padding-right: 100px;
+}
+
+.section2 {
+    background-color: #4b1608;
+    padding-bottom: 50px;
+    padding-top: 50px;
+    padding-left: 100px;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    gap: 20px;
+}
+
+/* left group */
+.section2 p:nth-child(1) { grid-column: 1; grid-row: 1; }
+.section2 p:nth-child(2) { grid-column: 1; grid-row: 2; }
+
+/* image */
+.section2 img { 
+    grid-column: 2; 
+    grid-row: 1 / span 2;
+    width: 600px;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* right group */
+.section2 p:nth-child(4) { grid-column: 3; grid-row: 1; }
+.section2 p:nth-child(5) { grid-column: 3; grid-row: 2; }
+
+.section2 p {
+    background-color: #FEC8C1;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 0;
+    max-width: 220px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
     </style>
 </head>
 <body>
@@ -141,7 +207,6 @@ use App\ViewModels\ExtraKidsEventViewModel;
     <table>
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Day</th>
                 <th>Start Time</th>
                 <th>End Time</th>
@@ -155,10 +220,9 @@ use App\ViewModels\ExtraKidsEventViewModel;
             <?php foreach ($vmKids->kidsEvents as $event): ?>
  
                 <tr>
-                    <td><?= htmlspecialchars($event->getId()) ?></td>
                     <td><?= htmlspecialchars($event->getDay()) ?></td>
-                    <td><?= htmlspecialchars($event->getStartTime()) ?></td>
-                    <td><?= htmlspecialchars($event->getEndTime()) ?></td>
+                    <td><?= htmlspecialchars(date('H:i', strtotime($event->getStartTime()))) ?></td>
+                    <td><?= htmlspecialchars(date('H:i', strtotime($event->getEndTime()))) ?></td>
                     <td><?= htmlspecialchars($event->getType()) ?></td>
                     <td><?= htmlspecialchars($event->getLocation()) ?></td>
                     <td><?= htmlspecialchars($event->getLimit()) ?></td>

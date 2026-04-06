@@ -87,10 +87,19 @@ $grandTotal = 0.0;
                                 $date = $details['date'] ?? '';
                                 $startTime = $details['startTime'] ?? '';
                             } elseif ($details) {
-                                
+
+                                if ($event->getEventType()->value === 'tour') {
+                                    $venue = $details->getVenue();
+
+                                    if ($venue && $venue->getImgURL()) {
+                                        $image = $venue->getImgURL();
+                                    }
+                                }
+
                                 if (method_exists($details, 'getTitle')) {
                                     $title = $details->getTitle();
                                 }
+
 
                                 if (method_exists($details, 'getName')) {
                                     $title = $details->getName();
@@ -140,7 +149,7 @@ $grandTotal = 0.0;
 
                                     $startTime = 'Festival hours';
                                 }
-                            } 
+                            }
                             $guestCount = $ticket->getNumberOfPeople();
                             ?>
                             <tr>
@@ -171,8 +180,8 @@ $grandTotal = 0.0;
                                             <form method="POST" action="/updateTicketQuantity" class="m-0">
                                                 <input type="hidden" name="program_item_id" value="<?= $ticket->getProgramItemId() ?>">
                                                 <input type="hidden" name="action" value="decrease">
-                                                <button type="submit" class="btn btn-link btn-sm p-0 qty-hover-btn" 
-                                                        <?= $guestCount <= 1 ? 'disabled' : '' ?>>
+                                                <button type="submit" class="btn btn-link btn-sm p-0 qty-hover-btn"
+                                                    <?= $guestCount <= 1 ? 'disabled' : '' ?>>
                                                     <i class="bi bi-dash-circle fs-5"></i>
                                                 </button>
                                             </form>

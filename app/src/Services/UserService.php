@@ -6,6 +6,7 @@ use App\Models\UserModel;
 use App\Repositories\Interfaces\IUserRepository;
 use App\Services\Interfaces\IUserService;
 use App\Services\Interfaces\IAuthService;
+use App\Services\Interfaces\ICommunicationService;
 use Exception;
 use InvalidArgumentException;
 
@@ -13,12 +14,14 @@ use InvalidArgumentException;
 class UserService implements IUserService
 {
     private IUserRepository $userRepository;
-    private IAuthService $authService;    
+    private IAuthService $authService;
+    private ICommunicationService $communicationService;
 
-    public function __construct(IUserRepository $userRepository, IAuthService $authService)
+    public function __construct(IUserRepository $userRepository, IAuthService $authService, ICommunicationService $communicationService)
     {
         $this->userRepository = $userRepository;
         $this->authService = $authService;
+        $this->communicationService = $communicationService;
     }
 
     public function getAllUsers(): array
@@ -36,12 +39,12 @@ class UserService implements IUserService
         $this->authService->validateUser($user, $password, true);
 
         if ($file && $file['error'] === UPLOAD_ERR_OK) {
-            $imgName = $this->handleSecureUpload($file, 'user'); 
-            
+            $imgName = $this->handleSecureUpload($file, 'user');
+
             if (!$imgName) {
                 throw new InvalidArgumentException("Invalid image format. Only JPG, PNG, and WebP are allowed.");
             }
-            
+
             $user->setProfilePicture('/assets/uploads/users/' . $imgName);
         }
 
@@ -68,39 +71,92 @@ class UserService implements IUserService
         }
     }
 
-    public function updateProfile(UserModel $user, array $data, ?array $imageFile): void
-    {
-        $user->setEmail(strtolower(trim($data['email'] ?? $user->getEmail())));
-        $user->setUserName(trim($data['userName'] ?? $user->getUserName()));
-        $user->setFullName(trim($data['fullName'] ?? $user->getFullName()));
-        $user->setPhoneNumber(trim($data['phoneNumber'] ?? $user->getPhoneNumber()));
+   public function updateProfile(UserModel $user, array $data, ?array $imageFile): void
+{
+    // Keep the original values so we can compare them later
+    // and only send an email for fields that actually changed.
+    $oldEmail = $user->getEmail();
+    $oldUserName = $user->getUserName();
+    $oldFullName = $user->getFullName();
+    $oldPhoneNumber = $user->getPhoneNumber();
 
-        $this->authService->validateUser($user, '', false);
+    // Normalize incoming form data before validation.
+    $newEmail = strtolower(trim($data['email'] ?? $user->getEmail()));
+    $newUserName = trim($data['userName'] ?? $user->getUserName());
+    $newFullName = trim($data['fullName'] ?? $user->getFullName());
+    $newPhoneNumber = trim($data['phoneNumber'] ?? $user->getPhoneNumber());
+    $newPassword = trim($data['newPassword'] ?? '');
 
-        // checking if the email changed, and if so, if it's taken by someone else
-        if (strtolower($data['email']) !== strtolower($user->getEmail()) && 
-            $this->authService->emailExists($data['email'])) {
-            throw new InvalidArgumentException('Email already exists!');
+    // Check what changed so we can notify the user later.
+    $changedFields = [];
+
+    if (strtolower($oldEmail) !== strtolower($newEmail)) {
+        $changedFields[] = 'Email address';
+    }
+
+    if ($oldUserName !== $newUserName) {
+        $changedFields[] = 'Username';
+    }
+
+    if ($oldFullName !== $newFullName) {
+        $changedFields[] = 'Full name';
+    }
+
+    if ($oldPhoneNumber !== $newPhoneNumber) {
+        $changedFields[] = 'Phone number';
+    }
+
+    if ($newPassword !== '') {
+        $changedFields[] = 'Password';
+    }
+
+    // Apply the new values to the model.
+    $user->setEmail($newEmail);
+    $user->setUserName($newUserName);
+    $user->setFullName($newFullName);
+    $user->setPhoneNumber($newPhoneNumber);
+
+    // Validate the updated model.
+    $this->authService->validateUser($user, '', false);
+
+    // If the email was changed, make sure it is not already in use.
+    if (strtolower($oldEmail) !== strtolower($newEmail) && $this->authService->emailExists($newEmail)) {
+        throw new InvalidArgumentException('Email already exists!');
+    }
+
+    // Only update the password if the user entered a new one.
+    if ($newPassword !== '') {
+        if (strlen($newPassword) < 8 || !preg_match('/[0-9]/', $newPassword)) {
+            throw new InvalidArgumentException("Password must be at least 8 characters and include a number.");
         }
 
-        if (!empty($data['newPassword'])) {
-            if (strlen($data['newPassword']) < 8 || !preg_match('/[0-9]/', $data['newPassword'])) {
-                throw new InvalidArgumentException("Password must be at least 8 characters and include a number.");
-            }
-            $user->setPassword(password_hash($data['newPassword'], PASSWORD_DEFAULT));
-        }
+        $user->setPassword(password_hash($newPassword, PASSWORD_DEFAULT));
+    }
 
-        if ($imageFile && $imageFile['error'] === UPLOAD_ERR_OK) {
-            $fileName = $this->handleSecureUpload($imageFile, 'user');
-            if ($fileName) {
-                $user->setProfilePicture('/assets/uploads/users/' . $fileName);
-            }
-        }
-        
-        if (!$this->userRepository->update($user)) {
-            throw new Exception('Failed to update profile in database.');
+    // Update the profile picture if a new one was uploaded.
+    if ($imageFile && $imageFile['error'] === UPLOAD_ERR_OK) {
+        $fileName = $this->handleSecureUpload($imageFile, 'user');
+
+        if ($fileName) {
+            $user->setProfilePicture('/assets/uploads/users/' . $fileName);
+            $changedFields[] = 'Profile picture';
         }
     }
+
+    // First save the profile changes in the database.
+    if (!$this->userRepository->update($user)) {
+        throw new Exception('Failed to update profile in database.');
+    }
+
+    // Only send a notification if something important actually changed.
+   if (!empty($changedFields)) {
+    $this->communicationService->sendAccountChangeNotification([
+        'email' => $user->getEmail(),
+        'full_name' => $user->getFullName()
+    ], $changedFields);
+}
+    
+}
 
     public function deleteUser(int $id): bool
     {

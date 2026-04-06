@@ -3,13 +3,12 @@
 namespace App\Controllers;
 
 use App\Models\HistoryVenueModel;
+use App\Repositories\ImageRepository;
+use App\Services\ButtonService;
 use App\Services\Interfaces\IHistoryService;
 use App\Services\Interfaces\IPersonalProgramService;
 use App\Services\PageElementService;
-use App\Repositories\TextRepository;
-use App\Repositories\ImageRepository;
 use App\ViewModels\PageElementViewModel;
-use App\Services\ButtonService;
 
 class HistoryController
 {
@@ -17,7 +16,6 @@ class HistoryController
     private IPersonalProgramService $programService;
 
     private PageElementService $pageService;
-    private TextRepository $textRepo;
     private ImageRepository $imageRepo;
     private ButtonService $buttonService;
 
@@ -27,7 +25,6 @@ class HistoryController
         $this->programService = $programService;
 
         $this->pageService = new PageElementService();
-        $this->textRepo = new TextRepository();
         $this->imageRepo = new ImageRepository();
         $this->buttonService = new ButtonService();
     }
@@ -62,27 +59,49 @@ class HistoryController
         return null;
     }
 
+    private function buildPageVM(string $pageName): PageElementViewModel
+    {
+        $sections = $this->pageService->getPageSections($pageName);
+        return new PageElementViewModel($sections);
+    }
+
     public function index(): void
     {
-         $vm = $this->buildPageVM('History');
-
+        $vm = $this->buildPageVM('History');
         $sessions = $this->service->getAllSessions();
         $venues = $this->service->getAllVenues();
 
         require __DIR__ . '/../Views/event/historyEvent/index.php';
     }
-    private function buildPageVM(string $pageName): PageElementViewModel
-{
-    $sections = $this->pageService->getPageSections($pageName);
-    return new PageElementViewModel($sections);
-}
+
+    public function adminIndex(): void
+    {
+        $this->requireAdmin();
+
+        $vm = $this->buildPageVM('History');
+        $venues = $this->service->getAllVenues();
+        $tours = $this->service->getAllSessions();
+        $pageName = 'History';
+
+        require __DIR__ . '/../Views/admin/history/index.php';
+    }
 
     public function booking(): void
-    {
-        $sessions = $this->service->getAllSessions();
+{
+    $sessions = $this->service->getAllSessions();
+    $stops = [];
 
-        require __DIR__ . '/../Views/event/historyEvent/booking.php';
+    foreach ($sessions as $session) {
+        $candidateStops = $this->service->getStopsByEventId($session->getEventId());
+        if (!empty($candidateStops)) {
+            $stops = $candidateStops;
+            break;
+        }
+
     }
+
+    require __DIR__ . '/../Views/event/historyEvent/booking.php';
+}
 
     public function book(): void
     {
@@ -116,12 +135,14 @@ class HistoryController
         exit;
     }
 
+    /**
+     * Old list page no longer used as main page.
+     * Keep route working by redirecting to combined admin page.
+     */
     public function adminVenues(): void
     {
-        $this->requireAdmin();
-        $venues = $this->service->getAllVenues();
-
-        require __DIR__ . '/../Views/admin/history/venues/index.php';
+        header('Location: /admin/history');
+        exit;
     }
 
     public function createVenue(): void
@@ -136,7 +157,7 @@ class HistoryController
         $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history/venues');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -156,8 +177,6 @@ class HistoryController
         if ($uploadedFileName !== null) {
             $imgURL = '/assets/images/history/' . $uploadedFileName;
             $altText = $venueName;
-
-            // This expects ImageRepository to have createImage($imgURL, $altText): int
             $imageId = $this->imageRepo->createImage($imgURL, $altText);
         }
 
@@ -170,7 +189,7 @@ class HistoryController
         );
 
         if ($this->service->createVenue($venue)) {
-            header('Location: /admin/history/venues');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -186,7 +205,7 @@ class HistoryController
         $venue = $this->service->getVenueById($venueId);
 
         if (!$venue) {
-            header('Location: /admin/history/venues');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -198,7 +217,7 @@ class HistoryController
         $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history/venues');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -206,7 +225,7 @@ class HistoryController
         $existingVenue = $this->service->getVenueById($venueId);
 
         if (!$existingVenue) {
-            header('Location: /admin/history/venues');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -227,8 +246,6 @@ class HistoryController
         if ($uploadedFileName !== null) {
             $imgURL = '/assets/images/history/' . $uploadedFileName;
             $altText = $venueName;
-
-            // This expects ImageRepository to have createImage($imgURL, $altText): int
             $imageId = $this->imageRepo->createImage($imgURL, $altText);
         }
 
@@ -241,7 +258,7 @@ class HistoryController
         );
 
         if ($this->service->updateVenue($venue)) {
-            header('Location: /admin/history/venues');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -255,7 +272,7 @@ class HistoryController
         $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history/venues');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -265,15 +282,18 @@ class HistoryController
             $this->service->deleteVenue($venueId);
         }
 
-        header('Location: /admin/history/venues');
+        header('Location: /admin/history');
         exit;
     }
+
+    /**
+     * Old list page no longer used as main page.
+     * Keep route working by redirecting to combined admin page.
+     */
     public function adminTours(): void
     {
-        $this->requireAdmin();
-        $tours = $this->service->getAllSessions();
-
-        require __DIR__ . '/../Views/admin/history/tours/index.php';
+        header('Location: /admin/history');
+        exit;
     }
 
     public function createTour(): void
@@ -289,7 +309,7 @@ class HistoryController
         $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history/tours');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -323,7 +343,7 @@ class HistoryController
         );
 
         if ($this->service->createSession($tour)) {
-            header('Location: /admin/history/tours');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -339,7 +359,7 @@ class HistoryController
         $tour = $this->service->getSessionByEventId($eventId);
 
         if (!$tour) {
-            header('Location: /admin/history/tours');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -351,7 +371,7 @@ class HistoryController
         $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history/tours');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -360,7 +380,7 @@ class HistoryController
 
         $existingTour = $this->service->getSessionByEventId($eventId);
         if (!$existingTour) {
-            header('Location: /admin/history/tours');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -394,7 +414,7 @@ class HistoryController
         );
 
         if ($this->service->updateSession($tour)) {
-            header('Location: /admin/history/tours');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -407,7 +427,7 @@ class HistoryController
         $this->requireAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history/tours');
+            header('Location: /admin/history');
             exit;
         }
 
@@ -417,21 +437,37 @@ class HistoryController
             $this->service->deleteSession($eventId);
         }
 
-        header('Location: /admin/history/tours');
+        header('Location: /admin/history');
         exit;
     }
+
     public function detail($vars): void
-{
-    $venueId = (int)($vars['id'] ?? 0);
+    {
+        $venueId = (int)($vars['id'] ?? 0);
 
-    $venue = $this->service->getVenueById($venueId);
+        $venue = $this->service->getVenueById($venueId);
 
-    if (!$venue) {
-        http_response_code(404);
-        echo "Venue not found";
-        return;
+        if (!$venue) {
+            http_response_code(404);
+            echo "Venue not found";
+            return;
+        }
+
+        require __DIR__ . '/../Views/event/historyEvent/detail.php';
     }
+    public function getStops($vars): void
+    {
+        $eventId = (int)($vars['id'] ?? 0);
 
-    require __DIR__ . '/../Views/event/historyEvent/detail.php';
-}
+        if ($eventId <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid event id']);
+            return;
+        }
+
+        $stops = $this->service->getStopsByEventId($eventId);
+
+        header('Content-Type: application/json');
+        echo json_encode($stops);
+    }
 }

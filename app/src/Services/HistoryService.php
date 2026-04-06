@@ -70,4 +70,8 @@ class HistoryService implements IHistoryService
     {
         return $this->historyVenueRepo->delete($venueId);
     }
+    public function getStopsByEventId(int $eventId): array
+    {
+        return $this->historyVenueRepo->getStopsByEventId($eventId);
+    }
 }

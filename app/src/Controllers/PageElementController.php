@@ -148,6 +148,25 @@ public function createForm(): void
         $type = $_POST['type'];
         $section = (int)$_POST['section'];
         $pageName = $_POST['pageName'];
+        if ($type === 'image') {
+
+        if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            echo "Upload failed.";
+            return;
+        }
+
+        $file = $_FILES['image'];
+
+        $fileName = uniqid() . '_' . basename($file['name']);
+        $targetPath = __DIR__ . '/../../public/assets/images/' . $fileName;
+
+        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+            echo "Failed to move uploaded file.";
+            return;
+        }
+
+        $_POST['imgURL'] = '/assets/images/' . $fileName;
+    }
 
         $this->service->createElement(
             $type,

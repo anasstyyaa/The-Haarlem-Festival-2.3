@@ -67,12 +67,12 @@ public function createElement(string $type,int $section,string $pageName,array $
             $subId = $this->textRepo->create($data['content']);
             break;
 
-        // case 'image':
-        //     $subId = $this->imageRepo->createImage(
-        //         $data['imgURL'],
-        //         $data['altText']
-        //     );
-        //     break;
+        case 'image':
+            $subId = $this->imageRepo->createImage(
+                $data['imgURL'],
+                $data['altText']
+            );
+            break;
 
         // case 'button':
         //     $subId = $this->buttonRepo->createButton(

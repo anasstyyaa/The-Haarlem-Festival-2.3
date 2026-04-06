@@ -117,4 +117,39 @@ class RestaurantSessionService implements IRestaurantSessionService {
         return $this->repository->updateSession($session);
     }
 
+    public function processAddSessions(array $data): bool {
+        $restaurantId = (int)($data['restaurant_id'] ?? 0);
+        $times = array_unique(array_filter($data['times'] ?? []));
+
+        if (empty($times)) {
+            throw new \Exception("No_times_provided");
+        }
+
+        $session = new RestaurantSessionModel();
+        $session->setRestaurantId($restaurantId);
+        $session->setDate($data['session_date'] ?? '');
+        $session->setAvailableSlots((int)($data['available_slots'] ?? 0));
+        $session->setSelectedTimes($times);
+
+        return $this->addSessions($session);
+    }
+
+    public function processUpdateSession(array $data): bool {
+        $restaurantId = (int)($data['restaurant_id'] ?? 0);
+        $sessionId = (int)($data['session_id'] ?? 0);
+
+        if (!$restaurantId || !$sessionId) {
+            throw new \Exception("Missing required IDs for session update.");
+        }
+
+        $session = new RestaurantSessionModel();
+        $session->setId($sessionId);
+        $session->setRestaurantId($restaurantId);
+        $session->setDate($data['session_date'] ?? '');
+        $session->setStartTime($data['start_time'] ?? '');
+        $session->setAvailableSlots((int)($data['available_slots'] ?? 0));
+
+        return $this->updateSession($session);
+    }
+
 }

@@ -13,5 +13,7 @@ interface IRestaurantSessionService {
     public function addSessions(RestaurantSessionModel $session): bool;
     public function deleteSession(int $id): bool; 
     public function updateSession(RestaurantSessionModel $session): bool;
+    public function processAddSessions(array $data): bool;
+    public function processUpdateSession(array $data): bool; 
 
 }

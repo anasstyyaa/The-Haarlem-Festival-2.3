@@ -103,22 +103,29 @@ use App\ViewModels\ExtraKidsEventViewModel;
 
 .kids-card a:hover {
     background: #e56710;
-}
-.section3 {
+}.section3 {
     display: flex;
+    flex-wrap: wrap;              
     align-items: center;
     justify-content: space-between;
 
     background-color: #FEDBCE;
     color: #4b1608; 
 
-    padding: 20px;
+    padding: 50px;
     gap: 20px;
+}
+
+/* TITLE (always first element) */
+.section3 > :first-child {
+    width: 100%;                  
+    color: #8E3D18;
+    font-size: 1.8rem;
+    margin-bottom: -130px;
 }
 
 /* TEXT */
 .section3 p {
-     order: 1;
     flex: 1;
     font-size: 1rem;
     line-height: 1.5;
@@ -127,14 +134,12 @@ use App\ViewModels\ExtraKidsEventViewModel;
 
 /* IMAGE */
 .section3 img {
-     order: 2;
-    width: 600px;
+    width: 500px;
+    max-width: 100%;
     height: auto;
     object-fit: cover;
     border-radius: 8px;
-    padding-right: 100px;
 }
-
 .section2 {
     background-color: #4b1608;
     padding-bottom: 50px;

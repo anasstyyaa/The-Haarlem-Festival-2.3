@@ -133,8 +133,9 @@ public function createForm(): void
 {
     $type = $_GET['type'] ?? null;
     $section = $_GET['section'] ?? null;
+    $pageName = $_GET['pageName'] ?? null;
 
-    if (!$type || !$section) {
+    if (!$type || !$section || !$pageName) {
         echo "Invalid request";
         return;
     }

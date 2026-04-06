@@ -67,16 +67,15 @@ td img {
 
 <h1 style="text-align:center;">Admin Page Manager</h1>
 
-<a href="/admin/sections/create">
-    <button class="add-btn">Add Section</button>
-</a>
 
 
-<?php foreach ($vm->getSections() as $section => $elements): ?>
+<?php $num=1;
+foreach ($vm->getSections() as $section => $elements): ?>
 
 <h2 class="section-title">
-    Section: <?= htmlspecialchars($section) ?>
+    Section: <?= $num ?>
 </h2>
+<?= $num++ ?>
 
 <table>
 <thead>

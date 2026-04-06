@@ -4,12 +4,14 @@ namespace App\Services;
 use App\Services\Interfaces\IImageService;
 use App\Repositories\Interfaces\IImageRepository;
 use App\Models\ImageModel;
+use App\Repositories\ImageRepository;
 
 class ImageService implements IImageService
 {
-    public function __construct(
-        private IImageRepository $imageRepository
-    ) {}
+    private IImageRepository $imageRepository;
+    public function __construct() {
+        $this->imageRepository = new ImageRepository();
+    }
     public function getById(int $id): ?ImageModel
     {
      return $this->imageRepository->getById($id);

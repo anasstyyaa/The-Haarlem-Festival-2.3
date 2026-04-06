@@ -3,56 +3,27 @@
 namespace App\Controllers;
 
 use App\Services\PageElementService;
-use App\Repositories\TextRepository;
-use App\Repositories\ImageRepository;
+use App\Services\TextService;
+use App\Services\ImageService;
 use App\Services\ButtonService;
-use App\Models\ButtonModel;
-use App\Models\PageElementModel;
-use App\Models\TextModel;
-use App\Models\ImageModel;
 
 class PageElementController
 {
     private PageElementService $service;
-    private TextRepository $textService;
-     private ImageRepository $imgService;
+    private TextService $textService;
+     private ImageService $imgService;
      private ButtonService $buttonService;
 
     public function __construct()
     {
         $this->service = new PageElementService();
-         $this->textService = new TextRepository();
-          $this->imgService = new ImageRepository();
+         $this->textService = new TextService();
+          $this->imgService = new ImageService();
           $this->buttonService = new ButtonService();
     }
 
-
-    // public function store(): void
-    // {
-    //     $element = new PageElementModel();
-
-    //     $element->setSection($_POST['section']);
-    //     $element->setType($_POST['type']);
-    //     $element->setContent($_POST['content']);
-    //     $element->setOrder((int)$_POST['display_order']);
-
-    //     $this->service->createElement($element);
-
-    //     header('Location: /admin/page-elements');
-    //     exit;
-    // }
-
     public function showEditForm(array $vars): void
     {
-        // $id = (int)$vars['id'];
-        // $pageElement = $this->service->getById($id);
-        // if($pageElement->getType()=='text'){
-        //  $text = $this->textService->getById($pageElement->getId());
-        //   include __DIR__ . '/../Views/admin/text/textEditForm.php';
-        // }elseif($pageElement->getType()=='image'){
-        // $img = $this->imgService->getById($pageElement->getId());
-        // include __DIR__ . '/../Views/admin/img/imgEditForm.php';
-        // }
          $id = (int)$vars['id'];
        
          $text = $this->textService->getById($id);

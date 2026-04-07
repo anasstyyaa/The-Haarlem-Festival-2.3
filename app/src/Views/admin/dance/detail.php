@@ -100,9 +100,9 @@ $trackImageMap = [
 ];
 
 /*
-|--------------------------------------------------------------------------
+
 | Ticket / schedule images
-|--------------------------------------------------------------------------
+
 | Used in performance schedule cards.
 */
 $ticketImageMap = [
@@ -115,9 +115,9 @@ $ticketImageMap = [
 ];
 
 /*
-|--------------------------------------------------------------------------
+
 | Pick images for current DJ
-|--------------------------------------------------------------------------
+
 */
 $manualGalleryImages = $djImages[$djName] ?? ['/assets/images/default-dj.jpg'];
 

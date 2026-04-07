@@ -145,7 +145,7 @@ foreach ($lineup as $item) {
 $djImages = [
     'Hardwell' => '/assets/images/dance/Hardwel.jpg',
     'Armin van Buuren' => '/assets/images/dance/Armin.jpg',
-    'Martin Garrix' => '/assets/images/dance/Martin-Garrix-2024-01.jpg',
+    'Martin Garrix' => '/assets/images/dance/Martin g.jpeg',
     'Tiësto' => '/assets/images/dance/Tiesto.png',
     'Nicky Romero' => '/assets/images/dance/Nicky.png.png',
     'Afrojack' => '/assets/images/dance/Afrojack.png',

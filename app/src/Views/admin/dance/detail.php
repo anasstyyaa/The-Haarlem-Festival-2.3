@@ -3,8 +3,143 @@
 <link rel="stylesheet" href="/assets/css/dance.css">
 
 <?php
+// Current DJ name from database/model
 $djName = $dj->getName();
 
+/*
+|--------------------------------------------------------------------------
+| Hero images
+|--------------------------------------------------------------------------
+| Large banner image shown at the top of the artist detail page.
+*/
+$heroImageMap = [
+    'Hardwell' => '/assets/images/dance/hardwel.png',
+    'Armin van Buuren' => '/assets/images/dance/Armin.jpg',
+    'Martin Garrix' => '/assets/images/dance/Garrix.jpg',
+    'Tiësto' => '/assets/images/dance/Tiesto 1.jpg',
+    'Nicky Romero' => '/assets/images/dance/Romero.jpg',
+    'Afrojack' => '/assets/images/dance/afrojack.png',
+];
+
+/*
+|--------------------------------------------------------------------------
+| Artist gallery images
+|--------------------------------------------------------------------------
+| Extra images for each artist.
+| CMS image is still used first if it exists.
+*/
+$djImages = [
+    'Hardwell' => [
+        '/assets/images/dance/hardwell.webp',
+        '/assets/images/dance/hard.png',
+        '/assets/images/dance/Kamp.jpg'
+    ],
+    'Armin van Buuren' => [
+        '/assets/images/dance/Gulu.jpeg',
+        '/assets/images/dance/Buuren.jpg',
+        '/assets/images/dance/pt.webp'
+    ],
+    'Martin Garrix' => [
+        '/assets/images/dance/DJ-Martin-Garrix20.jpg',
+        '/assets/images/dance/martin-garrix (1).avif',
+        '/assets/images/dance/martin-garrix-inside.jpg'
+    ],
+    'Tiësto' => [
+        '/assets/images/dance/Tiesto 2.jpg',
+        '/assets/images/dance/Ghost.jpg',
+        '/assets/images/dance/Mexico.webp'
+    ],
+    'Nicky Romero' => [
+        '/assets/images/dance/Nicky_Romero_Nofame.jpg',
+        '/assets/images/dance/nickyromero.jpg',
+        '/assets/images/dance/nicky-romero.avif'
+    ],
+    'Afrojack' => [
+        '/assets/images/dance/Ug.jpg',
+        '/assets/images/dance/Copy.jpg',
+        '/assets/images/dance/Delete.jpg'
+    ],
+];
+
+/*
+
+| Featured track cover images
+
+*/
+$trackImageMap = [
+    'Hardwell' => [
+        'Spaceman' => '/assets/images/dance/spaceman.jpg',
+        'United We Are' => '/assets/images/dance/united.jpg',
+        'Apollo' => '/assets/images/dance/Apolo.jpg',
+    ],
+    'Armin van Buuren' => [
+        'This Is What It Feels Like' => '/assets/images/dance/feel.jpg',
+        'Blah Blah Blah' => '/assets/images/dance/Blah.jpg',
+        'A State of Trance' => '/assets/images/dance/Record.jpg',
+    ],
+    'Martin Garrix' => [
+        'Animals' => '/assets/images/dance/Animal.jpg',
+        'Forbidden Voices' => '/assets/images/dance/Tt.jpg',
+        'Scared to Be Lonely' => '/assets/images/dance/ab67616d00001e026a1cba0e39d52540add955c6.jpg',
+    ],
+    'Tiësto' => [
+        'Adagio for Strings' => '/assets/images/dance/Ties.jpg',
+        'Red Lights' => '/assets/images/dance/Red.jpg',
+        'The Business' => '/assets/images/dance/The business.jpg',
+    ],
+    'Nicky Romero' => [
+        'Toulouse' => '/assets/images/dance/images.png',
+        'I Could Be the One' => '/assets/images/dance/km.jpg',
+        'Protocol Recordings' => '/assets/images/dance/en.jpg',
+    ],
+    'Afrojack' => [
+        'Take Over Control' => '/assets/images/dance/Music.jpg',
+        'Replica' => '/assets/images/dance/Replica.PNg',
+        'Forget the World' => '/assets/images/dance/World.jpg',
+    ],
+];
+
+/*
+|--------------------------------------------------------------------------
+| Ticket / schedule images
+|--------------------------------------------------------------------------
+| Used in performance schedule cards.
+*/
+$ticketImageMap = [
+    'Hardwell' => '/assets/images/dance/Ticket.png',
+    'Armin van Buuren' => '/assets/images/dance/Buuren.jpg',
+    'Martin Garrix' => '/assets/images/dance/DJ-Martin-Garrix20.jpg',
+    'Tiësto' => '/assets/images/dance/Tiesto 1.jpg',
+    'Nicky Romero' => '/assets/images/dance/Nicky_Romero_Nofame.jpg',
+    'Afrojack' => '/assets/images/dance/two.jpg',
+];
+
+/*
+|--------------------------------------------------------------------------
+| Pick images for current DJ
+|--------------------------------------------------------------------------
+*/
+$manualGalleryImages = $djImages[$djName] ?? ['/assets/images/default-dj.jpg'];
+
+// Main CMS image or fallback
+$mainImage = !empty($dj->getImageUrl())
+    ? $dj->getImageUrl()
+    : ($manualGalleryImages[0] ?? '/assets/images/default-dj.jpg');
+
+// Hero image uses hero map first, then CMS image, then fallback
+$heroImage = $heroImageMap[$djName] ?? $mainImage;
+
+// Gallery uses CMS image first, then manual gallery extras
+$galleryImages = array_slice($manualGalleryImages, 0, 3);
+
+// Ticket image for schedule cards
+$ticketImage = $ticketImageMap[$djName] ?? $mainImage;
+
+/*
+
+| Text content based on DJ name
+
+*/
 $genreText = match ($djName) {
     'Hardwell' => 'Dance & Big room house',
     'Armin van Buuren' => 'Progressive trance & melodic techno',
@@ -73,13 +208,8 @@ $highlights = match ($djName) {
     ]
 };
 
+// Story from database
 $storyText = $dj->getDescription() ?? 'No story available.';
-
-$galleryImages = [
-    $dj->getImageUrl() ?? '/assets/images/default-dj.jpg',
-    $dj->getImageUrl() ?? '/assets/images/default-dj.jpg',
-    $dj->getImageUrl() ?? '/assets/images/default-dj.jpg'
-];
 
 $tracks = match ($djName) {
     'Hardwell' => [
@@ -176,13 +306,13 @@ $tracks = match ($djName) {
 
 <main class="dance-detail-page">
 
-    <!-- HERO -->
+    <!-- HERO SECTION -->
     <section class="dance-detail-hero-top">
         <div class="dance-container">
             <div class="dance-detail-banner">
                 <img
-                    src="<?= htmlspecialchars($dj->getImageUrl() ?? '/assets/images/default-dj.jpg') ?>"
-                    alt="<?= htmlspecialchars($dj->getName()) ?>"
+                    src="<?= htmlspecialchars($heroImage) ?>"
+                    alt="<?= htmlspecialchars($djName) ?>"
                 >
             </div>
 
@@ -195,7 +325,7 @@ $tracks = match ($djName) {
         </div>
     </section>
 
-    <!-- CONTENT -->
+    <!-- MAIN CONTENT -->
     <section class="dance-detail-main-section">
         <div class="dance-container">
 
@@ -235,25 +365,30 @@ $tracks = match ($djName) {
                 </div>
             </div>
 
+            <!-- GALLERY -->
             <div class="dance-gallery-section">
                 <h3><?= htmlspecialchars($djName) ?> in pictures</h3>
                 <div class="dance-gallery-grid">
                     <?php foreach ($galleryImages as $image): ?>
-                        <div class="dance-gallery-item">
-                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($djName) ?>">
-                        </div>
-                    <?php endforeach; ?>
+    <div class="dance-gallery-item">
+        <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($djName) ?>">
+    </div>
+<?php endforeach; ?>
                 </div>
             </div>
 
+            <!-- TRACKS -->
             <div class="dance-tracks-section">
                 <h3>Featured Tracks &amp; Albums</h3>
 
                 <div class="dance-tracks-card">
                     <?php foreach ($tracks as $track): ?>
+                        <?php
+                        $trackCover = $trackImageMap[$djName][$track['title']] ?? $mainImage;
+                        ?>
                         <div class="dance-track-row">
                             <div class="dance-track-cover">
-                                <img src="<?= htmlspecialchars($dj->getImageUrl() ?? '/assets/images/default-dj.jpg') ?>" alt="<?= htmlspecialchars($track['title']) ?>">
+                                <img src="<?= htmlspecialchars($trackCover) ?>" alt="<?= htmlspecialchars($track['title']) ?>">
                             </div>
 
                             <div class="dance-track-info">
@@ -265,6 +400,7 @@ $tracks = match ($djName) {
                 </div>
             </div>
 
+            <!-- PERFORMANCE SCHEDULE -->
             <div class="dance-perf-section">
                 <h3><?= htmlspecialchars($djName) ?> Performance Schedule</h3>
 
@@ -281,7 +417,7 @@ $tracks = match ($djName) {
                             <div class="dance-detail-schedule-card">
                                 <div class="dance-detail-schedule-image">
                                     <img
-                                        src="<?= htmlspecialchars($dj->getImageUrl() ?? '/assets/images/default-dj.jpg') ?>"
+                                        src="<?= htmlspecialchars($ticketImage) ?>"
                                         alt="<?= htmlspecialchars($djName) ?>"
                                     >
                                 </div>
@@ -304,26 +440,26 @@ $tracks = match ($djName) {
                                     </div>
 
                                     <form method="POST" action="/addTicket" class="dance-program-form">
-    <input type="hidden" name="event_id" value="<?= $event->getDanceEventID(); ?>">
-    <input type="hidden" name="event_type" value="dance">
+                                        <input type="hidden" name="event_id" value="<?= $event->getDanceEventID(); ?>">
+                                        <input type="hidden" name="event_type" value="dance">
 
-    <div class="dance-ticket-controls">
-        <button type="button" class="dance-qty-btn" onclick="changeQuantity(this, -1)">−</button>
+                                        <div class="dance-ticket-controls">
+                                            <button type="button" class="dance-qty-btn" onclick="changeQuantity(this, -1)">−</button>
 
-        <input
-            type="number"
-            name="number_of_people"
-            value="1"
-            min="1"
-            class="dance-qty-input"
-            readonly
-        >
+                                            <input
+                                                type="number"
+                                                name="number_of_people"
+                                                value="1"
+                                                min="1"
+                                                class="dance-qty-input"
+                                                readonly
+                                            >
 
-        <button type="button" class="dance-qty-btn" onclick="changeQuantity(this, 1)">+</button>
-    </div>
+                                            <button type="button" class="dance-qty-btn" onclick="changeQuantity(this, 1)">+</button>
+                                        </div>
 
-    <button type="submit" class="dance-small-btn">+ Add to my program</button>
-</form>
+                                        <button type="submit" class="dance-small-btn">+ Add to my program</button>
+                                    </form>
                                 </div>
 
                                 <div class="dance-detail-schedule-date">

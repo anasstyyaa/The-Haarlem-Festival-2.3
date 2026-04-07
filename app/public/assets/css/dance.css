@@ -1,6 +1,4 @@
-/* DANCE PAGE STYLES (Haarlem Festival - Dance Page)*/
-  
-
+/* DANCE PAGE STYLES (Haarlem Festival - Dance Page) */
 
 .dance-page {
     background: #f0d1cd;
@@ -13,15 +11,12 @@
     margin: 0 auto;
 }
 
-
-/*  HERO SECTION  */
+/* HERO SECTION */
 
 .dance-hero {
     width: 100%;
     height: 420px;
-
     background: url('/assets/images/home/Dancehero.png') center / cover no-repeat;
-
     position: relative;
 }
 
@@ -30,7 +25,6 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-
     display: flex;
     align-items: center;
 }
@@ -67,39 +61,22 @@
 .dance-btn:hover {
     background: #f2b3a0;
 }
- 
 
-
-/*  SECTION BACKGROUNDS  */
+/* SECTION BACKGROUNDS */
 .dance-about-section,
 .dance-featured-section,
 .dance-schedule-section {
     background: #4d1605;
 }
 
-
-/*  ABOUT SECTION  */
+/* ABOUT SECTION */
 .dance-about-section {
-    position: relative;
-    padding: 82px 0 34px;
-}
-
-.dance-wave-top {
-    position: absolute;
-    top: -44px;.dance-about-section {
     position: relative;
     padding: 40px 0 34px;
 }
 
 .dance-wave-top {
     display: none;
-}
-    left: 0;
-    width: 100%;
-    height: 90px;
-    background: #4d1605;
-    border-top-left-radius: 50% 100%;
-    border-top-right-radius: 50% 100%;
 }
 
 .dance-about-grid {
@@ -131,8 +108,7 @@
     box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
 }
 
-
-/*  FEATURED DJs SECTION  */
+/* FEATURED DJs SECTION */
 .dance-featured-section {
     padding: 22px 0 30px;
 }
@@ -154,7 +130,7 @@
 .dance-dj-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 28px 20px;
+    gap: 40px 30px;
 }
 
 .dance-dj-item {
@@ -177,10 +153,6 @@
     object-position: center;
 }
 
-.dance-dj-grid {
-    gap: 40px 30px;
-}
-
 .dance-dj-item h3 {
     font-size: 20px;
     margin-bottom: 6px;
@@ -194,11 +166,7 @@
     margin-bottom: 12px;
 }
 
-
-/* 
-   GLOBAL BUTTON STYLE */
-  
-
+/* GLOBAL BUTTON STYLE */
 .dance-small-btn,
 .dance-filter-chip,
 .dance-qty-btn,
@@ -221,18 +189,17 @@
 .dance-pass-card button:hover {
     background: #f5b7a4;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Active state (clicked) */
+/* Active state */
 .dance-small-btn:active,
 .dance-filter-chip:active,
 .dance-qty-btn:active {
     transform: scale(0.96);
 }
 
-
-/*  SCHEDULE SECTION  */
+/* SCHEDULE SECTION */
 .dance-schedule-section {
     padding: 24px 0 36px;
 }
@@ -247,8 +214,7 @@
     margin-bottom: 18px;
 }
 
-
-/*  FILTER CHIPS */
+/* FILTER CHIPS */
 .dance-filter-row {
     display: flex;
     gap: 10px;
@@ -261,8 +227,8 @@
     border: 1px solid #f1d6cc;
     color: #fff;
     border-radius: 999px;
-    padding: 8px 16px;
-    font-size: 13px;
+    padding: 10px 22px;
+    font-size: 15px;
     cursor: pointer;
 }
 
@@ -272,8 +238,7 @@
     color: #4d1605;
 }
 
-
-/* DJ & VENUE FILTER BOX  */
+/* DJ & VENUE FILTER BOX */
 .dance-filter-form {
     margin-bottom: 28px;
 }
@@ -337,10 +302,10 @@
     color: #4d1605;
 }
 
-
 /* DAY BLOCKS */
 .dance-day-block {
     margin-bottom: 34px;
+    scroll-margin-top: 110px;
 }
 
 .dance-day-title {
@@ -356,8 +321,7 @@
     align-items: start;
 }
 
-
-/*  EVENT CARDS  */
+/* EVENT CARDS */
 .dance-events-column {
     display: flex;
     flex-direction: column;
@@ -406,8 +370,7 @@
     margin-bottom: 10px;
 }
 
-
-/*  PASS CARDS  */
+/* PASS CARDS */
 .dance-pass-column {
     display: flex;
     flex-direction: column;
@@ -438,49 +401,12 @@
     margin-bottom: 12px;
 }
 
-
-/*  EMPTY STATES */
+/* EMPTY STATES */
 .dance-empty-text {
     color: #f6dfd6;
 }
 
-
-/*  RESPONSIVE= */
-@media (max-width: 900px) {
-    .dance-hero-grid,
-    .dance-about-grid,
-    .dance-day-grid,
-    .dance-dual-filter-box {
-        grid-template-columns: 1fr;
-    }
-
-    .dance-dj-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .dance-dj-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .dance-event-card {
-        grid-template-columns: 1fr;
-    }
-
-    .dance-hero-text h1 {
-        font-size: 34px;
-    }
-}
-/* ===== ADD TO PROGRAM FORM FIX ===== */
-.dance-program-form {
-    margin: 0;
-}
-
-/* 
-    DANCE TICKET QUANTITY CONTROLS
-    */
-
+/* ADD TO PROGRAM FORM FIX */
 .dance-program-form {
     margin: 0;
     display: flex;
@@ -489,6 +415,7 @@
     flex-wrap: wrap;
 }
 
+/* DANCE TICKET QUANTITY CONTROLS */
 .dance-ticket-controls {
     display: inline-flex;
     align-items: center;
@@ -514,46 +441,39 @@
     font-weight: 600;
 }
 
-.dance-filter-chip {
-    padding: 10px 22px;
-    font-size: 15px;
-}
-
-/* Active selected filter */
-.dance-filter-chip.active {
-    background: #FFCCBD;
-    color: #4b1e0e;
-}
-
-
-
-
-/* 
-   DANCE DETAIL PAGE 
-    */
-
+/* DANCE DETAIL PAGE */
 .dance-detail-page {
-    background: #f0d1cd;
+    background: #4d1605;
+    color: #fff;
+    padding-bottom: 40px;
 }
 
 .dance-detail-hero-top {
-    background: #f0d1cd;
-    padding: 20px 0 0;
+    background: #4d1605;
+    padding: 24px 0 0;
+}
+
+.dance-detail-banner {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 22px 22px 0 0;
+    background: #2f0d03;
 }
 
 .dance-detail-banner img {
     width: 100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 18px 18px 0 0;
+    height: 380px;
     display: block;
+    object-fit: cover;
+    object-position: center 20%;
+    border-radius: 22px 22px 0 0;
 }
 
 .dance-detail-intro {
-    background: #4d1605;
+    background: #6a1d00;
     color: #fff;
-    padding: 28px;
-    border-radius: 0 0 18px 18px;
+    padding: 32px;
+    border-radius: 0 0 22px 22px;
     position: relative;
     overflow: hidden;
 }
@@ -571,13 +491,17 @@
 
 .dance-detail-intro h1 {
     font-size: 42px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1.1;
 }
 
 .dance-detail-intro p {
     max-width: 760px;
     color: #f6e2db;
     line-height: 1.7;
+    margin: 0;
+    font-size: 1.05rem;
 }
 
 .dance-detail-main-section {
@@ -598,7 +522,7 @@
     background: linear-gradient(180deg, #6a2d0c 0%, #582107 100%);
     border-radius: 14px;
     padding: 20px;
-    box-shadow: 0 10px 18px rgba(0,0,0,0.16);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.16);
 }
 
 .dance-overview-card h3,
@@ -754,10 +678,38 @@
     font-size: 14px;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
+/* RESPONSIVE */
+@media (max-width: 991px) {
+    .dance-detail-banner img {
+        height: 300px;
+        object-position: center 18%;
+    }
+
+    .dance-detail-intro {
+        padding: 26px;
+    }
+
+    .dance-detail-intro h1 {
+        font-size: 34px;
+    }
+}
+
 @media (max-width: 900px) {
+    .dance-hero-grid,
+    .dance-about-grid,
+    .dance-day-grid,
+    .dance-dual-filter-box,
     .dance-detail-top-grid,
     .dance-gallery-grid {
         grid-template-columns: 1fr;
+    }
+
+    .dance-dj-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .dance-detail-schedule-card {
@@ -769,10 +721,32 @@
     }
 }
 
-html {
-    scroll-behavior: smooth;
-}
+@media (max-width: 600px) {
+    .dance-dj-grid {
+        grid-template-columns: 1fr;
+    }
 
-.dance-day-block {
-    scroll-margin-top: 110px;
+    .dance-event-card {
+        grid-template-columns: 1fr;
+    }
+
+    .dance-detail-banner img {
+        height: 230px;
+        object-position: center 15%;
+        border-radius: 18px 18px 0 0;
+    }
+
+    .dance-detail-intro {
+        padding: 22px 20px 24px;
+        border-radius: 0 0 18px 18px;
+    }
+
+    .dance-detail-intro h1 {
+        font-size: 28px;
+    }
+
+    .dance-detail-intro p {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
 }

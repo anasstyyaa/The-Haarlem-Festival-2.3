@@ -10,6 +10,7 @@ use App\Services\ArtistService;
 use App\Services\DanceEventService;
 use App\Repositories\ArtistRepository;
 use App\Repositories\DanceEventRepository;
+use App\Models\ArtistModel;
 
 class DanceController
 {
@@ -38,7 +39,7 @@ class DanceController
     {
         // Get all artists from database
         // On this page we treat them as DJs
-        $artists = $this->artistService->getAllArtists();
+        $artists = $this->artistService->getDanceArtists();
 
         // This array will store only artists who have dance events
         $lineup = [];
@@ -65,39 +66,19 @@ class DanceController
         include __DIR__ . '/../Views/admin/Dance/index.php';
     }
 
-    public function adminIndex()
-    {
-        
-    //  Check if user is logged in
-    // If there is no user in the session, redirect to login page
+public function adminIndex()
+{
     if (!isset($_SESSION['user'])) {
-        header('Location: /login'); // send user to login page
-        exit; // stop running the code
+        header('Location: /login');
+        exit;
     }
 
-     // Get all artists first
-    $allArtists = $this->artistService->getAllArtists();
+    $artists = $this->artistService->getDanceArtists();
 
-    // Keep only artists who have dance events
-    $artists = [];
-
-    foreach ($allArtists as $artist) {
-        $artistEvents = $this->danceEventService->getEventsForArtist(
-            $artist->getId(),
-            EventTypeEnum::DanceEvent
-        );
-
-        if (!empty($artistEvents)) {
-            $artists[] = $artist;
-        }
-    }
-
-    // Get all dance events
     $events = $this->danceEventService->getAllDanceEvents();
 
     include __DIR__ . '/../Views/admin/Dance/adminIndex.php';
 }
-
     /**
      * /dance/{id}
      * Shows one DJ detail page
@@ -124,7 +105,7 @@ class DanceController
     );
 
     // Load the correct detail page
-   include __DIR__ . '/../Views/admin/Dance/detail.php';
+   include __DIR__ . '/../Views/admin/dance/detail.php';
 }
 public function showCreateForm()
 {
@@ -136,42 +117,37 @@ public function showCreateForm()
 
 public function store()
 {
-    //  Check if the request is POST (form was submitted)
+    // Check if the request is POST
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        //  Handle image upload
-        // 'image_file' = input name in form
-        // 'artist' = folder/type (used inside your upload function)
+        // Upload image if provided
         $fileName = $this->handleImageUpload('image_file', 'artist');
 
-        //  Create a new Artist object
-        $artist = new ArtistModel();
+        // Create new artist model
+        $artist = new \App\Models\ArtistModel();
 
-        //  Set artist name
+        // Basic artist fields from form
         $artist->setName(trim($_POST['name'] ?? ''));
-
-        //  Set short description
         $artist->setShortDescription(trim($_POST['short_description'] ?? ''));
-
-        //  Set full description
         $artist->setDescription(trim($_POST['description'] ?? ''));
 
-        //  If image was uploaded, save its path
+        // Very important: make sure this artist belongs to Dance
+        $artist->setArtistType('dance');
+
+        // Save uploaded image path
         if ($fileName) {
             $artist->setImageUrl('/assets/uploads/dance/artists/' . $fileName);
         }
 
-        //  Save artist using the service
+        // Save artist
         if ($this->artistService->createArtist($artist)) {
-
-            //  Redirect back to admin page after success
             header('Location: /admin/dance?status=created');
             exit;
         }
     }
 
-    //  If something fails, reload the form again
-    include __DIR__ . '/../Views/admin/Dance/createArtist.php';
+    // If form not submitted or save fails, show form again
+    include __DIR__ . '/../Views/admin/dance/createArtist.php';
 }
 
 public function showEditForm($vars)
@@ -203,46 +179,35 @@ public function showEditForm($vars)
 
 public function update($vars)
 {
-    // Get the artist ID from the URL
     $id = (int)$vars['id'];
 
-    // Find the artist in the database
     $artist = $this->artistService->getArtistById($id);
 
-    // If artist does not exist, go back to Dance admin page
     if (!$artist) {
         header('Location: /admin/dance');
         exit;
     }
 
-    // Check if the form was submitted
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-        // Update the artist name from the form
         $artist->setName(trim($_POST['name'] ?? ''));
-
-        // Update the short description from the form
         $artist->setShortDescription(trim($_POST['short_description'] ?? ''));
-
-        // Update the full description from the form
         $artist->setDescription(trim($_POST['description'] ?? ''));
 
-        // Check if a new image was uploaded
+        // Keep this artist in the Dance category
+        $artist->setArtistType('dance');
+
         $newImage = $this->handleImageUpload('image_file', 'artist');
 
-        // If there is a new image, update the image path
         if ($newImage) {
             $artist->setImageUrl('/assets/uploads/dance/artists/' . $newImage);
         }
 
-        // Save the updated artist in the database
         if ($this->artistService->updateArtist($id, $artist)) {
             header('Location: /admin/dance?status=updated');
             exit;
         }
     }
 
-    // If page is first opened, or update fails, show the edit form again
     include __DIR__ . '/../Views/admin/Dance/editArtist.php';
 }
 
@@ -258,4 +223,152 @@ public function delete($vars)
     header('Location: /admin/dance?status=deleted');
     exit;
 }
+
+private function handleImageUpload(string $inputName, string $type = 'artist'): ?string
+{
+    if (!isset($_FILES[$inputName])) {
+        return null;
+    }
+
+    $file = $_FILES[$inputName];
+
+    if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($extension, $allowedExtensions, true)) {
+        return null;
+    }
+
+    $uploadDir = __DIR__ . '/../../public/assets/uploads/dance/artists/';
+
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    $originalName = pathinfo($file['name'], PATHINFO_FILENAME);
+    $safeName = preg_replace('/[^A-Za-z0-9_-]/', '-', $originalName);
+    $newFileName = $safeName . '-' . time() . '.' . $extension;
+
+    $targetPath = $uploadDir . $newFileName;
+
+    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+        return null;
+    }
+
+    return $newFileName;
+}
+public function showCreateEventForm()
+{
+    $artists = $this->artistService->getDanceArtists();
+
+    include __DIR__ . '/../Views/admin/dance/createEvent.php';
+}
+
+public function storeEvent()
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $event = new \App\Models\DanceEventModel();
+
+        // Convert HTML datetime-local format to SQL Server datetime format
+        $startDateTime = !empty($_POST['start_datetime'])
+            ? date('Y-m-d H:i:s', strtotime($_POST['start_datetime']))
+            : '';
+
+        $endDateTime = !empty($_POST['end_datetime'])
+            ? date('Y-m-d H:i:s', strtotime($_POST['end_datetime']))
+            : null;
+
+        $event->setArtistId((int)($_POST['artist_id'] ?? 0));
+        $event->setDanceVenueId((int)($_POST['venue_id'] ?? 0));
+        $event->setStartDateTime($startDateTime);
+        $event->setEndDateTime($endDateTime);
+        $event->setPrice((float)($_POST['price'] ?? 0));
+        $event->setCapacity((int)($_POST['capacity'] ?? 0));
+        $event->setDisplayTitle(trim($_POST['title'] ?? ''));
+
+        if ($this->danceEventService->createDanceEvent($event)) {
+            header('Location: /admin/dance?status=event-created');
+            exit;
+        }
+    }
+
+    $artists = $this->artistService->getDanceArtists();
+    include __DIR__ . '/../Views/admin/dance/createEvent.php';
+}
+public function showEditEventForm($vars)
+{
+    $id = (int)$vars['id'];
+
+    $event = $this->danceEventService->getDanceEventById($id);
+
+    if (!$event) {
+        header('Location: /admin/dance?error=event-notfound');
+        exit;
+    }
+
+    $artists = $this->artistService->getDanceArtists();
+
+    include __DIR__ . '/../Views/admin/dance/editEvent.php';
+}
+public function deleteEvent($vars)
+{
+    $id = (int)$vars['id'];
+
+    $this->danceEventService->deleteDanceEvent($id);
+
+    header('Location: /admin/dance?status=event-deleted');
+    exit;
+}
+
+public function updateEvent($vars)
+{
+    // Get the event ID from the URL
+    $id = (int)$vars['id'];
+
+    // Find the event in the database
+    $event = $this->danceEventService->getDanceEventById($id);
+
+    // If event does not exist, go back
+    if (!$event) {
+        header('Location: /admin/dance?error=event-notfound');
+        exit;
+    }
+
+    // Check if the form was submitted
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        // Convert HTML datetime-local to SQL format
+        $startDateTime = !empty($_POST['start_datetime'])
+            ? date('Y-m-d H:i:s', strtotime($_POST['start_datetime']))
+            : '';
+
+        $endDateTime = !empty($_POST['end_datetime'])
+            ? date('Y-m-d H:i:s', strtotime($_POST['end_datetime']))
+            : null;
+
+        // Update event values from the form
+        $event->setArtistId((int)($_POST['artist_id'] ?? 0));
+        $event->setDanceVenueId((int)($_POST['venue_id'] ?? 0));
+        $event->setDisplayTitle(trim($_POST['title'] ?? ''));
+        $event->setStartDateTime($startDateTime);
+        $event->setEndDateTime($endDateTime);
+        $event->setPrice((float)($_POST['price'] ?? 0));
+        $event->setCapacity((int)($_POST['capacity'] ?? 0));
+
+        // Save updated event
+        if ($this->danceEventService->updateDanceEvent($id, $event)) {
+            header('Location: /admin/dance?status=event-updated');
+            exit;
+        }
+    }
+
+    // Reload form if first open or update fails
+    $artists = $this->artistService->getDanceArtists();
+    include __DIR__ . '/../Views/admin/dance/editEvent.php';
+}
+
 }

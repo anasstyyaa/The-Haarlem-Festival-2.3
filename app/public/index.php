@@ -257,7 +257,7 @@ switch ($routeInfo[0]) {
             $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService);
             $communicationService = new \App\Services\CommunicationService();
             $service = new \App\Services\UserService($repository, $authService, $communicationService);
-            $controller = new $class($service, $authService, $ticketService);
+            $controller = new $class($service, $ticketService);
         } elseif ($class === 'App\Controllers\RestaurantController') {
             $pageElementService = new \App\Services\PageElementService(new \App\Repositories\PageElementRepository());
             $repository = new \App\Repositories\Yummy\RestaurantRepository();

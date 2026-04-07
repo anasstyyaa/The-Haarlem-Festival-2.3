@@ -16,5 +16,7 @@ interface ITicketRepository {
     public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool; 
     public function markAsExpired(string $orderId): bool;  
     public function getTicketsByUserId(int $userId): array;
+    public function getTicketsByUserIdPaginated(int $userId, int $page = 1, int $limit = 5): array; 
+    public function countTicketsByUserId(int $userId): int; 
 
 }

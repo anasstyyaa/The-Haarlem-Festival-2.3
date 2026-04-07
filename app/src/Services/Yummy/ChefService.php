@@ -64,8 +64,6 @@ class ChefService implements IChefService {
         $chef->setName($data['name']);
         $chef->setExperienceYears((int)$data['experience_years']);
         $chef->setDescription($data['description']);
-        $chef->setImageUrl($imageName ? '/assets/uploads/chefs/' . $imageName : null);
-        
         if ($imageName) {
             $chef->setImageUrl('/assets/uploads/chefs/' . $imageName);
         }
@@ -75,7 +73,7 @@ class ChefService implements IChefService {
 
     private function handleImageUpload(?array $file): ?string {
         // if no file was uploaded, return null
-        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+        if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) {
             return null;
         }
 

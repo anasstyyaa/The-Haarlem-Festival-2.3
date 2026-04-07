@@ -172,8 +172,6 @@ body.auth-page .auth-card button:hover {
 /* --- Admin Management Styles --- */
 
 body.admin-page {
-    display: flex !important;
-    flex-direction: row !important;
     background-color: #f8f9fa;
     margin: 0;
 }
@@ -181,8 +179,8 @@ body.admin-page {
 body.admin-page #admin-wrapper {
     display: flex;
     width: 100%;
+    align-items: flex-start; /* Crucial for sticky behavior */
 }
-
 
 body.admin-page #sidebar .nav-item {
     border: none !important;
@@ -203,6 +201,12 @@ body.admin-page #sidebar .nav-item {
     padding-top: 20px;
     display: flex;
     flex-direction: column;
+    
+    /* --- STICKY LOGIC --- */
+    position: sticky;
+    top: 0;
+    height: 100vh; 
+    overflow-y: auto; 
 }
 
 .bi::before, [class^="bi-"]::before, [class*=" bi-"]::before {
@@ -251,6 +255,7 @@ body.admin-page #sidebar .nav-item {
     flex-grow: 1;
     padding: 30px;
     background-color: #f8f9fa;
+    min-height: 100vh; 
 }
 
 /* --- --- --- */
@@ -2043,6 +2048,33 @@ body.admin-page #sidebar .nav-item {
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);      /* Red glow */
 }
 
+.dashboard-pagination-link {
+    background-color: transparent !important;
+    border: 1px solid #F4C7B8 !important; /* Your peach color */
+    color: #F4C7B8 !important;
+    margin: 0 2px;
+    transition: 0.3s;
+}
+
+.dashboard-pagination-link:hover {
+    background-color: rgba(244, 199, 184, 0.1) !important;
+}
+
+.dashboard-pagination-link.active {
+    background-color: #F4C7B8 !important;
+    color: #3B0B00 !important; /* Dark brown for contrast */
+    font-weight: bold;
+}
+
+.page-item.disabled .dashboard-pagination-link {
+    opacity: 0.3;
+    border-color: #6c757d !important;
+}
+
+.border-t-peach {
+    border-top: 1px solid rgba(244, 199, 184, 0.2);
+}
+
 
 
 
@@ -2055,7 +2087,7 @@ body.admin-page #sidebar .nav-item {
     height: auto !important;
     object-fit: cover;
 }
-/* This resets the 'Hero' height just for the admin preview box */
+
 .admin-element-preview .section4 {
     height: 120px !important;
     padding: 10px !important;
@@ -2067,3 +2099,34 @@ body.admin-page #sidebar .nav-item {
 
 
 
+/* pagination styles */
+
+
+/* Dashboard / Peach Theme */
+.custom-pagination-peach {
+    background-color: rgba(244, 199, 184, 0.1) !important;
+    border-color: rgba(244, 199, 184, 0.2) !important;
+    color: #F4C7B8 !important;
+}
+.page-item.active .custom-pagination-peach {
+    background-color: #F4C7B8 !important;
+    border-color: #F4C7B8 !important;
+    color: #3B0B00 !important;
+}
+
+/* Admin / Dark Theme */
+.custom-pagination-dark {
+    background-color: #fff !important;
+    border-color: #dee2e6 !important;
+    color: #212529 !important;
+}
+.page-item.active .custom-pagination-dark {
+    background-color: #212529 !important;
+    border-color: #212529 !important;
+    color: #fff !important;
+}
+
+.page-item.disabled .page-link {
+    opacity: 0.4;
+    pointer-events: none;
+}

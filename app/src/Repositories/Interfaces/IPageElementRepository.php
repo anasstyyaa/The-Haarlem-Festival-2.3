@@ -12,4 +12,5 @@ interface IPageElementRepository
     public function getById(int $id): ?PageElementModel;
     public function getNextPosition(string $pageName, int $section): int;
     public function create(int $subId,string $type,string $pageName,int $section,int $position): bool;
+    public function delete(int $id, $type):bool;
 }

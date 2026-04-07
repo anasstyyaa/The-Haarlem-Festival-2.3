@@ -11,16 +11,34 @@ class KidsEventModel
     private string $type;
     private string $location;
     private int $limit;
+    private string $eventDate;
 
-public function __construct(int $id, string $day, string $startTime, string $endTime, string $type, string $location,  int $limit)
-{
+public function __construct(
+    int $id,
+    string $day,
+    string $startTime,
+    string $endTime,
+    string $type,
+    string $location,
+    int $limit,
+    string $eventDate   
+) {
     $this->id = $id;
     $this->day = $day;
     $this->startTime = $startTime;
     $this->endTime = $endTime;
     $this->type = $type;
     $this->location = $location;
-     $this->limit = $limit;
+    $this->limit = $limit;
+    $this->eventDate = $eventDate; 
+}
+public function getEventDate(): string
+{
+    return $this->eventDate;
+}
+public function setEventDate(string $eventDate): void
+{
+    $this->eventDate = $eventDate;
 }
 public function getLimit(): int
 {

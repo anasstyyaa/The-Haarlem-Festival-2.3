@@ -43,4 +43,12 @@ class TextRepository extends Repository implements ITextRepository
 
     return (int)$this->connection->lastInsertId();
 }
+public function delete(int $id):bool
+    {
+        $sql = "DELETE FROM text WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+
+        return $stmt->execute(['id' => $id]);
+    }
 }

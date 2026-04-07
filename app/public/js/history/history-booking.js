@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeContainer = document.getElementById('historyTimeContainer');
     const languageContainer = document.getElementById('historyLanguageContainer');
 
+    const timeSection = document.getElementById('historyTimeSection');
+    const languageSection = document.getElementById('historyLanguageSection');
+
     const selectedSessionContainer = document.getElementById('historySelectedSessionContainer');
     const ticketSection = document.getElementById('historyTicketSection');
 
@@ -37,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         days.forEach(day => {
             const button = document.createElement('button');
             button.type = 'button';
-            button.className = 'history-booking__pill' + (selectedDay === day ? ' history-booking__pill--active' : '');
+            button.className = 'history-booking-pill' + (selectedDay === day ? ' history-booking-pill--active' : '');
             button.textContent = formatDay(day);
 
             button.addEventListener('click', () => {
@@ -55,7 +58,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTimes() {
         timeContainer.innerHTML = '';
 
-        if (!selectedDay) return;
+        if (!selectedDay) {
+            timeSection.style.display = 'none';
+            return;
+        }
+
+        timeSection.style.display = 'block';
 
         const times = uniqueValues(
             sessions
@@ -66,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         times.forEach(time => {
             const button = document.createElement('button');
             button.type = 'button';
-            button.className = 'history-booking__pill' + (selectedTime === time ? ' history-booking__pill--active' : '');
+            button.className = 'history-booking-pill' + (selectedTime === time ? ' history-booking-pill--active' : '');
             button.textContent = time;
 
             button.addEventListener('click', () => {
@@ -83,7 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderLanguages() {
         languageContainer.innerHTML = '';
 
-        if (!selectedDay || !selectedTime) return;
+        if (!selectedDay || !selectedTime) {
+            languageSection.style.display = 'none';
+            return;
+        }
+
+        languageSection.style.display = 'block';
 
         const languages = uniqueValues(
             sessions
@@ -97,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         languages.forEach(language => {
             const button = document.createElement('button');
             button.type = 'button';
-            button.className = 'history-booking__pill' + (selectedLanguage === language ? ' history-booking__pill--active' : '');
+            button.className = 'history-booking-pill' + (selectedLanguage === language ? ' history-booking-pill--active' : '');
             button.textContent = language;
 
             button.addEventListener('click', () => {

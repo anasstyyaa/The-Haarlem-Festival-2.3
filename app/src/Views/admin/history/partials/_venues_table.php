@@ -1,11 +1,8 @@
-<?php require __DIR__ . '/../../../partials/adminHeader.php'; ?>
-
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-geo-alt-fill me-2"></i>Manage History Venues</h2>
+    <h3 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Manage History Venues</h3>
     <div class="d-flex gap-2">
-    <a href="/admin/history/venues/create" class="btn btn-primary">Add Venue</a>
-    <a href="/admin/history/tours" class="btn btn-outline-secondary">Manage Tours</a>
-</div>
+        <a href="/admin/history/venues/create" class="btn btn-primary">Add Venue</a>
+    </div>
 </div>
 
 <div class="card shadow-sm border-0">
@@ -75,5 +72,3 @@
         </table>
     </div>
 </div>
-
-<?php require __DIR__ . '/../../../partials/adminFooter.php'; ?>

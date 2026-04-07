@@ -6,6 +6,7 @@ use App\Models\UserModel;
 use App\Repositories\Interfaces\IUserRepository;
 use App\Services\Interfaces\IUserService;
 use App\Services\Interfaces\IAuthService;
+use App\Services\Interfaces\ICommunicationService;
 use Exception;
 use InvalidArgumentException;
 
@@ -13,12 +14,16 @@ use InvalidArgumentException;
 class UserService implements IUserService
 {
     private IUserRepository $userRepository;
-    private IAuthService $authService;    
+    private IAuthService $authService;
+    private ICommunicationService $communicationService;
 
-    public function __construct(IUserRepository $userRepository, IAuthService $authService)
+    private const UPLOAD_PATH = '/assets/uploads/users/';
+
+    public function __construct(IUserRepository $userRepository, IAuthService $authService, ICommunicationService $communicationService)
     {
         $this->userRepository = $userRepository;
         $this->authService = $authService;
+        $this->communicationService = $communicationService;
     }
 
     public function getAllUsers(): array
@@ -26,22 +31,36 @@ class UserService implements IUserService
         return $this->userRepository->getAll();
     }
 
+    public function getPaginatedUsers(string $search = '', string $role = '', string $sort = '', int $page = 1): array
+    {
+        $limit = 10; // users per page
+        $users = $this->userRepository->getAllFiltered($search, $role, $sort, $page, $limit);
+        $totalUsers = $this->userRepository->countAllFiltered($search, $role);
+
+        return [
+            'users' => $users,
+            'total_pages' => ceil($totalUsers / $limit),
+            'current_page' => $page,
+            'total_results' => $totalUsers
+        ];
+    }
+
     public function getUserById(int $id): ?UserModel
     {
         return $this->userRepository->getById($id);
     }
 
-    public function createUser(UserModel $user, string $password, ?array $file): void
+    public function createUser(UserModel $user, string $password, ?array $file): bool
     {
         $this->authService->validateUser($user, $password, true);
 
         if ($file && $file['error'] === UPLOAD_ERR_OK) {
-            $imgName = $this->handleSecureUpload($file, 'user'); 
-            
+            $imgName = $this->handleSecureUpload($file, 'user');
+
             if (!$imgName) {
                 throw new InvalidArgumentException("Invalid image format. Only JPG, PNG, and WebP are allowed.");
             }
-            
+
             $user->setProfilePicture('/assets/uploads/users/' . $imgName);
         }
 
@@ -50,6 +69,52 @@ class UserService implements IUserService
         if (!$this->userRepository->create($user)) {
             throw new Exception("Database error: Could not create user.");
         }
+
+        return true;
+    }
+
+    public function processCreateUser(array $data, ?array $file): bool 
+    {
+        if ($this->userRepository->getByUsername(trim($data['userName'] ?? ''))) {
+            throw new \InvalidArgumentException("Username is already taken.");
+        }
+
+        $user = new UserModel(
+            0,
+            strtolower(trim($data['email'])),
+            '', // Password hashed in createUser
+            trim($data['userName'] ?? ''),
+            trim($data['fullName'] ?? ''),
+            trim($data['phoneNumber'] ?? ''),
+            $data['role'] ?? 'User',
+            date('Y-m-d H:i:s')
+        );
+
+        $imgName = $this->handleSecureUpload($file, 'user');
+        if ($imgName) {
+            $user->setProfilePicture(self::UPLOAD_PATH . $imgName);
+        }
+
+        return $this->createUser($user, $data['password'] ?? '', $file);
+    }
+
+    public function processUpdateUser(int $id, array $data, ?array $file): bool 
+    {
+        $user = $this->userRepository->getById($id);
+        if (!$user) throw new \Exception("User not found.");
+
+        $user->setEmail(strtolower(trim($data['email'])));
+        $user->setFullName(trim($data['fullName']));
+        $user->setUserName(trim($data['userName']));
+        $user->setPhoneNumber(trim($data['phoneNumber']));
+        $user->setRole($data['role']);
+
+        $imgName = $this->handleSecureUpload($file, 'user');
+        if ($imgName) {
+            $user->setProfilePicture(self::UPLOAD_PATH . $imgName);
+        }
+
+        return $this->userRepository->update($user);
     }
 
     public function updateUser(UserModel $user, ?array $file = null): void
@@ -68,39 +133,92 @@ class UserService implements IUserService
         }
     }
 
-    public function updateProfile(UserModel $user, array $data, ?array $imageFile): void
-    {
-        $user->setEmail(strtolower(trim($data['email'] ?? $user->getEmail())));
-        $user->setUserName(trim($data['userName'] ?? $user->getUserName()));
-        $user->setFullName(trim($data['fullName'] ?? $user->getFullName()));
-        $user->setPhoneNumber(trim($data['phoneNumber'] ?? $user->getPhoneNumber()));
+   public function updateProfile(UserModel $user, array $data, ?array $imageFile): void
+{
+    // Keep the original values so we can compare them later
+    // and only send an email for fields that actually changed.
+    $oldEmail = $user->getEmail();
+    $oldUserName = $user->getUserName();
+    $oldFullName = $user->getFullName();
+    $oldPhoneNumber = $user->getPhoneNumber();
 
-        $this->authService->validateUser($user, '', false);
+    // Normalize incoming form data before validation.
+    $newEmail = strtolower(trim($data['email'] ?? $user->getEmail()));
+    $newUserName = trim($data['userName'] ?? $user->getUserName());
+    $newFullName = trim($data['fullName'] ?? $user->getFullName());
+    $newPhoneNumber = trim($data['phoneNumber'] ?? $user->getPhoneNumber());
+    $newPassword = trim($data['newPassword'] ?? '');
 
-        // checking if the email changed, and if so, if it's taken by someone else
-        if (strtolower($data['email']) !== strtolower($user->getEmail()) && 
-            $this->authService->emailExists($data['email'])) {
-            throw new InvalidArgumentException('Email already exists!');
+    // Check what changed so we can notify the user later.
+    $changedFields = [];
+
+    if (strtolower($oldEmail) !== strtolower($newEmail)) {
+        $changedFields[] = 'Email address';
+    }
+
+    if ($oldUserName !== $newUserName) {
+        $changedFields[] = 'Username';
+    }
+
+    if ($oldFullName !== $newFullName) {
+        $changedFields[] = 'Full name';
+    }
+
+    if ($oldPhoneNumber !== $newPhoneNumber) {
+        $changedFields[] = 'Phone number';
+    }
+
+    if ($newPassword !== '') {
+        $changedFields[] = 'Password';
+    }
+
+    // Apply the new values to the model.
+    $user->setEmail($newEmail);
+    $user->setUserName($newUserName);
+    $user->setFullName($newFullName);
+    $user->setPhoneNumber($newPhoneNumber);
+
+    // Validate the updated model.
+    $this->authService->validateUser($user, '', false);
+
+    // If the email was changed, make sure it is not already in use.
+    if (strtolower($oldEmail) !== strtolower($newEmail) && $this->authService->emailExists($newEmail)) {
+        throw new InvalidArgumentException('Email already exists!');
+    }
+
+    // Only update the password if the user entered a new one.
+    if ($newPassword !== '') {
+        if (strlen($newPassword) < 8 || !preg_match('/[0-9]/', $newPassword)) {
+            throw new InvalidArgumentException("Password must be at least 8 characters and include a number.");
         }
 
-        if (!empty($data['newPassword'])) {
-            if (strlen($data['newPassword']) < 8 || !preg_match('/[0-9]/', $data['newPassword'])) {
-                throw new InvalidArgumentException("Password must be at least 8 characters and include a number.");
-            }
-            $user->setPassword(password_hash($data['newPassword'], PASSWORD_DEFAULT));
-        }
+        $user->setPassword(password_hash($newPassword, PASSWORD_DEFAULT));
+    }
 
-        if ($imageFile && $imageFile['error'] === UPLOAD_ERR_OK) {
-            $fileName = $this->handleSecureUpload($imageFile, 'user');
-            if ($fileName) {
-                $user->setProfilePicture('/assets/uploads/users/' . $fileName);
-            }
-        }
-        
-        if (!$this->userRepository->update($user)) {
-            throw new Exception('Failed to update profile in database.');
+    // Update the profile picture if a new one was uploaded.
+    if ($imageFile && $imageFile['error'] === UPLOAD_ERR_OK) {
+        $fileName = $this->handleSecureUpload($imageFile, 'user');
+
+        if ($fileName) {
+            $user->setProfilePicture('/assets/uploads/users/' . $fileName);
+            $changedFields[] = 'Profile picture';
         }
     }
+
+    // First save the profile changes in the database.
+    if (!$this->userRepository->update($user)) {
+        throw new Exception('Failed to update profile in database.');
+    }
+
+    // Only send a notification if something important actually changed.
+   if (!empty($changedFields)) {
+    $this->communicationService->sendAccountChangeNotification([
+        'email' => $user->getEmail(),
+        'full_name' => $user->getFullName()
+    ], $changedFields);
+}
+    
+}
 
     public function deleteUser(int $id): bool
     {
@@ -130,6 +248,9 @@ class UserService implements IUserService
 
     private function handleSecureUpload(array $file, string $prefix): ?string
     {
+        if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) return null;
+        if ($file['error'] !== UPLOAD_ERR_OK) return null;
+
         // validating MIME type (actual file content, not just extension)
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($file['tmp_name']);
@@ -137,7 +258,11 @@ class UserService implements IUserService
 
         if (!in_array($mimeType, $allowed)) return null;
 
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/users/';
+        $uploadDir = __DIR__ . '/../../public' . self::UPLOAD_PATH;
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+        
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
         $newName = uniqid($prefix . '_', true) . '.' . $ext;
 

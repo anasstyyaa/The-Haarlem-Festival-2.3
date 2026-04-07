@@ -52,24 +52,6 @@ class RestaurantSessionRepository extends Repository implements IRestaurantSessi
         ]);
     }
 
-    public function addSessions(RestaurantSessionModel $session): bool {
-        $sql = "INSERT INTO RestaurantSessions (restaurant_id, [date], startTime, available_slots) 
-                VALUES (:rid, :date, :time, :slots)";
-                
-        $stmt = $this->connection->prepare($sql);
-
-        foreach ($session->getSelectedTimes() as $time) {
-            $stmt->execute([
-                'rid'   => $session->getRestaurantId(),
-                'date'  => $session->getDate(),
-                'time'  => $time,
-                'slots' => $session->getAvailableSlots()
-            ]);
-        }
-        
-        return true; 
-    }
-
     public function deleteSession(int $id): bool {
         $sql = "DELETE FROM RestaurantSessions WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
@@ -121,15 +103,16 @@ class RestaurantSessionRepository extends Repository implements IRestaurantSessi
         return (int)$stmt->fetchColumn() > 0;
     }
     
-    public function saveSingleSession(RestaurantSessionModel $session) {
+    public function save(RestaurantSessionModel $session): bool {
         $query = "INSERT INTO RestaurantSessions (restaurant_id, [date], startTime, available_slots) 
-                VALUES (?, ?, ?, ?)";
+                  VALUES (:rid, :date, :time, :slots)";
+        
         $stmt = $this->connection->prepare($query);
-        $stmt->execute([
-            $session->getRestaurantId(),
-            $session->getDate(),
-            $session->getStartTime(),
-            $session->getAvailableSlots()
+        return $stmt->execute([
+            'rid'   => $session->getRestaurantId(),
+            'date'  => $session->getDate(),
+            'time'  => $session->getStartTime(),
+            'slots' => $session->getAvailableSlots()
         ]);
     }
 } 

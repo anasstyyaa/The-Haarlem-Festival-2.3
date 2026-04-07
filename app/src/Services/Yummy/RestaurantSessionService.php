@@ -46,13 +46,13 @@ class RestaurantSessionService implements IRestaurantSessionService {
         $times = $session->getSelectedTimes();
 
         if ($session->getAvailableSlots() > $restaurant->getTotalSlots()) {
-            throw new \Exception("Capacity Error: Session capacity (" . $session->getAvailableSlots() . ") cannot exceed the restaurant's total capacity (" . $restaurant->getTotalSlots() . ").");
+            throw new \App\Exceptions\CapacityException("Capacity Error: Session capacity (" . $session->getAvailableSlots() . ") cannot exceed the restaurant's total capacity (" . $restaurant->getTotalSlots() . ").");
         }
 
         // internal overlap check (check the form data against itself)
-        sort($times); 
+        sort($times); //arranging times from earliest to latest so i can compare them in order
         
-        for ($i = 0; $i < count($times) - 1; $i++) {
+        for ($i = 0; $i < count($times) - 1; $i++) { // canculating when the current session ends by adding the duration (converted to seconds: $duration * 60) to the start time
             $currentStart = strtotime($times[$i]);
             $nextStart = strtotime($times[$i + 1]);
             $currentEnd = $currentStart + ($duration * 60);
@@ -63,7 +63,7 @@ class RestaurantSessionService implements IRestaurantSessionService {
         }
 
         // database overlap check 
-        $this->repository->beginTransaction();
+        $this->repository->beginTransaction(); //sending several commands,but nit saving them permanently yet; just holding them in memory
         try {
             foreach ($times as $time) {
                 $session->setStartTime($time);
@@ -72,7 +72,7 @@ class RestaurantSessionService implements IRestaurantSessionService {
                     throw new \Exception("The slot at $time overlaps with an existing session. No sessions were added.");
                 }
                 
-                $this->repository->saveSingleSession($session); // stage the save (it's not permanent yet)
+                $this->repository->save($session); // stage the save (it's not permanent yet)
             }
 
             $this->repository->commit(); // if we got here without errors, make it permanent
@@ -115,6 +115,41 @@ class RestaurantSessionService implements IRestaurantSessionService {
         }
 
         return $this->repository->updateSession($session);
+    }
+
+    public function processAddSessions(array $data): bool {
+        $restaurantId = (int)($data['restaurant_id'] ?? 0);
+        $times = array_unique(array_filter($data['times'] ?? []));
+
+        if (empty($times)) {
+            throw new \Exception("No_times_provided");
+        }
+
+        $session = new RestaurantSessionModel();
+        $session->setRestaurantId($restaurantId);
+        $session->setDate($data['session_date'] ?? '');
+        $session->setAvailableSlots((int)($data['available_slots'] ?? 0));
+        $session->setSelectedTimes($times);
+
+        return $this->addSessions($session);
+    }
+
+    public function processUpdateSession(array $data): bool {
+        $restaurantId = (int)($data['restaurant_id'] ?? 0);
+        $sessionId = (int)($data['session_id'] ?? 0);
+
+        if (!$restaurantId || !$sessionId) {
+            throw new \Exception("Missing required IDs for session update.");
+        }
+
+        $session = new RestaurantSessionModel();
+        $session->setId($sessionId);
+        $session->setRestaurantId($restaurantId);
+        $session->setDate($data['session_date'] ?? '');
+        $session->setStartTime($data['start_time'] ?? '');
+        $session->setAvailableSlots((int)($data['available_slots'] ?? 0));
+
+        return $this->updateSession($session);
     }
 
 }

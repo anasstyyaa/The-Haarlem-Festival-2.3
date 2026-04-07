@@ -1,7 +1,7 @@
 <form method="POST" action="/admin/elements/store">
     <input type="hidden" name="type" value="text">
-    <input type="hidden" name="section" value="<?= $section ?>">
-    <input type="hidden" name="pageName" value="home">
+    <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
+    <input type="hidden" name="pageName" value="<?= htmlspecialchars($pageName) ?>">
 
     <textarea name="content" placeholder="Enter text"></textarea>
 

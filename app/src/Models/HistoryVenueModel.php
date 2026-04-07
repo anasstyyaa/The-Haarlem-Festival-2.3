@@ -8,18 +8,26 @@ class HistoryVenueModel
     private string $venueName;
     private ?string $details;
     private ?string $location;
+
     private ?int $imageId;
     private ?string $imgURL;
     private ?string $altText;
 
+    private ?int $detailImageId;
+    private ?string $detailImgURL;
+    private ?string $detailAltText;
+
     public function __construct(
         int $venueId,
         string $venueName,
-        ?string $details,
-        ?string $location,
-        ?int $imageId,
+        ?string $details = null,
+        ?string $location = null,
+        ?int $imageId = null,
         ?string $imgURL = null,
-        ?string $altText = null
+        ?string $altText = null,
+        ?int $detailImageId = null,
+        ?string $detailImgURL = null,
+        ?string $detailAltText = null
     ) {
         $this->venueId = $venueId;
         $this->venueName = $venueName;
@@ -28,6 +36,9 @@ class HistoryVenueModel
         $this->imageId = $imageId;
         $this->imgURL = $imgURL;
         $this->altText = $altText;
+        $this->detailImageId = $detailImageId;
+        $this->detailImgURL = $detailImgURL;
+        $this->detailAltText = $detailAltText;
     }
 
     public function getVenueId(): int
@@ -64,4 +75,20 @@ class HistoryVenueModel
     {
         return $this->altText;
     }
+
+    public function getDetailImageId(): ?int
+    {
+        return $this->detailImageId;
+    }
+
+    public function getDetailImgURL(): ?string
+    {
+        return $this->detailImgURL;
+    }
+
+    public function getDetailAltText(): ?string
+    {
+        return $this->detailAltText;
+    }
+    
 }

@@ -37,9 +37,31 @@ class Controller
         $this->requireRole('Employee');
     }
     
-    protected function redirect(string $url): void
+    protected function redirect(string $url, ?string $flashMessage = null, string $type = 'success'): void
     {
+        if ($flashMessage) {
+            if ($type === 'danger' || $type === 'error') {
+                $_SESSION['error'] = $flashMessage;
+            } else {
+                $_SESSION['flash_success'] = $flashMessage;
+            }
+        }
+
         header("Location: $url");
         exit;
+    }
+
+    protected function render(string $viewPath, array $data = []): void
+    {
+        // extracting variables so they are accessible in the view 
+        extract($data);
+        
+        $fullPath = __DIR__ . '/../Views/' . $viewPath . '.php';
+        
+        if (file_exists($fullPath)) {
+            include $fullPath;
+        } else {
+            throw new \Exception("View not found: $viewPath");
+        }
     }
 }

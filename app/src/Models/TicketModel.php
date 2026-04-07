@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Models;
+
 use App\Models\EventModel;
 use App\Models\UserModel;
 use App\Models\Yummy\RestaurantModel;
-use App\Models\JazzPassModel; 
-use App\Models\JazzEventModel; 
+use App\Models\JazzPassModel;
+use App\Models\JazzEventModel;
 
 class TicketModel
 {
@@ -84,12 +86,14 @@ class TicketModel
         if (is_array($details) && isset($details['jazzEvent']) && $details['jazzEvent'] instanceof      JazzEventModel) {
             return (float)$details['jazzEvent']->getPrice();
         }
-
+        if ($details instanceof \App\Models\HistoryEventModel) {
+            return (float)$details->getPriceIndividual();
+        }
         if (is_array($details) && isset($details['price'])) {
             return (float)$details['price'];
         }
 
-        return 15.00; 
+        return 15.00;
     }
 
     public function getTotalPrice(): float
@@ -116,4 +120,5 @@ class TicketModel
     {
         $this->uniqueTicketToken = $token;
     }
+
 }

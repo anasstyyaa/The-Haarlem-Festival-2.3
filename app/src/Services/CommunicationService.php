@@ -15,50 +15,50 @@ use chillerlan\QRCode\Common\EccLevel;
 
 class CommunicationService implements ICommunicationService
 {
-    private function getPdfEngine(): Dompdf
+    private function getMailer(): PHPMailer
+    {
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = 'mailpit'; 
+        $mail->Port = 1025;
+        $mail->SMTPAuth = false;
+        $mail->setFrom('noreply@haarlemfestival.com', 'Haarlem Festival');
+        return $mail;
+    }
+
+    private function generatePdf(string $html): string
     {
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true); // helpful for loading external images (like QR codes)
-        return new Dompdf($options);
+        $options->set('isRemoteEnabled', true);
+        
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        return $dompdf->output();
     }
 
     public function sendOrderConfirmation(array $user, array $tickets, string $orderId): bool
     {
-        try {
-            // generating Invoice PDF
-            $invoiceHtml = $this->renderInvoiceHtml($user, $tickets, $orderId);
-            $dompdfInvoice = $this->getPdfEngine();
-            $dompdfInvoice->loadHtml($invoiceHtml);
-            $dompdfInvoice->setPaper('A4', 'portrait');
-            $dompdfInvoice->render();
-            $invoiceBinary = $dompdfInvoice->output();
+        try { 
+            $data = [
+                'user' => $user, 
+                'tickets' => $tickets, 
+                'orderId' => $orderId, 
+                'service' => $this
+            ];        
+            $invoiceHtml = $this->renderView('pdf/invoice', $data);
+            $ticketsHtml = $this->renderView('pdf/tickets', $data);
 
-            // generating Tickets PDF 
-            $ticketsHtml = $this->renderTicketsHtml($user, $tickets, $orderId);
-            $dompdfTickets = $this->getPdfEngine();
-            $dompdfTickets->loadHtml($ticketsHtml);
-            $dompdfTickets->setPaper('A4', 'portrait');
-            $dompdfTickets->render();
-            $ticketsBinary = $dompdfTickets->output();
-
-            // preparing the email
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = 'mailpit'; 
-            $mail->Port = 1025;
-            $mail->SMTPAuth = false;
-
-            $mail->setFrom('noreply@haarlemfestival.com', 'Haarlem Festival');
+            $mail = $this->getMailer();
             $mail->addAddress($user['email'], $user['full_name']);
-
             $mail->isHTML(true);
-            $mail->Subject = 'Your Haarlem Festival Tickets - Order ' . $orderId;
-            $mail->Body = "Dear {$user['full_name']},<br><br>Thank you for your purchase! Please find your <b>Invoice</b> and <b>Tickets</b> attached.";
+            $mail->Subject = "Your Haarlem Festival Tickets - Order $orderId";
+            $mail->Body = "Please find your tickets attached.";
 
-            // attaching both PDF's 
-            $mail->addStringAttachment($invoiceBinary, 'Invoice_' . $orderId . '.pdf');
-            $mail->addStringAttachment($ticketsBinary, 'Tickets_' . $orderId . '.pdf');
+            $mail->addStringAttachment($this->generatePdf($invoiceHtml), "Invoice_$orderId.pdf");
+            $mail->addStringAttachment($this->generatePdf($ticketsHtml), "Tickets_$orderId.pdf");
 
             return $mail->send();
         } catch (Exception $e) {
@@ -66,154 +66,12 @@ class CommunicationService implements ICommunicationService
         }
     }
 
-    private function renderInvoiceHtml(array $user, array $tickets, string $orderId): string
+    private function renderView(string $path, array $data): string
     {
-        $rows = "";
-        $totalExclVat = 0;
-        $totalVat = 0;
-        
-        foreach ($tickets as $ticket) {
-            $details = $ticket->getEvent()->getDetails();
-            
-            $qty = $ticket->getNumberOfPeople() ?: 1;
-            $unitPriceIncl = $ticket->getUnitPrice();
-            $lineTotalIncl = $ticket->getTotalPrice();
-
-            // Assumption: 9% VAT for Festival/Food, 21% for others. 
-            $vatRate = 0.09; 
-            $vatAmount = $lineTotalIncl - ($lineTotalIncl / (1 + $vatRate));
-            $lineExcl = $lineTotalIncl - $vatAmount;
-
-            $totalExclVat += $lineExcl;
-            $totalVat += $vatAmount;
-
-            $eventName = $this->getEventNameFromTicket($ticket);
-            $location = $this->getEventAddress($ticket);
-
-            $rows .= "
-            <tr>
-                <td style='padding: 10px; border-bottom: 1px solid #eee;'>
-                    <div style='font-weight: bold;'>{$eventName}</div>
-                    <div style='font-size: 0.85em; color: #666;'>Loc: {$location}</div>
-                </td>
-                <td style='padding: 10px; border-bottom: 1px solid #eee;'>{$qty}</td>
-                <td style='padding: 10px; border-bottom: 1px solid #eee;'>&euro;" . number_format($lineExcl / $qty, 2) . "</td>
-                <td style='padding: 10px; border-bottom: 1px solid #eee;'>&euro;" . number_format($lineExcl, 2) . "</td>
-                <td style='padding: 10px; border-bottom: 1px solid #eee; text-align:right;'>" . ($vatRate * 100) . "%</td>
-            </tr>";
-            }
-
-        $grandTotal = $totalExclVat + $totalVat;
-
-        // CSS for Dompdf
-        return "
-        <html>
-        <body style='font-family: sans-serif; color: #333;'>
-            <table style='width: 100%;'>
-                <tr>
-                    <td><h1>INVOICE</h1></td>
-                    <td style='text-align: right;'>
-                        <strong>Haarlem Festival</strong><br>
-                    </td>
-                </tr>
-            </table>
-
-            <hr>
-
-            <table style='width: 100%; margin-top: 20px;'>
-                <tr>
-                    <td style='width: 50%; vertical-align: top;'>
-                        <strong>Bill To:</strong><br>
-                        {$user['full_name']}<br>
-                        {$user['email']}<br>
-                        {$user['phone']}
-                    </td>
-                    <td style='width: 50%; text-align: right; vertical-align: top;'>
-                        <strong>Invoice #:</strong> INV-{$orderId}<br>
-                        <strong>Invoice Date:</strong> {$user['invoice_date']}<br>
-                        <strong>Payment Date:</strong> {$user['payment_date']}<br>
-                        <strong>Status:</strong> PAID
-                    </td>
-                </tr>
-            </table>
-
-            <table style='width: 100%; border-collapse: collapse; margin-top: 30px;'>
-                <thead>
-                    <tr style='background: #333; color: white;'>
-                        <th style='padding: 10px; text-align: left;'>Description</th>
-                        <th style='padding: 10px; text-align: left;'>Qty</th>
-                        <th style='padding: 10px; text-align: left;'>Unit Price</th>
-                        <th style='padding: 10px; text-align: right;'>Total (Incl. VAT)</th>
-                    </tr>
-                </thead>
-                <tbody>{$rows}</tbody>
-            </table>
-
-            <table style='width: 40%; margin-left: 60%; margin-top: 20px;'>
-                <tr>
-                    <td style='padding: 5px;'>Subtotal (Excl. VAT):</td>
-                    <td style='text-align: right;'>&euro;" . number_format($totalExclVat, 2) . "</td>
-                </tr>
-                <tr>
-                    <td style='padding: 5px;'>VAT Total:</td>
-                    <td style='text-align: right;'>&euro;" . number_format($totalVat, 2) . "</td>
-                </tr>
-                <tr style='font-weight: bold; font-size: 1.2em; border-top: 2px solid #333;'>
-                    <td style='padding: 5px;'>Grand Total:</td>
-                    <td style='text-align: right;'>&euro;" . number_format($grandTotal, 2) . "</td>
-                </tr>
-            </table>
-        </body>
-        </html>";
-    }
-
-    private function renderTicketsHtml(array $user, array $tickets, string $orderId): string
-    {
-        $ticketSections = "";
-        
-        // configuring QR options for high-quality PDF output
-        $options = new QROptions([
-        'version'             => 5,
-        'outputType'          => 'gdimage_png',
-        'eccLevel'            => EccLevel::L, 
-        'addQuietzone'        => true,
-        'imageBase64'         => true, 
-    ]);
-
-        foreach ($tickets as $ticket) {
-            $eventName = $this->getEventNameFromTicket($ticket);
-            $token = $ticket->getUniqueTicketToken();
-            $eventDate = $this->getEventDateDisplay($ticket);
-
-            // generating the secure URL data
-            $qrData = "https://yourdomain.com/scan?token=" . $token;
-
-            // generating the QR code as an SVG string directly
-            $qrcode = new QRCode($options);
-            $qrCodeMarkup = $qrcode->render($qrData);
-
-            $ticketSections .= "
-                <div style='border: 2px dashed #444; padding: 20px; margin-bottom: 30px; font-family: sans-serif;'>
-                    <table style='width: 100%;'>
-                        <tr>
-                            <td style='vertical-align: top; width: 70%;'>
-                                <h2 style='margin: 0; color: #d32f2f;'>HAARLEM FESTIVAL</h2>
-                                <p style='font-size: 18px; margin: 10px 0;'><strong>Event:</strong> {$eventName}</p>
-                                <p><strong>Date/Time:</strong> {$eventDate}</p>
-                                <p><strong>Attendee:</strong> {$user['full_name']}</p>
-                                <p><strong>Quantity:</strong> {$ticket->getNumberOfPeople()} Person(s)</p>
-                            </td>
-                            <td style='text-align: right; width: 30%;'>
-                                <img src='{$qrCodeMarkup}' width='150' height='150' />
-                                <div style='font-size: 9px; color: #666; margin-top: 5px;'>Scan to Validate</div>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div style='page-break-after: always;'></div>";
-        }
-
-        return "<html><body>$ticketSections</body></html>";
+        extract($data);
+        ob_start();
+        include __DIR__ . "/../Views/{$path}.php";
+        return ob_get_clean();
     }
 
     public function sendPaymentReminder(array $userData, string $orderId): bool

@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\PersonalProgram;
 use App\Repositories\TicketRepository;
 use App\Services\Interfaces\ITicketService;
-
+use App\ViewModels\TicketViewModel;
 use App\Exceptions\CapacityException;
 use App\Framework\Controller;
 
@@ -25,10 +25,21 @@ class TicketController extends Controller
     public function index(): void
     {
         $program = $_SESSION['program'] ?? new PersonalProgram();
-        $tickets = $this->ticketService->hydrateTickets($program->getTickets());
+        $rawTickets = $this->ticketService->hydrateTickets($program->getTickets());
+
+        // transforming raw models into viewModels
+        $viewTickets = [];
+        $grandTotal = 0.0;
+
+        foreach ($rawTickets as $ticket) {
+            $vm = new TicketViewModel($ticket);
+            $viewTickets[] = $vm;
+            $grandTotal += $vm->totalPrice;
+        }
 
         $this->render('personalProgram/personalProgram', [
-            'tickets' => $tickets
+            'viewTickets' => $viewTickets,
+            'grandTotal'  => $grandTotal
         ]);
     }
 

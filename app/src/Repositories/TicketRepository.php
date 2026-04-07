@@ -191,7 +191,7 @@ class TicketRepository extends Repository implements ITicketRepository
             $enumType = \App\Models\Enums\EventTypeEnum::tryFrom($row['eventType']);
 
             //passing null for details because TicketService->hydrateTickets() will fill them
-            $event = new \App\Models\EventModel(
+            $event = new EventModel(
                 (int)$row['event_id'],
                 $enumType,
                 (int)$row['sub_event_id']

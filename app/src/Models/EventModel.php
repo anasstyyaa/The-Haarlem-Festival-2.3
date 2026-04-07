@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Enums\EventTypeEnum;
 
-class EventModel//test
+class EventModel
 {
     private int $id;
     private EventTypeEnum $eventType;

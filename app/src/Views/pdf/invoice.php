@@ -73,7 +73,6 @@ $totalVat = 0;
                 $qty = $ticket->getNumberOfPeople() ?: 1;
                 $lineTotalIncl = $ticket->getTotalPrice();
 
-                // Logic: 9% VAT
                 $vatRate = 0.09; 
                 $lineVat = $lineTotalIncl - ($lineTotalIncl / (1 + $vatRate));
                 $lineExcl = $lineTotalIncl - $lineVat;

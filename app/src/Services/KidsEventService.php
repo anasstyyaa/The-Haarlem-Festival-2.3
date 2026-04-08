@@ -10,9 +10,9 @@ class KidsEventService implements IKidsEventService
 {
     private KidsEventRepository $repository;
 
-    public function __construct()
+    public function __construct(KidsEventRepository $repository)
     {
-        $this->repository = new KidsEventRepository();
+        $this->repository = $repository;
     }
 
     

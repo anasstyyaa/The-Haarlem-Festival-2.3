@@ -50,8 +50,6 @@
 <div class="top-bar">
     <h1>Tickets Dashboard</h1>
 
-    <a href="/admin/export-csv" class="export-btn">Export CSV</a>
-     <a href="/admin/export-excel" class="export-btn">Export Excel</a>
 </div>
 <form method="POST" action="/admin/export-excel">
     <div style="margin-bottom:10px;">

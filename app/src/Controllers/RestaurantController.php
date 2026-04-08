@@ -7,7 +7,7 @@ use App\Services\Interfaces\Yummy\IRestaurantSessionService;
 use App\Models\Yummy\RestaurantModel;
 use App\Models\Yummy\RestaurantSessionModel;
 
-use App\Services\PageElementService;
+use App\Services\Interfaces\IPageElementService;
 use App\ViewModels\PageElementViewModel;
 
 use App\Framework\Controller; 
@@ -18,9 +18,9 @@ class RestaurantController extends Controller {
     private IRestaurantService $service;
     private IChefService $chefService;
     private IRestaurantSessionService $sessionService;
-    private PageElementService $pageElementService;
+    private IPageElementService $pageElementService;
 
-    public function __construct(IRestaurantService $service, IChefService $chefService, IRestaurantSessionService $sessionService, PageElementService $pageElementService) {
+    public function __construct(IRestaurantService $service, IChefService $chefService, IRestaurantSessionService $sessionService, IPageElementService $pageElementService) {
         $this->service = $service;
         $this->chefService = $chefService;
         $this->sessionService = $sessionService;

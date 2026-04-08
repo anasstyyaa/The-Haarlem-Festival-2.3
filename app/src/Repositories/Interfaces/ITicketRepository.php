@@ -6,7 +6,6 @@ use App\Models\TicketModel;
 
 interface ITicketRepository {
 
-    public function getAll(): array; 
     public function getAllWithDetails(): array; 
     public function getTicketsByOrderId(string $orderId): array; 
     public function savePaidTicket(TicketModel $ticket, string $stripeId): bool; 

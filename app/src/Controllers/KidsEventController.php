@@ -1,32 +1,32 @@
 <?php 
 namespace App\Controllers;
 
-use App\Services\KidsEventService;
+use App\Services\Interfaces\IKidsEventService;
 use App\ViewModels\KidsEventViewModel;
 use App\Models\KidsEventModel;
-use App\Services\PageElementService;
+use App\Services\Interfaces\IPageElementService;
 use App\ViewModels\PageElementViewModel;
 
-use App\Services\ExtraKidsEventService;
+use App\Services\Interfaces\IExtraKidsEventService;
 use App\Models\ExtraKidsEventModel;
 use App\ViewModels\ExtraKidsEventViewModel;
 
 class KidsEventController
 {
-    private PageElementService $pageService;
-    private KidsEventService $service;
-    private ExtraKidsEventService $extraKidsService;
-    public function __construct()
+    private IPageElementService $pageService;
+    private IKidsEventService $kidsService;
+    private IExtraKidsEventService $extraKidsService;
+    public function __construct(IPageElementService $pageService, IKidsEventService $kidsService, IExtraKidsEventService $extraKidsService)
     {
-        $this->service = new KidsEventService();
-       $this->pageService  = new PageElementService();
-        $this->extraKidsService = new ExtraKidsEventService();
+        $this->kidsService = $kidsService;
+        $this->pageService  = $pageService;
+        $this->extraKidsService = $extraKidsService;
     }
 
    public function index(): void
 {
      $vm = $this->buildPageVM('kids');
-    $kidsEvents = $this->service->getAll();
+    $kidsEvents = $this->kidsService->getAll();
     $vmKids = new KidsEventViewModel($kidsEvents);
       $extraEvents = $this->extraKidsService->getAllEvents();
         $extraViewModel = new ExtraKidsEventViewModel($extraEvents);

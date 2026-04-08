@@ -9,5 +9,8 @@ interface IKidsEventService
     public function getAll(): array;
     public function getEventById(int $id): ?KidsEventModel; 
     public function getEventBySchedule(string $day, string $startTime, string $endTime): ?KidsEventModel;
-    public function mapDayToDate(string $dayName): ?string;
+    public function mapDayToDate(string $dayName): ?string; 
+    public function update(KidsEventModel $event): bool;
+    public function delete(int $id): bool;
+    public function create(KidsEventModel $event): bool;
 }

@@ -2,31 +2,28 @@
 
 namespace App\Controllers;
 
-use App\Services\PageElementService;
+use App\Services\Interfaces\IPageElementService;
 use App\ViewModels\PageElementViewModel;
 
 class HomeController
 {
-    private PageElementService $pageService;
+    private IPageElementService $pageService;
 
-    public function __construct()
+    public function __construct(IPageElementService $pageService)
 {
-    $this->pageService = new PageElementService();
+    $this->pageService = $pageService;
 }
 
     public function index()
     {
      $sections = $this->pageService->getPageSections("home");
-
     $vm = new PageElementViewModel($sections);
-
-
       require __DIR__ . '/../Views/home/index.php';
     }
+
     public function adminIndex(): void
 {
     $sections = $this->pageService->getPageSections("home");
-
     $vm = new PageElementViewModel($sections);
       require __DIR__ . '/../Views/admin/home/index.php';
 }

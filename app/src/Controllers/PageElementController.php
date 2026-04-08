@@ -2,30 +2,29 @@
 
 namespace App\Controllers;
 
-use App\Services\PageElementService;
-use App\Services\TextService;
-use App\Services\ImageService;
-use App\Services\ButtonService;
+use App\Services\Interfaces\IPageElementService;
+use App\Services\Interfaces\ITextService;
+use App\Services\Interfaces\IImageService;
+use App\Services\Interfaces\IButtonService;
 
 class PageElementController
 {
-    private PageElementService $service;
-    private TextService $textService;
-     private ImageService $imgService;
-     private ButtonService $buttonService;
+    private IPageElementService $pageService;
+    private ITextService $textService;
+    private IImageService $imgService;
+    private IButtonService $buttonService;
 
-    public function __construct()
+    public function __construct(IPageElementService $pageService, ITextService $textService, IImageService $imgService, IButtonService $buttonService)
     {
-        $this->service = new PageElementService();
-         $this->textService = new TextService();
-          $this->imgService = new ImageService();
-          $this->buttonService = new ButtonService();
+        $this->pageService = $pageService;
+         $this->textService = $textService;
+          $this->imgService = $imgService;
+          $this->buttonService = $buttonService;
     }
 
     public function showEditForm(array $vars): void
     {
          $id = (int)$vars['id'];
-       
          $text = $this->textService->getById($id);
           include __DIR__ . '/../Views/admin/text/textEditForm.php';
     }
@@ -71,7 +70,7 @@ class PageElementController
         $id = (int)$vars['id'];
         $type = $vars['type'];
 
-        if ($this->service->delete($id, $type)) {
+        if ($this->pageService->delete($id, $type)) {
             header('Location: /admin/home/index');
             exit;
         }
@@ -162,7 +161,7 @@ public function createForm(): void
         $_POST['imgURL'] = '/assets/images/' . $fileName;
     }
 
-        $this->service->createElement(
+        $this->pageService->createElement(
             $type,
             $section,
             $pageName, 

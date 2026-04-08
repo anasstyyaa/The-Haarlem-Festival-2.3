@@ -12,4 +12,5 @@ public function getAllEvents(): array;
 
     public function createEvent(ExtraKidsEventModel $event): bool;
     public function deleteEvent(int $id): bool;
+     public function updateEvent(ExtraKidsEventModel $event): bool;
     }

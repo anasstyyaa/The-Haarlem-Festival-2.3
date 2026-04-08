@@ -259,7 +259,11 @@ switch ($routeInfo[0]) {
             $service = new \App\Services\UserService($repository, $authService, $communicationService);
             $controller = new $class($service, $authService, $ticketService);
         } elseif ($class === 'App\Controllers\RestaurantController') {
-            $pageElementService = new \App\Services\PageElementService(new \App\Repositories\PageElementRepository());
+             $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageElementService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
             $repository = new \App\Repositories\Yummy\RestaurantRepository();
             $chefRepo = new \App\Repositories\Yummy\ChefRepository();
             $sessionRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
@@ -338,7 +342,24 @@ switch ($routeInfo[0]) {
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
 
             $controller = new $class($historyService, $personalProgramService);
-        } else {
+
+        }elseif ($class === 'App\Controllers\KidsEventController') {
+            $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+
+            $kidsRepo = new \App\Repositories\KidsEventRepository();
+            $kidsService = new \App\Services\KidsEventService($kidsRepo);
+           
+            $extraKidsRepo = new \App\Repositories\ExtraKidsEventRepository();
+            $extraKidsService = new \App\Services\ExtraKidsEventService($extraKidsRepo);
+
+
+            $controller = new $class($pageService, $kidsService, $extraKidsService);
+        } 
+         else {
             $controller = new $class();
         }
 

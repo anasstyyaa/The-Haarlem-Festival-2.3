@@ -66,11 +66,7 @@ class TicketService implements ITicketService
       return $this->ticketRepository->markAsExpired($orderId);
    }
 
-   public function getAll(): array
-   {
-      return $this->ticketRepository->getAll();
-   }
-
+   
    public function getAllWithDetails(): array
    {
       return $this->ticketRepository->getAllWithDetails();
@@ -207,7 +203,7 @@ class TicketService implements ITicketService
          }
       }
 
-      $eventId = $this->eventService->checkEventType($subEventId, $eventType);
+      $eventId = $this->eventService->checkEventType($subEventId, $eventType);//check for newly created events
 
       if ($eventId === 0) {
          throw new \Exception("Configuration Error: No Event found for Type: $eventType.");

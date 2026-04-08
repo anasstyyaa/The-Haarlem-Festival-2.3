@@ -20,11 +20,15 @@ class PageElementService implements IPageElementService
     private IImageRepository $imageRepo;
     private ITextRepository $textRepo;
     public function __construct(
+         IPageElementRepository $pageElementRepository,
+         IButtonRepository $buttonRepo,
+         IImageRepository $imageRepo,
+         ITextRepository $textRepo
     ) {
-       $this->pageElementRepository = new PageElementRepository();
-       $this->buttonRepo = new ButtonRepository();
-       $this->imageRepo = new ImageRepository();
-       $this->textRepo = new TextRepository();
+       $this->pageElementRepository = $pageElementRepository;
+       $this->buttonRepo = $buttonRepo;
+       $this->imageRepo = $imageRepo;
+       $this->textRepo = $textRepo;
 
     }
    

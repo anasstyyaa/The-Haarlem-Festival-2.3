@@ -3,15 +3,16 @@ namespace App\Services;
 
 use App\Repositories\ExtraKidsEventRepository;
 use App\Models\ExtraKidsEventModel;
+use App\Repositories\Interfaces\IExtraKidsEventRepository;
 use App\Services\Interfaces\IExtraKidsEventService;
 
 class ExtraKidsEventService implements IExtraKidsEventService
 {
     private ExtraKidsEventRepository $repository;
 
-    public function __construct()
+    public function __construct(IExtraKidsEventRepository $repository)
     {
-        $this->repository = new ExtraKidsEventRepository();
+        $this->repository = $repository;
     }
 
     public function getAllEvents(): array

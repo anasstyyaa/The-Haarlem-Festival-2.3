@@ -355,7 +355,7 @@ class CommunicationService implements ICommunicationService
         $details = $ticket->getEvent()->getDetails();
         $type = strtolower($ticket->getEvent()->getEventType()->value);
 
-        if ($type === 'reservation' && is_object($details)) {
+        if ($type === 'reservation' && is_object($details)) { //add for kids
             $session = $details->getSessionData();
             return $session ? (new \DateTime($session->getStartTime()))->format('l, d F Y') : 'Date TBD';
         }

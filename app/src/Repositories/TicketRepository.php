@@ -123,15 +123,15 @@ class TicketRepository extends Repository implements ITicketRepository
         return $stmt->execute(['orderId' => $orderId]);
     }
 
-    public function getAll(): array
-    {
-        $sql = "SELECT * FROM Tickets ORDER BY id DESC";
-        $stmt = $this->connection->query($sql);
+    // public function getAll(): array
+    // {
+    //     $sql = "SELECT * FROM Tickets ORDER BY id DESC";
+    //     $stmt = $this->connection->query($sql);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // }
 
-    public function getAllWithDetails(): array
+    public function getAllWithDetails(): array// limit and offset + kidsevent duplicate event checker
     {
         $sql = "
             SELECT 

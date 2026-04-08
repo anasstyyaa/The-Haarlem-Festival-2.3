@@ -64,184 +64,164 @@ class HistoryController extends Controller
         }
     }
 
-    public function adminTours(): void
-    {
-        header('Location: /admin/history');
-        exit;
-    }
-
     public function createTour(): void
     {
-        $this->requireAdmin();
-        $tour = null;
+        try {
+            $this->requireAdmin();
 
-        require __DIR__ . '/../Views/admin/history/tours/create.php';
+            $this->view('admin/history/tours/create', [
+                'tour' => null
+            ]);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            $_SESSION['error'] = 'Failed to load create tour page.';
+            $this->redirect('/admin/history');
+        }
     }
 
     public function storeTour(): void
     {
-        $this->requireAdmin();
+        try {
+            $this->requireAdmin();
+            $this->requirePost('/admin/history');
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history');
-            exit;
+            $this->service->createTourFromForm($_POST);
+
+            $_SESSION['flash_success'] = 'Tour created successfully.';
+            $this->redirect('/admin/history');
+        } catch (\InvalidArgumentException $e) {
+            $_SESSION['error'] = $e->getMessage();
+
+            $this->view('admin/history/tours/create', [
+                'tour' => null
+            ]);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            $_SESSION['error'] = 'Failed to create tour.';
+
+            $this->view('admin/history/tours/create', [
+                'tour' => null
+            ]);
         }
-
-        $slotDate = trim($_POST['slotDate'] ?? '');
-        $startTime = trim($_POST['startTime'] ?? '');
-        $language = trim($_POST['language'] ?? '');
-        $duration = (int)($_POST['duration'] ?? 150);
-        $minAge = (int)($_POST['minAge'] ?? 12);
-        $capacity = (int)($_POST['capacity'] ?? 12);
-        $priceIndividual = (float)($_POST['priceIndividual'] ?? 17.50);
-        $priceFamily = (float)($_POST['priceFamily'] ?? 60.00);
-
-        if ($slotDate === '' || $startTime === '' || $language === '') {
-            $error = 'Date, time and language are required.';
-            $tour = null;
-            require __DIR__ . '/../Views/admin/history/tours/create.php';
-            return;
-        }
-
-        $tour = new \App\Models\HistoryEventModel(
-            0,
-            0,
-            $slotDate,
-            $startTime,
-            $language,
-            $duration,
-            $minAge,
-            $capacity,
-            $priceIndividual,
-            $priceFamily
-        );
-
-        if ($this->service->createSession($tour)) {
-            header('Location: /admin/history');
-            exit;
-        }
-
-        $error = 'Failed to create tour.';
-        require __DIR__ . '/../Views/admin/history/tours/create.php';
     }
 
     public function editTour(): void
     {
-        $this->requireAdmin();
+        try {
+            $this->requireAdmin();
 
-        $eventId = (int)($_GET['id'] ?? 0);
-        $tour = $this->service->getSessionByEventId($eventId);
+            $eventId = (int)($_GET['id'] ?? 0);
+            $tour = $this->service->getSessionByEventId($eventId);
 
-        if (!$tour) {
-            header('Location: /admin/history');
-            exit;
+            if (!$tour) {
+                $_SESSION['error'] = 'Tour not found.';
+                $this->redirect('/admin/history');
+            }
+
+            $this->view('admin/history/tours/edit', [
+                'tour' => $tour
+            ]);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            $_SESSION['error'] = 'Failed to load tour.';
+            $this->redirect('/admin/history');
         }
-
-        require __DIR__ . '/../Views/admin/history/tours/edit.php';
     }
 
     public function updateTour(): void
     {
-        $this->requireAdmin();
+        try {
+            $this->requireAdmin();
+            $this->requirePost('/admin/history');
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history');
-            exit;
+            $this->service->updateTourFromForm($_POST);
+
+            $_SESSION['flash_success'] = 'Tour updated successfully.';
+            $this->redirect('/admin/history');
+        } catch (\InvalidArgumentException $e) {
+            $_SESSION['error'] = $e->getMessage();
+
+            $eventId = (int)($_POST['eventId'] ?? 0);
+            $existingTour = $this->service->getSessionByEventId($eventId);
+
+            $this->view('admin/history/tours/edit', [
+                'tour' => $existingTour
+            ]);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            $_SESSION['error'] = 'Failed to update tour.';
+
+            $eventId = (int)($_POST['eventId'] ?? 0);
+            $existingTour = $this->service->getSessionByEventId($eventId);
+
+            $this->view('admin/history/tours/edit', [
+                'tour' => $existingTour
+            ]);
         }
-
-        $eventId = (int)($_POST['eventId'] ?? 0);
-        $historyEventId = (int)($_POST['historyEventId'] ?? 0);
-
-        $existingTour = $this->service->getSessionByEventId($eventId);
-        if (!$existingTour) {
-            header('Location: /admin/history');
-            exit;
-        }
-
-        $slotDate = trim($_POST['slotDate'] ?? '');
-        $startTime = trim($_POST['startTime'] ?? '');
-        $language = trim($_POST['language'] ?? '');
-        $duration = (int)($_POST['duration'] ?? 150);
-        $minAge = (int)($_POST['minAge'] ?? 12);
-        $capacity = (int)($_POST['capacity'] ?? 12);
-        $priceIndividual = (float)($_POST['priceIndividual'] ?? 17.50);
-        $priceFamily = (float)($_POST['priceFamily'] ?? 60.00);
-
-        if ($slotDate === '' || $startTime === '' || $language === '') {
-            $error = 'Date, time and language are required.';
-            $tour = $existingTour;
-            require __DIR__ . '/../Views/admin/history/tours/edit.php';
-            return;
-        }
-
-        $tour = new \App\Models\HistoryEventModel(
-            $eventId,
-            $historyEventId,
-            $slotDate,
-            $startTime,
-            $language,
-            $duration,
-            $minAge,
-            $capacity,
-            $priceIndividual,
-            $priceFamily
-        );
-
-        if ($this->service->updateSession($tour)) {
-            header('Location: /admin/history');
-            exit;
-        }
-
-        $error = 'Failed to update tour.';
-        require __DIR__ . '/../Views/admin/history/tours/edit.php';
     }
 
     public function deleteTour(): void
     {
-        $this->requireAdmin();
+        try {
+            $this->requireAdmin();
+            $this->requirePost('/admin/history');
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /admin/history');
-            exit;
-        }
-
-        $eventId = (int)($_POST['id'] ?? 0);
-
-        if ($eventId > 0) {
+            $eventId = (int)($_POST['id'] ?? 0);
             $this->service->deleteSession($eventId);
-        }
 
-        header('Location: /admin/history');
-        exit;
+            $_SESSION['flash_success'] = 'Tour deleted successfully.';
+            $this->redirect('/admin/history');
+        } catch (\InvalidArgumentException $e) {
+            $_SESSION['error'] = $e->getMessage();
+            $this->redirect('/admin/history');
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            $_SESSION['error'] = 'Failed to delete tour.';
+            $this->redirect('/admin/history');
+        }
     }
 
     public function detail($vars): void
     {
-        $venueId = (int)($vars['id'] ?? 0);
+        try {
+            $venueId = (int)($vars['id'] ?? 0);
+            $venue = $this->service->getVenueById($venueId);
 
-        $venue = $this->service->getVenueById($venueId);
+            if (!$venue) {
+                http_response_code(404);
+                echo 'Venue not found';
+                return;
+            }
 
-        if (!$venue) {
-            http_response_code(404);
-            echo "Venue not found";
-            return;
+            $this->view('event/historyEvent/detail', [
+                'venue' => $venue
+            ]);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            $this->internalServerError();
         }
-
-        require __DIR__ . '/../Views/event/historyEvent/detail.php';
     }
+    
     public function getStops($vars): void
     {
-        $eventId = (int)($vars['id'] ?? 0);
+        try {
+            $eventId = (int)($vars['id'] ?? 0);
 
-        if ($eventId <= 0) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid event id']);
-            return;
+            if ($eventId <= 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid event id']);
+                return;
+            }
+
+            $stops = $this->service->getStopsByEventId($eventId);
+
+            header('Content-Type: application/json');
+            echo json_encode($stops);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Internal server error']);
         }
-
-        $stops = $this->service->getStopsByEventId($eventId);
-
-        header('Content-Type: application/json');
-        echo json_encode($stops);
     }
 }

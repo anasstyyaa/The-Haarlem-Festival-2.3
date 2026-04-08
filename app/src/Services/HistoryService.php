@@ -48,6 +48,86 @@ class HistoryService implements IHistoryService
     {
         return $this->historyEventRepo->create($event);
     }
+    public function createTourFromForm(array $post): HistoryEventModel
+    {
+        $slotDate = trim($post['slotDate'] ?? '');
+        $startTime = trim($post['startTime'] ?? '');
+        $language = trim($post['language'] ?? '');
+        $duration = (int)($post['duration'] ?? 150);
+        $minAge = (int)($post['minAge'] ?? 12);
+        $capacity = (int)($post['capacity'] ?? 12);
+        $priceIndividual = (float)($post['priceIndividual'] ?? 17.50);
+        $priceFamily = (float)($post['priceFamily'] ?? 60.00);
+
+        if ($slotDate === '' || $startTime === '' || $language === '') {
+            throw new \InvalidArgumentException('Date, time and language are required.');
+        }
+
+        $tour = new HistoryEventModel(
+            0,
+            0,
+            $slotDate,
+            $startTime,
+            $language,
+            $duration,
+            $minAge,
+            $capacity,
+            $priceIndividual,
+            $priceFamily
+        );
+
+        $success = $this->createSession($tour);
+
+        if (!$success) {
+            throw new \RuntimeException('Failed to create tour.');
+        }
+
+        return $tour;
+    }
+    public function updateTourFromForm(array $post): HistoryEventModel
+    {
+        $eventId = (int)($post['eventId'] ?? 0);
+        $historyEventId = (int)($post['historyEventId'] ?? 0);
+
+        $existingTour = $this->getSessionByEventId($eventId);
+        if (!$existingTour) {
+            throw new \InvalidArgumentException('Tour not found.');
+        }
+
+        $slotDate = trim($post['slotDate'] ?? '');
+        $startTime = trim($post['startTime'] ?? '');
+        $language = trim($post['language'] ?? '');
+        $duration = (int)($post['duration'] ?? 150);
+        $minAge = (int)($post['minAge'] ?? 12);
+        $capacity = (int)($post['capacity'] ?? 12);
+        $priceIndividual = (float)($post['priceIndividual'] ?? 17.50);
+        $priceFamily = (float)($post['priceFamily'] ?? 60.00);
+
+        if ($slotDate === '' || $startTime === '' || $language === '') {
+            throw new \InvalidArgumentException('Date, time and language are required.');
+        }
+
+        $tour = new HistoryEventModel(
+            $eventId,
+            $historyEventId,
+            $slotDate,
+            $startTime,
+            $language,
+            $duration,
+            $minAge,
+            $capacity,
+            $priceIndividual,
+            $priceFamily
+        );
+
+        $success = $this->updateSession($tour);
+
+        if (!$success) {
+            throw new \RuntimeException('Failed to update tour.');
+        }
+
+        return $tour;
+    }
 
     public function updateSession(HistoryEventModel $event): bool
     {

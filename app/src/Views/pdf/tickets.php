@@ -22,30 +22,21 @@
 <body>
     <?php foreach ($tickets as $ticket): ?>
         <div class="ticket-wrapper">
-            <table style="width: 100%;">
-                <tr>
-                    <td style="width: 70%;">
-                        <h1 class="festival-header">HAARLEM FESTIVAL</h1>
-                        <p><strong>Event:</strong> <?= htmlspecialchars($ticket->title) ?></p>
-                        <p><strong>Location:</strong> <?= htmlspecialchars($ticket->location) ?></p>
-                        <p><strong>Date:</strong> <?= htmlspecialchars($ticket->date) ?></p>
-                        <p><strong>Time:</strong> 
-                            <?= htmlspecialchars($ticket->startTime) ?> 
-                            <?php if (!empty($ticket->endTime)): ?>
-                                - <?= htmlspecialchars($ticket->endTime) ?>
-                            <?php endif; ?>
-                        </p>
-                        <?php if (!empty($ticket->language)): ?>
-                            <p><strong>Language:</strong> <?= htmlspecialchars($ticket->language) ?></p>
-                        <?php endif; ?>
-                        <p><strong>Quantity:</strong> <?= $ticket->guestCount ?> Person(s)</p>
-                    </td>
-                    <td style="width: 30%; text-align: right; vertical-align: top;">
-                        <img src="<?= $qrcode->render($ticket->token) ?>" width="120" />
-                        <div style="font-size: 10px; margin-top: 5px; color: #666;">Scan at Entrance</div>
-                    </td>
-                </tr>
-            </table>
+            <h1 class="festival-header">HAARLEM FESTIVAL</h1>
+            <p><strong>Event:</strong> <?= htmlspecialchars($ticket->title) ?></p>
+            <p><strong>Location:</strong> <?= htmlspecialchars($ticket->location) ?></p>
+            <p><strong>Date:</strong> <?= htmlspecialchars($ticket->date) ?></p>
+            <p><strong>Time:</strong> 
+                <?= htmlspecialchars($ticket->startTime) ?> 
+                <?php if (!empty($ticket->endTime)): ?>
+                    - <?= htmlspecialchars($ticket->endTime) ?>
+                <?php endif; ?>
+            </p>
+            <p><strong>Quantity:</strong> <?= $ticket->guestCount ?></p>
+            
+            <div style="text-align: right;">
+                <img src="<?= $qrcode->render($ticket->token) ?>" width="150" />
+            </div>
         </div>
     <?php endforeach; ?>
 </body>

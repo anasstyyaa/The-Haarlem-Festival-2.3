@@ -47,7 +47,7 @@ class CommunicationService implements ICommunicationService
             $qrOptions = new QROptions([
             'version'    => 5,
             'eccLevel'   => EccLevel::L,
-            'outputType' => 'gdimage_png', // Better for PDF
+            'outputType' => 'gdimage_png', 
             'imageBase64' => true,
             ]);
             $qrcode = new QRCode($qrOptions);
@@ -56,7 +56,7 @@ class CommunicationService implements ICommunicationService
                 'customer' => $customer, 
                 'tickets'  => $tickets, 
                 'orderId'  => $orderId,
-                'qrcode'   => $qrcode, // <--- Add this line
+                'qrcode'   => $qrcode, 
                 'user'     => [
                     'full_name'    => $customer->fullName,
                     'email'        => $customer->email,
@@ -135,112 +135,7 @@ class CommunicationService implements ICommunicationService
         }
     }
 
-    // private function getEventNameFromTicket($ticket): string
-    // {
-    //     $details = $ticket->getEvent()->getDetails();
-        
-    //     if (is_array($details)) {
-    //         if (isset($details['artist']) && is_object($details['artist'])) {
-    //             return "Jazz: " . $details['artist']->getName();
-    //         }
-    //         return $details['name'] ?? ($details['title'] ?? 'Festival Event');
-    //     }
 
-    //     if (is_object($details)) {
-    //         if (method_exists($details, 'getName')) {
-    //             return $details->getName();
-    //         }
-    //         if (method_exists($details, 'getType')) {
-    //             return $details->getType();
-    //         }
-    //     }
-
-    //     return $ticket->getEvent()->getEventType()->value . " Ticket";
-    // }
-
-    private function getEventNameFromTicket($ticket): string 
-    {
-        $event = $ticket->getEvent();
-        $details = $event->getDetails();
-        $type = strtolower($event->getEventType()->value);
-
-        // 1. Handle Restaurant Reservations
-        if (($type === 'reservation') && is_object($details)) {
-            $restaurantName = $details->getName() ?? 'Restaurant';
-            $session = $details->getSessionData(); 
-            
-            if ($session && method_exists($session, 'getStartTime')) {
-                $startStr = $session->getStartTime();
-                $duration = $details->getSessionDuration() ?: 90;
-
-                $startTimeObj = new \DateTime($startStr);
-                $endTimeObj = clone $startTimeObj;
-                $endTimeObj->modify("+{$duration} minutes");
-
-                return "Reservation: {$restaurantName} (" . $startTimeObj->format('H:i') . " - " . $endTimeObj->format('H:i') . ")";
-            }
-            return "Reservation: {$restaurantName}";
-        }
-        
-        // 2. Handle Jazz Events
-        // if ($type === 'jazz') {
-        //     // Based on your populateTicketDetails, Jazz details is an array ['artist' => ..., 'jazzEvent' => ...]
-        //     if (is_array($details) && isset($details['artist'])) {
-        //         $artistName = $details['artist']->getName();
-        //         $jazzEvent = $details['jazzEvent']; // This is your JazzEventModel
-                
-        //         if ($jazzEvent && method_exists($jazzEvent, 'getStartTime')) {
-        //             $time = (new \DateTime($jazzEvent->getStartTime()))->format('H:i');
-        //             return "Jazz: {$artistName} at {$time}";
-        //         }
-        //         return "Jazz: {$artistName}";
-        //     }
-        // }
-
-        // 3. Fallback for JazzPass or unknown types
-        return ucfirst($type) . " Ticket";
-    }
-
-    private function getEventAddress($ticket): string 
-    {
-        $details = $ticket->getEvent()->getDetails();
-        $type = $ticket->getEvent()->getEventType()->value;
-
-        if ($type === 'reservation' || $type === 'food') {
-
-            if (is_object($details) && method_exists($details, 'getLocation')) {
-                return $details->getLocation() ?? 'Haarlem Restaurant';
-            }
-            
-            if (is_array($details) && isset($details['location'])) {
-                return $details['location'];
-            }
-        }
-
-        return match($type) {
-            'jazz'     => 'Grote Markt, 2011 RD Haarlem',
-            'jazzpass' => 'Festival Access - Various Locations',
-            'history'  => 'Church of St. Bavo (Meeting Point)',
-            default    => 'Haarlem Festival Venue'
-        };
-    }
-
-    private function getEventDateDisplay($ticket): string
-    {
-        $details = $ticket->getEvent()->getDetails();
-        $type = strtolower($ticket->getEvent()->getEventType()->value);
-
-        if ($type === 'reservation' && is_object($details)) { //add for kids
-            $session = $details->getSessionData();
-            return $session ? (new \DateTime($session->getStartTime()))->format('l, d F Y') : 'Date TBD';
-        }
-
-        if ($type === 'jazz' && is_array($details) && isset($details['jazzEvent'])) {
-            return (new \DateTime($details['jazzEvent']->getStartDateTime()))->format('l, d F Y');
-        }
-
-        return "Check Schedule for Details";
-    }
     public function sendAccountChangeNotification(array $userData, array $changedFields): bool
 {
     try {

@@ -56,4 +56,5 @@ class ArtistModel{
     public function setArtistType(string $artistType): void {
         $this->ArtistType = $artistType;
     }
+    
 }

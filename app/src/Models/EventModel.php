@@ -46,47 +46,52 @@ class EventModel
     public function getDisplayData(): array {
         $details = $this->getDetails();
         $type = $this->getEventType();
+        
         $data = [
             'title' => 'Festival Event',
             'venue' => 'Festival Grounds',
             'startTime' => 'TBD',
             'icon' => 'bi-calendar-event'
         ];
+
         if ($details === null) {
             return $data;
         }
 
+        
         if ($type === EventTypeEnum::JazzPass && $details instanceof \App\Models\JazzPassModel) {
             $data['title'] = $details->getTitle();
             $data['venue'] = "All Jazz Venues";
             $data['startTime'] = "Festival Period";
             $data['icon'] = 'bi-stars';
-        } elseif ($type === EventTypeEnum::JazzEvent && is_array($details)) {
-            $jazzEvent = $details['jazzEvent'] ?? null;
-            $artist = $details['artist'] ?? null;
-            $venueInfo = $details['venueInfo'] ?? null;
-            
-            $data['startTime'] = $jazzEvent ? $jazzEvent->getStartDateTime() : 'TBD';
-            $data['title'] = $artist ? $artist->getName() : 'Jazz Artist';
-            $data['venue'] = $venueInfo['VenueName'] ?? 'Jazz Venue';
-            if (!empty($venueInfo['HallName'])) {
-                $data['venue'] .= " - " . $venueInfo['HallName'];
-            }
+        } 
+      
+        elseif ($type === EventTypeEnum::JazzEvent && $details instanceof \App\Models\JazzEventModel) {
+            $data['startTime'] = $details->getStartDateTime();
+            $data['title'] = "Jazz Performance"; // You can link Artist here if needed
+            $data['venue'] = "Jazz Venue"; 
             $data['icon'] = 'bi-music-note-beamed';
-        } elseif ($type === EventTypeEnum::Reservation && $details instanceof \App\Models\Yummy\RestaurantModel) {
-            $data['startTime'] = $details->getSessionData()->getStartTime();
-            $data['venue'] = $details->getLocation();
+        } 
+       
+        elseif ($type === EventTypeEnum::Reservation && $details instanceof \App\Models\Yummy\RestaurantModel) {
+            $session = $details->getSessionData();
+            $data['startTime'] = $session ? $session->getStartTime() : 'TBD';
+            $data['venue'] = $details->getLocation() ?? 'Haarlem';
             $data['title'] = $details->getName();
             $data['icon'] = 'bi-egg-fried';
-        } elseif ($type === EventTypeEnum::Tour && $details instanceof \App\Models\HistoryEventModel) {
+        } 
+  
+        elseif ($type === EventTypeEnum::Tour && $details instanceof \App\Models\HistoryEventModel) {
             $data['startTime'] = $details->getStartTime();
-            $data['venue'] = $details->getVenue()->getLocation();
+            $data['venue'] = $details->getVenue() ? $details->getVenue()->getLocation() : 'Haarlem Center';
             $data['title'] = "History Tour";
             $data['icon'] = 'bi-map';
-        } elseif ($type === EventTypeEnum::KidsEvent && is_array($details)) {
-            $data['title'] = $details['name'] ?? 'Kids Event';
-            $data['venue'] = $details['location'] ?? 'Festival Area';
-            $data['startTime'] = ($details['date'] ?? '') . ' ' . ($details['startTime'] ?? '');
+        } 
+       
+        elseif ($type === EventTypeEnum::KidsEvent && $details instanceof \App\Models\KidsEventModel) {
+            $data['title'] = $details->getType();
+            $data['venue'] = $details->getLocation();
+            $data['startTime'] = $details->getEventDate() . ' ' . $details->getStartTime();
             $data['icon'] = 'bi-balloon-heart';
         }
         

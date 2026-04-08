@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\ViewModels\TicketViewModel; 
 use App\Services\Interfaces\IUserService;
 use App\Services\Interfaces\ITicketService;
 use App\Framework\Controller;
@@ -119,9 +120,10 @@ class UserController extends Controller
             $this->redirect('/');
         }
         $paginationData = $this->ticketService->getUserTicketsPaginated($id, $currentPage);
-
-        // extracting data for the view
-        $tickets = $paginationData['tickets'];
+        $tickets = array_map(
+            fn($t) => new TicketViewModel($t), 
+            $paginationData['tickets']
+        );
         $totalPages = $paginationData['total_pages'];
         $totalResults = $paginationData['total_results'];
 

@@ -110,4 +110,5 @@ class HistoryEventModel
     {
         return $this->venue ? $this->venue->getLocation() : null;
     }
+
 }

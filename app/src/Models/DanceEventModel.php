@@ -16,6 +16,7 @@ class DanceEventModel
     private ?string $updated_at = null;
     private ?string $created_at = null;
     private int $Capacity;
+    private ?int $TicketsLeft = null;
 
     public function getId(): int
     {
@@ -113,4 +114,26 @@ public function setDisplayTitle(?string $displayTitle): void
 {
     $this->DisplayTitle = $displayTitle;
 }
+
+    public function getTicketsLeft(): int
+    {
+        return $this->TicketsLeft ?? $this->Capacity;
+    }
+
+   
+    public function setTicketsLeft(int $count): void
+    {
+        $this->TicketsLeft = $count;
+    }
+
+
+    private ?ArtistModel $artist = null;
+
+    public function setArtist(ArtistModel $artist): void {
+        $this->artist = $artist;
+    }
+
+    public function getArtist(): ?ArtistModel {
+        return $this->artist;
+    }
 }

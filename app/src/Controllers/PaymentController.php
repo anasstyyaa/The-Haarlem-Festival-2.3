@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Services\Interfaces\IPaymentService;
 use App\Services\Interfaces\ICommunicationService;
 use App\Services\Interfaces\IUserService;
+use App\Services\Interfaces\ITicketService;
 use App\Framework\Controller;
 use App\Config\AppConfig;
 use App\ViewModels\CustomerViewModel;
@@ -15,15 +16,18 @@ class PaymentController extends Controller
     private IPaymentService $paymentService;
     private ICommunicationService $communicationService;
     private IUserService $userService;
+    private ITicketService $ticketService;
 
     public function __construct(
         IPaymentService $paymentService,
         ICommunicationService $communicationService,
         IUserService $userService, 
+        ITicketService $ticketService
     ) {
         $this->paymentService = $paymentService;
         $this->communicationService = $communicationService;
         $this->userService = $userService;
+        $this->ticketService = $ticketService;
     }
 
     public function checkout(): void
@@ -68,10 +72,15 @@ class PaymentController extends Controller
             $tickets = $this->paymentService->finalizeOrder($tempOrderId, $stripeSessionId);
 
             if (!empty($tickets)) {
+                $tickets = $this->ticketService->hydrateTickets($tickets); 
+
                 $userModel = $this->userService->getUserById($_SESSION['user']['id']);
                 $customer = new CustomerViewModel($userModel, $tempOrderId);
-                $tickets = array_map(fn($t) => new TicketViewModel($t), $tickets);
-                $this->communicationService->sendOrderConfirmation($customer, $tickets, $tempOrderId);
+                
+                // Now map to ViewModels
+                $ticketViewModels = array_map(fn($t) => new TicketViewModel($t), $tickets);
+                
+                $this->communicationService->sendOrderConfirmation($customer, $ticketViewModels, $tempOrderId);
             }
 
             unset($_SESSION['program']);

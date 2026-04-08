@@ -49,7 +49,6 @@ class TicketController extends Controller
             $this->ticketService->addToProgram($_POST, $_SESSION['user']['id'] ?? null);
             $this->redirect($_SERVER['HTTP_REFERER'] ?? '/', "Ticket added to your program!");
         } catch (CapacityException $e) {
-            //if it's a capacity issue, progrram will sned user back to the event page to pick a smaller number
             $this->redirect($_SERVER['HTTP_REFERER'], $e->getMessage(), 'error');
         } catch (\Exception $e) {
             $this->redirect($_SERVER['HTTP_REFERER'] ?? '/', "Something went wrong.", 'error');

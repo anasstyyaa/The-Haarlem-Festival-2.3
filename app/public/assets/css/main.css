@@ -2130,3 +2130,26 @@ body.admin-page #sidebar .nav-item {
     opacity: 0.4;
     pointer-events: none;
 }
+
+/* Ensure the table stays dark and transparent */
+.custom-dark-table {
+    background-color: transparent !important;
+    color: #F4C7B8 !important; /* light-peach */
+}
+
+/* Fix the white background on rows */
+.custom-dark-table tbody tr {
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(244, 199, 184, 0.2); /* light-peach border */
+}
+
+/* Hover effect that isn't white */
+.custom-dark-table tbody tr:hover {
+    background-color: rgba(244, 199, 184, 0.05) !important;
+}
+
+/* Ensure table cells don't have a white background */
+.custom-dark-table td {
+    background: none !important;
+    border: none;
+}

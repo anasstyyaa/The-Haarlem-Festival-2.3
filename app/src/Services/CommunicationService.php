@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Services\Interfaces\ICommunicationService;
+use App\ViewModels\CustomerViewModel; 
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -18,6 +19,7 @@ class CommunicationService implements ICommunicationService
     private function getMailer(): PHPMailer
     {
         $mail = new PHPMailer(true);
+        //$mail->SMTPDebug = 2;
         $mail->isSMTP();
         $mail->Host = 'mailpit'; 
         $mail->Port = 1025;
@@ -39,20 +41,35 @@ class CommunicationService implements ICommunicationService
         return $dompdf->output();
     }
 
-    public function sendOrderConfirmation(array $user, array $tickets, string $orderId): bool
+    public function sendOrderConfirmation(CustomerViewModel $customer, array $tickets, string $orderId): bool
     {
         try { 
+            $qrOptions = new QROptions([
+            'version'    => 5,
+            'eccLevel'   => EccLevel::L,
+            'outputType' => 'gdimage_png', // Better for PDF
+            'imageBase64' => true,
+            ]);
+            $qrcode = new QRCode($qrOptions);
+
             $data = [
-                'user' => $user, 
-                'tickets' => $tickets, 
-                'orderId' => $orderId, 
-                'service' => $this
-            ];        
+                'customer' => $customer, 
+                'tickets'  => $tickets, 
+                'orderId'  => $orderId,
+                'qrcode'   => $qrcode, // <--- Add this line
+                'user'     => [
+                    'full_name'    => $customer->fullName,
+                    'email'        => $customer->email,
+                    'phone'        => $customer->phoneNumber ?? '',
+                    'invoice_date' => date('d-m-Y'),
+                    'payment_date' => date('d-m-Y')
+                ]
+            ];     
             $invoiceHtml = $this->renderView('pdf/invoice', $data);
             $ticketsHtml = $this->renderView('pdf/tickets', $data);
 
             $mail = $this->getMailer();
-            $mail->addAddress($user['email'], $user['full_name']);
+            $mail->addAddress($customer->email, $customer->fullName);
             $mail->isHTML(true);
             $mail->Subject = "Your Haarlem Festival Tickets - Order $orderId";
             $mail->Body = "Please find your tickets attached.";

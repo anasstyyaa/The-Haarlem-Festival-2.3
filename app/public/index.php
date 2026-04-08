@@ -249,6 +249,8 @@ switch ($routeInfo[0]) {
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
 
+            $danceRpository = new \App\Repositories\DanceEventRepository;
+            $danceService = new \App\Services\DanceEventService($danceRpository);
             $eventRepo = new App\Repositories\EventRepository();
             $eventService = new App\Services\EventService($eventRepo);
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $repository);
@@ -278,7 +280,8 @@ switch ($routeInfo[0]) {
                 $artistService,
                 $jazzPassService,
                 $eventService,
-                $personalProgramService
+                $personalProgramService,
+                $danceService
             );
 
             $communicationService = new \App\Services\CommunicationService();
@@ -320,15 +323,19 @@ switch ($routeInfo[0]) {
             $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
             $jazzPassRepository = new \App\Repositories\JazzPassRepository();
             $jazzPassService = new \App\Services\JazzPassService($jazzPassRepository);
-
+           
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
-            $imageRepository = new \App\Repositories\ImageRepository();
+            $danceRpository = new \App\Repositories\DanceEventRepository;
+            $danceService = new \App\Services\DanceEventService($danceRpository);
 
             $userRepo = new App\Repositories\UserRepository();
             $eventRepo = new App\Repositories\EventRepository();
             $eventService = new App\Services\EventService($eventRepo);
             $ticketRepo = new \App\Repositories\TicketRepository();
+           
+            $kidsEventRepo = new \App\Repositories\KidsEventRepository();
+            $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo); 
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
 
              $pageElementRepository = new \App\Repositories\PageElementRepository();
@@ -337,6 +344,7 @@ switch ($routeInfo[0]) {
             $textRepo = new \App\Repositories\TextRepository();
             $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
 
+            $imageRepository = new \App\Repositories\ImageRepository();
             $historyService = new \App\Services\HistoryService(
                 $historyEventRepository,
                 $historyVenueRepository,
@@ -344,10 +352,6 @@ switch ($routeInfo[0]) {
                 $personalProgramService,
                 $pageService
             );
-
-            $kidsEventRepo = new \App\Repositories\KidsEventRepository();
-            $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
-
             $ticketService = new \App\Services\TicketService(
                 $ticketRepo,
                 $restaurantSessionService,
@@ -359,8 +363,10 @@ switch ($routeInfo[0]) {
                 $artistService,
                 $jazzPassService,
                 $eventService,
-                $personalProgramService
+                $personalProgramService,
+                $danceService
             );
+            
 
             $controller = new $class($ticketRepo, $ticketService);
         } elseif ($class === 'App\Controllers\PaymentController') {

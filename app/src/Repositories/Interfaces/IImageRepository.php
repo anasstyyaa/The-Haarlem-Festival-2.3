@@ -11,6 +11,5 @@ interface IImageRepository
     public function createImage(string $imgURL, string $altText): int;
 
     public function updateImage(int $id, string $imgURL, string $altText): bool;
-      public function getById(int $id): ?ImageModel;
      public function delete(int $id):bool;
 }

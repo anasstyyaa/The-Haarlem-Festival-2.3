@@ -23,6 +23,9 @@ class DanceEventViewModel
     private ?int $Capacity = null;
     private ?string $DisplayTitle = null;
 
+    public ?int $EventCapacity = null;
+    public ?int $VenueCapacity = null;
+
     /**
      * Get the general Event table ID
      */

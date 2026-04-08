@@ -4,8 +4,6 @@ namespace App\Framework;
 
 class Controller
 {
-    // all methods are protected because this allows the method to be accessed only by the class itself and any class that extends it
-
     protected function getCurrentUser(): ?array
     {
         return $_SESSION['user'] ?? null;
@@ -19,7 +17,7 @@ class Controller
     protected function requireRole(string $role): void
     {
         $user = $this->getCurrentUser();
-        
+
         if (!$user || ($user['role'] ?? '') !== $role) {
             $_SESSION['error'] = "Access Denied: You do not have the $role role.";
             header('Location: /login');
@@ -36,24 +34,49 @@ class Controller
     {
         $this->requireRole('Employee');
     }
-    
-    protected function redirect(string $url): void
+
+    protected function redirect(string $url, ?string $flashMessage = null, string $type = 'success'): void
     {
+        if ($flashMessage) {
+            if ($type === 'danger' || $type === 'error') {
+                $_SESSION['error'] = $flashMessage;
+            } else {
+                $_SESSION['flash_success'] = $flashMessage;
+            }
+        }
+
         header("Location: $url");
         exit;
     }
 
+    protected function requirePost(string $redirectUrl = '/'): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect($redirectUrl);
+        }
+    }
+
+    protected function view(string $path, array $data = []): void
+    {
+        extract($data);
+
+        $fullPath = __DIR__ . '/../Views/' . $path . '.php';
+
+        if (file_exists($fullPath)) {
+            require $fullPath;
+        } else {
+            throw new \Exception("View not found: $path");
+        }
+    }
+
     protected function render(string $viewPath, array $data = []): void
     {
-        // extracting variables so they are accessible in the view 
-        extract($data);
-        
-        $fullPath = __DIR__ . '/../Views/' . $viewPath . '.php';
-        
-        if (file_exists($fullPath)) {
-            include $fullPath;
-        } else {
-            throw new \Exception("View not found: $viewPath");
-        }
+        $this->view($viewPath, $data);
+    }
+
+    protected function internalServerError(): void
+    {
+        http_response_code(500);
+        echo "Internal server error.";
     }
 }

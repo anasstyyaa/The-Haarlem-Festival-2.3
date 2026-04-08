@@ -83,6 +83,29 @@ class TicketService implements ITicketService
       return $this->ticketRepository->getTicketsByUserId($userId);
    }
 
+   public function getUserTicketsPaginated(int $userId, int $page = 1): array
+   {
+      $limit = 5; 
+      $tickets = $this->ticketRepository->getTicketsByUserIdPaginated($userId, $page, $limit);
+      $totalTickets = $this->ticketRepository->countTicketsByUserId($userId);
+      $hydratedTickets = $this->hydrateTickets($tickets);
+
+      return [
+         'tickets'       => $hydratedTickets,
+         'total_pages'   => ceil($totalTickets / $limit),
+         'current_page'  => $page,
+         'total_results' => $totalTickets
+      ];
+   }
+
+   public function countTicketsByUserId(int $userId): int {
+      return $this->ticketRepository->countTicketsByUserId($userId);
+   }
+
+   // public function getTicketsByUserIdPaginated(int $userId, int $page = 1, int $limit = 5): array{
+   //    return $this->ticketRepository->getTicketsByUserIdPaginated($userId, $page, $limit);
+   // }
+
    public function hydrateTickets(array $tickets): array
    {
       foreach ($tickets as $ticket) {

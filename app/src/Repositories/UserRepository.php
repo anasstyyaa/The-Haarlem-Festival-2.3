@@ -26,6 +26,33 @@ class UserRepository extends Repository implements IUserRepository
         return $row ? $this->mapToModel($row) : null;
     }
 
+    public function getByUsername(string $username): ?UserModel
+    {
+        $stmt = $this->connection->prepare(
+            "SELECT id, email, password, userName, fullName, phoneNumber, role, created_at, updated_at, profilePicture, deleted_at 
+             FROM Users WHERE userName = :username");
+        $stmt->execute(['username' => $username]);
+        
+        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$data) {
+            return null;
+        }
+        return new UserModel(
+            (int)($data['id'] ?? 0),
+            (string)($data['email'] ?? ''),
+            (string)($data['password'] ?? ''),
+            (string)($data['userName'] ?? ''),
+            (string)($data['fullName'] ?? ''),
+            (string)($data['phoneNumber'] ?? ''),
+            (string)($data['role'] ?? 'User'),
+            (string)($data['created_at'] ?? date('Y-m-d H:i:s')),
+            $data['updated_at'] ?? null,
+            $data['profilePicture'] ?? null,
+            $data['deleted_at'] ?? null
+        );
+    }
+
     public function create(UserModel $user): bool
     {
         $sql = "INSERT INTO dbo.Users (Email, Password, UserName, FullName, PhoneNumber, Role, Created_At,     ProfilePicture) 
@@ -96,33 +123,33 @@ class UserRepository extends Repository implements IUserRepository
     }
 
 
-public function findByEmail(string $email): ?array
-{
-    $stmt = $this->connection->prepare("
-        SELECT *
-        FROM Users
-        WHERE Email = :email
-          AND Deleted_At IS NULL
-    ");
+    public function findByEmail(string $email): ?array
+    {
+        $stmt = $this->connection->prepare("
+            SELECT *
+            FROM Users
+            WHERE Email = :email
+            AND Deleted_At IS NULL
+        ");
 
-    $stmt->execute([
-        'email' => $email
-    ]);
+        $stmt->execute([
+            'email' => $email
+        ]);
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$row) {
-        return null;
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'Id' => $row['Id'],
+            'Email' => $row['Email'],
+            'Password' => $row['Password'],
+            'UserName' => $row['UserName'],
+            'Role' => $row['Role'],
+        ];
     }
-
-    return [
-        'Id' => $row['Id'],
-        'Email' => $row['Email'],
-        'Password' => $row['Password'],
-        'UserName' => $row['UserName'],
-        'Role' => $row['Role'],
-    ];
-}
 
     public function adminGetAll(): array
     {
@@ -133,21 +160,21 @@ public function findByEmail(string $email): ?array
     }
 
 
-public function updatePassword(int $userId, string $hashedPassword): bool
-{
-    $stmt = $this->connection->prepare("
-        UPDATE users
-        SET password = :password,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = :id
-          AND deleted_at IS NULL
-    ");
+    public function updatePassword(int $userId, string $hashedPassword): bool
+    {
+        $stmt = $this->connection->prepare("
+            UPDATE users
+            SET password = :password,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id
+            AND deleted_at IS NULL
+        ");
 
-    return $stmt->execute([
-        'password' => $hashedPassword,
-        'id' => $userId
-    ]);
-}
+        return $stmt->execute([
+            'password' => $hashedPassword,
+            'id' => $userId
+        ]);
+    }
 
 
     public function updateProfile(\App\Models\UserModel $user): bool
@@ -175,17 +202,17 @@ public function updatePassword(int $userId, string $hashedPassword): bool
         ]);
     }
 
-    public function getAllFiltered(string $search = '', string $role = '', string $sort = ''): array
+    public function getAllFiltered(string $search = '', string $role = '', string $sort = '', int $page = 1, int $limit = 10): array
     {
         $query = "SELECT * FROM [Users] WHERE 1=1";
         $params = [];
-
+        
         if (!empty($search)) {
-            // Use unique placeholders for each column
             $query .= " AND (FullName LIKE :search1 OR Email LIKE :search2 OR UserName LIKE :search3)";
-            $params['search1'] = "%$search%";
-            $params['search2'] = "%$search%";
-            $params['search3'] = "%$search%";
+            $searchParam = "%$search%";
+            $params['search1'] = $searchParam;
+            $params['search2'] = $searchParam;
+            $params['search3'] = $searchParam;
         }
 
         if (!empty($role)) {
@@ -193,23 +220,52 @@ public function updatePassword(int $userId, string $hashedPassword): bool
             $params['role'] = $role;
         }
 
-        // Apply Sorting (Using the correct DB column names)
+        // required for OFFSET in SQL Server as well 
         switch ($sort) {
-            case 'name_asc': 
-                $query .= " ORDER BY FullName ASC"; 
-                break;
-            case 'created_at_asc': 
-                $query .= " ORDER BY Created_At ASC"; 
-                break;
-            default: 
-                $query .= " ORDER BY Created_At DESC"; 
-                break;
+            case 'name_asc': $query .= " ORDER BY FullName ASC"; break;
+            case 'created_at_asc': $query .= " ORDER BY Created_At ASC"; break;
+            default: $query .= " ORDER BY Created_At DESC"; break;
         }
 
+
+        $offset = ($page - 1) * $limit;
+        $query .= " OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+
         $stmt = $this->connection->prepare($query);
-        $stmt->execute($params); 
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
+
+        // PDO::PARAM_INT is required for OFFSET/FETCH in some SQL Server drivers
+        $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute(); 
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn($row) => $this->mapToModel($row), $results);
+    }
+
+    public function countAllFiltered(string $search = '', string $role = ''): int
+    {
+        $query = "SELECT COUNT(*) FROM [Users] WHERE 1=1";
+        $params = [];
+
+        if (!empty($search)) {
+            $query .= " AND (FullName LIKE :search1 OR Email LIKE :search2 OR UserName LIKE :search3)";
+            $searchParam = "%$search%";
+            $params['search1'] = $searchParam;
+            $params['search2'] = $searchParam;
+            $params['search3'] = $searchParam;
+        }
+
+        if (!empty($role)) {
+            $query .= " AND Role = :role";
+            $params['role'] = $role;
+        }
+
+        $stmt = $this->connection->prepare($query);
+        $stmt->execute($params);
+        return (int)$stmt->fetchColumn();
     }
 }

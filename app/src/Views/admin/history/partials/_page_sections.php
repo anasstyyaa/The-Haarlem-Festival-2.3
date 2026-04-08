@@ -2,13 +2,16 @@
 use App\Models\TextModel;
 use App\Models\ImageModel;
 use App\Models\ButtonModel;
+use App\ViewModels\PageElementViewModel;
+
+/** @var PageElementViewModel $pageVM */
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0">History Home Page</h3>
 </div>
 
-<?php foreach ($vm->getSections() as $section => $elements): ?>
+<?php foreach ($pageVM->getSections() as $section => $elements): ?>
 
     <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
         <h4 class="h5 mb-0">

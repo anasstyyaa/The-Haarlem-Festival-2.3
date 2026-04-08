@@ -49,4 +49,9 @@ class ArtistService implements IArtistService
     {
         return $this->repository->getJazzLineup();
     }
+
+    public function getDanceArtists(): array
+{
+    return $this->repository->getDanceArtists();
+}
 }

@@ -15,6 +15,7 @@ class DanceEventModel
     private ?string $deleted_at = null;
     private ?string $updated_at = null;
     private ?string $created_at = null;
+    private int $Capacity;
 
     public function getId(): int
     {
@@ -100,4 +101,16 @@ class DanceEventModel
     {
         $this->VenueName = $venueName;
     }
+    public function getCapacity(): int
+{
+    return $this->Capacity;
+}
+public function setCapacity(int $capacity): void
+{
+    $this->Capacity = $capacity;
+}
+public function setDisplayTitle(?string $displayTitle): void
+{
+    $this->DisplayTitle = $displayTitle;
+}
 }

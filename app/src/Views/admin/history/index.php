@@ -1,7 +1,7 @@
 <?php
 use App\ViewModels\PageElementViewModel;
 
-/** @var PageElementViewModel $vm */
+/** @var PageElementViewModel $pageVM */
 
 require __DIR__ . '/../../partials/adminHeader.php';
 ?>

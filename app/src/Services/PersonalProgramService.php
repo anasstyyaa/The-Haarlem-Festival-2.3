@@ -9,7 +9,6 @@ use App\Models\TicketModel;
 
 class PersonalProgramService implements IPersonalProgramService
 {
-    // Inject Interfaces instead of creating concrete classes with 'new'
     public function __construct(
         private IEventRepository $eventRepository,
         private IUserRepository $userRepository

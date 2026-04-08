@@ -16,19 +16,22 @@ class DanceEventRepository extends Repository implements IDanceEventRepository
      * Get all active dance events (not soft deleted),
      * ordered by start date and time.
      */
-    public function getAllActive(): array
-    {
-        $stmt = $this->connection->prepare("
-            SELECT *
-            FROM DanceEvent
-            WHERE deleted_at IS NULL
-            ORDER BY StartDateTime ASC
-        ");
+  public function getAllActive(): array
+{
+    $stmt = $this->connection->prepare("
+        SELECT
+            de.*,
+            dv.VenueName
+        FROM DanceEvent de
+        LEFT JOIN DanceVenue dv ON dv.DanceVenueID = de.DanceVenueID
+        WHERE de.deleted_at IS NULL
+        ORDER BY de.StartDateTime ASC
+    ");
 
-        $stmt->execute();
+    $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_CLASS, DanceEventModel::class);
-    }
+    return $stmt->fetchAll(PDO::FETCH_CLASS, DanceEventModel::class);
+}
 
     /**
      * Get one dance event by its ID.
@@ -57,7 +60,7 @@ class DanceEventRepository extends Repository implements IDanceEventRepository
      */
     public function getEventsForArtist(int $artistId, EventTypeEnum $eventType): array
     {
-       $sql = "
+  $sql = "
     SELECT
         e.id AS EventID,
         de.DanceEventID,
@@ -65,9 +68,10 @@ class DanceEventRepository extends Repository implements IDanceEventRepository
         de.StartDateTime,
         de.EndDateTime,
         de.Price,
+        de.Capacity AS EventCapacity,
         v.VenueName,
         v.Location,
-        v.Capacity
+        v.Capacity AS VenueCapacity
     FROM Event e
     JOIN DanceEvent de ON de.DanceEventID = e.subEventId
     JOIN DanceVenue v ON v.DanceVenueID = de.DanceVenueID
@@ -117,75 +121,79 @@ class DanceEventRepository extends Repository implements IDanceEventRepository
      * Create a new dance event and also insert the matching row
      * into the general Event table.
      */
-    public function create(DanceEventModel $event): bool
-    {
-        $this->connection->beginTransaction();
+   public function create(DanceEventModel $event): bool
+{
+    $this->connection->beginTransaction();
 
-        try {
-            $stmt = $this->connection->prepare("
-                INSERT INTO DanceEvent (ArtistID, DanceVenueID, StartDateTime, EndDateTime, Price)
-                VALUES (:ArtistID, :DanceVenueID, :StartDateTime, :EndDateTime, :Price)
-            ");
+    try {
+        $stmt = $this->connection->prepare("
+    INSERT INTO DanceEvent (ArtistID, DanceVenueID, StartDateTime, EndDateTime, Price, Capacity, DisplayTitle)
+    VALUES (:ArtistID, :DanceVenueID, :StartDateTime, :EndDateTime, :Price, :Capacity, :DisplayTitle)
+");
 
-            $success = $stmt->execute([
-                'ArtistID' => $event->getArtistId(),
-                'DanceVenueID' => $event->getDanceVenueId(),
-                'StartDateTime' => $event->getStartDateTime(),
-                'EndDateTime' => $event->getEndDateTime(),
-                'Price' => $event->getPrice()
-            ]);
+       $success = $stmt->execute([
+    'ArtistID' => $event->getArtistId(),
+    'DanceVenueID' => $event->getDanceVenueId(),
+    'StartDateTime' => $event->getStartDateTime(),
+    'EndDateTime' => $event->getEndDateTime(),
+    'Price' => $event->getPrice(),
+    'Capacity' => $event->getCapacity(),
+    'DisplayTitle' => $event->getDisplayTitle()
+]);
 
-            if (!$success) {
-                $this->connection->rollBack();
-                return false;
-            }
-
-            // Get the new DanceEvent ID
-            $danceEventId = (int)$this->connection->lastInsertId();
-
-            // Create wrapper row in the generic Event table
-            $wrapperSuccess = $this->createEventWrapper($danceEventId);
-
-            if (!$wrapperSuccess) {
-                $this->connection->rollBack();
-                return false;
-            }
-
-            $this->connection->commit();
-            return true;
-
-        } catch (Throwable $e) {
+        if (!$success) {
             $this->connection->rollBack();
-            throw $e;
+            return false;
         }
+
+        // Get the new DanceEvent ID
+        $danceEventId = (int)$this->connection->lastInsertId();
+
+        // Create wrapper row in the generic Event table
+        $wrapperSuccess = $this->createEventWrapper($danceEventId);
+
+        if (!$wrapperSuccess) {
+            $this->connection->rollBack();
+            return false;
+        }
+
+        $this->connection->commit();
+        return true;
+
+    } catch (Throwable $e) {
+        $this->connection->rollBack();
+        throw $e;
     }
+}
 
     /**
      * Update an existing dance event.
      */
-    public function update(int $id, DanceEventModel $event): bool
-    {
-        $stmt = $this->connection->prepare("
-            UPDATE DanceEvent
-            SET ArtistID = :ArtistID,
-                DanceVenueID = :DanceVenueID,
-                StartDateTime = :StartDateTime,
-                EndDateTime = :EndDateTime,
-                Price = :Price,
-                updated_at = GETDATE()
-            WHERE DanceEventID = :DanceEventID
-              AND deleted_at IS NULL
-        ");
+   public function update(int $id, DanceEventModel $event): bool
+{
+    $stmt = $this->connection->prepare("
+        UPDATE DanceEvent
+        SET ArtistID = :ArtistID,
+            DanceVenueID = :DanceVenueID,
+            StartDateTime = :StartDateTime,
+            EndDateTime = :EndDateTime,
+            Price = :Price,
+            Capacity = :Capacity,
+            updated_at = GETDATE()
+        WHERE DanceEventID = :DanceEventID
+          AND deleted_at IS NULL
+    ");
 
-        return $stmt->execute([
-            'DanceEventID' => $id,
-            'ArtistID' => $event->getArtistId(),
-            'DanceVenueID' => $event->getDanceVenueId(),
-            'StartDateTime' => $event->getStartDateTime(),
-            'EndDateTime' => $event->getEndDateTime(),
-            'Price' => $event->getPrice()
-        ]);
-    }
+    return $stmt->execute([
+        'DanceEventID' => $id,
+        'ArtistID' => $event->getArtistId(),
+        'DanceVenueID' => $event->getDanceVenueId(),
+        'StartDateTime' => $event->getStartDateTime(),
+        'EndDateTime' => $event->getEndDateTime(),
+        'Price' => $event->getPrice(),
+        'Capacity' => $event->getCapacity()
+    ]);
+}
 
     /**
      * Soft delete the dance event and remove the wrapper row

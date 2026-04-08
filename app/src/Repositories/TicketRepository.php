@@ -170,7 +170,9 @@ class TicketRepository extends Repository implements ITicketRepository
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    // In App/Repositories/TicketRepository.php
+
+    // tickets for profile view 
+
 
     public function getTicketsByUserId(int $userId): array
     {
@@ -189,7 +191,7 @@ class TicketRepository extends Repository implements ITicketRepository
             $enumType = \App\Models\Enums\EventTypeEnum::tryFrom($row['eventType']);
 
             //passing null for details because TicketService->hydrateTickets() will fill them
-            $event = new \App\Models\EventModel(
+            $event = new EventModel(
                 (int)$row['event_id'],
                 $enumType,
                 (int)$row['sub_event_id']
@@ -207,6 +209,47 @@ class TicketRepository extends Repository implements ITicketRepository
         }
 
         return $tickets;
+    }
+
+    public function getTicketsByUserIdPaginated(int $userId, int $page = 1, int $limit = 5): array
+    {
+        $offset = ($page - 1) * $limit;
+        $sql = "SELECT t.*, e.eventType, e.subEventId 
+                FROM tickets t
+                JOIN [event] e ON t.event_id = e.id
+                WHERE t.user_id = :userId
+                ORDER BY t.id DESC
+                OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+                    
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue('userId', $userId, \PDO::PARAM_INT);
+        $stmt->bindValue('offset', $offset, \PDO::PARAM_INT);
+        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $tickets = [];
+        foreach ($rows as $row) {
+            $enumType = \App\Models\Enums\EventTypeEnum::tryFrom($row['eventType']);
+            $event = new \App\Models\EventModel((int)$row['event_id'], $enumType, (int)$row['subEventId']);
+            $tickets[] = new \App\Models\TicketModel(
+                (int)$row['id'], 
+                $event, 
+                null, 
+                (int)$row['number_of_people'], 
+                $row['unique_ticket_token'] ?? null
+            );
+        }
+        return $tickets;
+    }
+
+    public function countTicketsByUserId(int $userId): int
+    {
+        $sql = "SELECT COUNT(*) FROM tickets WHERE user_id = :userId";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute(['userId' => $userId]);
+        return (int)$stmt->fetchColumn();
     }
 
 }

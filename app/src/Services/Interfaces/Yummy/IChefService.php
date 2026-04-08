@@ -11,5 +11,7 @@ interface IChefService {
     public function createChef(ChefModel $chef): bool;
     public function updateChef(ChefModel $chef): bool;
     public function deleteChef(int $id): bool;
+    public function processCreateChef(array $data, ?array $file): bool;
+    public function processUpdateChef(int $id, array $data, ?array $file): bool;
 
 }

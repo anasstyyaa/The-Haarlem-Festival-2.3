@@ -63,23 +63,24 @@
                         <table class="table custom-dark-table align-middle mb-0">
                             <thead>
                                 <tr>
-                                    <th class="ps-4">Event</th>
-                                    <th>Guests</th>
-                                    <th>Schedule</th>
+                                   <th class="ps-4 text-peach border-0">Event</th>
+                                    <th class="text-peach border-0">Location</th> 
+                                    <th class="text-peach border-0">Schedule</th>
+                                    <th class="text-center text-peach border-0">Guests</th> 
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($tickets)): ?>
                                     <tr>
-                                        <td colspan="3" class="text-center py-5 text-peach opacity-50">
+                                        <td colspan="4" class="text-center py-5 text-peach opacity-50">
                                             No tickets found. <br>
                                             <a href="/program" class="text-light-peach small">Browse events?</a>
                                         </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($tickets as $ticket): ?>
-                                        <?php include __DIR__ . '/../partials/ticketRow.php'; ?>
-                                    <?php endforeach; ?>
+                                        <<tr class="border-b-peach-light"> <?php include __DIR__ . '/../partials/programItem.php'; ?>
+                                     </tr> <?php endforeach; ?>                                   
                                 <?php endif; ?>
                             </tbody>
                         </table>

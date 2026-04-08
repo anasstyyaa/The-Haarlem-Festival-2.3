@@ -14,7 +14,9 @@ use App\Services\Interfaces\IKidsEventService;
 use App\Repositories\Interfaces\IHistoryVenueRepository;
 use App\Services\Interfaces\IArtistService;
 use App\Services\Interfaces\IJazzPassService;
+use App\Services\Interfaces\IDanceEventService;
 use App\Models\HistoryVenueModel;
+use App\Models\ArtistModel; 
 
 use App\Services\Interfaces\IEventService;
 use App\Services\Interfaces\IPersonalProgramService;
@@ -33,7 +35,8 @@ class TicketService implements ITicketService
       private IArtistService $artistService,
       private IJazzPassService $jazzPassService,
       private IEventService $eventService,
-      private IPersonalProgramService $programService
+      private IPersonalProgramService $programService,
+      private IDanceEventService $danceEventService
    ) {}
 
    public function savePaidTicket(TicketModel $ticket, string $stripeId): bool
@@ -83,7 +86,6 @@ class TicketService implements ITicketService
 
    public function getUserTickets(int $userId): array
    {
-      // can add logic here to filter out expired tickets or format prices
       return $this->ticketRepository->getTicketsByUserId($userId);
    }
 
@@ -105,10 +107,6 @@ class TicketService implements ITicketService
    public function countTicketsByUserId(int $userId): int {
       return $this->ticketRepository->countTicketsByUserId($userId);
    }
-
-   // public function getTicketsByUserIdPaginated(int $userId, int $page = 1, int $limit = 5): array{
-   //    return $this->ticketRepository->getTicketsByUserIdPaginated($userId, $page, $limit);
-   // }
 
    public function hydrateTickets(array $tickets): array
    {
@@ -134,13 +132,17 @@ class TicketService implements ITicketService
 
             if ($jazzEvent) {
                $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
-               $venueInfo = ($this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId()));
+               if ($artist instanceof \App\Models\ArtistModel) {
+                     $jazzEvent->setArtist($artist);
+               }
 
-               $event->setDetails([
-                  'artist' => $artist,
-                  'venueInfo' => $venueInfo,
-                  'jazzEvent' => $jazzEvent
-               ]);
+               $venueInfo = $this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId());
+               if (!empty($venueInfo['VenueName'])) {
+                     $location = $venueInfo['VenueName'] . (!empty($venueInfo['HallName']) ? ' - ' . $venueInfo['HallName'] : '');
+                     $jazzEvent->setVenueName($location);
+               }
+
+               $event->setDetails($jazzEvent);
             }
          }
 
@@ -153,29 +155,35 @@ class TicketService implements ITicketService
          }
 
          if (strcasecmp($event->getEventType()->value, 'tour') === 0) {
-            $historyEventId = $event->getSubEventId();
+            $targetHistoryId = $event->getSubEventId(); 
+            $allSessions = $this->historyService->getAllSessions();
+            $historyEvent = null;
 
-            $historyEvent = $this->historyService->getSessionByEventId($historyEventId);
+            foreach ($allSessions as $session) {
+               if ($session->getHistoryEventId() === $targetHistoryId) {
+                     $historyEvent = $session;
+                     break;
+               }
+            }
 
             if ($historyEvent) {
-               $stops = $this->historyVenueRepository->getStopsByEventId($historyEventId);
+               $stops = $this->historyVenueRepository->getStopsByEventId($targetHistoryId);
 
                if (!empty($stops)) {
-                  $firstStop = $stops[0];
+                     $firstStop = $stops[0];
 
-                  $venue = new HistoryVenueModel(
-                     (int)($firstStop['venueId'] ?? 0),
-                     $firstStop['venueName'] ?? '',
-                     $firstStop['details'] ?? null,
-                     $firstStop['location'] ?? null,
-                     isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null,
-                     $firstStop['imgURL'] ?? null,
-                     $firstStop['altText'] ?? null
-                  );
+                     $venue = new HistoryVenueModel(
+                        (int)($firstStop['venueId'] ?? 0),
+                        $firstStop['venueName'] ?? '',
+                        $firstStop['details'] ?? null,
+                        $firstStop['location'] ?? null,
+                        isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null,
+                        $firstStop['imgURL'] ?? null,
+                        $firstStop['altText'] ?? null
+                     );
 
-                  $historyEvent->setVenue($venue);
+                     $historyEvent->setVenue($venue);
                }
-
                $event->setDetails($historyEvent);
             }
          }
@@ -183,12 +191,27 @@ class TicketService implements ITicketService
          if (strcasecmp($event->getEventType()->value, 'kids') === 0) {
             $kidsEvent = $this->kidsEventService->getEventById($subId);
             if ($kidsEvent) {
-               $event->setDetails([
-                  'name'      => $kidsEvent->getType() === 'Teylers Secret' ? 'Teylers Secret' : $kidsEvent->getType(),
-                  'location'  => $kidsEvent->getLocation() ?? 'Teylers Museum, Haarlem',
-                  'date' => $kidsEvent->getEventDate(),
-                  'startTime' => $kidsEvent->getStartTime() ?? '17:00'
-               ]);
+               $event->setDetails($kidsEvent);
+            }
+         }
+
+
+         if (strcasecmp($event->getEventType()->value, 'dance') === 0) {
+            $danceEvent = $this->danceEventService->getDanceEventById($subId);
+
+            if ($danceEvent) {
+               $artist = $this->artistService->getArtistById($danceEvent->getArtistId());
+               
+               if ($artist instanceof ArtistModel) {
+                     $danceEvent->setArtist($artist);
+               }
+
+               $venueInfo = $this->danceEventService->getVenueInfoByDanceEventId($danceEvent->getId());
+               if ($venueInfo) {
+                     $danceEvent->setVenueName($venueInfo['VenueName']);
+               }
+
+               $event->setDetails($danceEvent);
             }
          }
       }
@@ -247,8 +270,6 @@ class TicketService implements ITicketService
    public function updateProgramQuantity(int $itemId, string $action): void
    {
       if (!isset($_SESSION['program'])) return;
-
-      /** @var \App\Models\PersonalProgram $program */
       $program = $_SESSION['program'];
       $tickets = $program->getTickets();
 
@@ -264,8 +285,6 @@ class TicketService implements ITicketService
             break;
          }
       }
-
-      // saving back to session
       $_SESSION['program'] = $program;
    }
 }

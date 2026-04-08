@@ -2,6 +2,8 @@
 
 namespace App\Models; 
 
+use App\Models\ArtistModel; 
+
 class JazzEventModel{
     private int $JazzEventID;
     private int $ArtistID;
@@ -88,4 +90,13 @@ class JazzEventModel{
     public function setTicketsLeft(int $ticketsLeft): void {
         $this->TicketsLeft = $ticketsLeft;
     }
+
+    private ?ArtistModel $artist = null;
+    private ?string $venueName = null;
+
+    public function setArtist(ArtistModel $artist): void { $this->artist = $artist; }
+    public function getArtist(): ?ArtistModel { return $this->artist; }
+
+    public function setVenueName(string $name): void { $this->venueName = $name; }
+    public function getVenueName(): string { return $this->venueName ?? 'Jazz Venue'; }
 }

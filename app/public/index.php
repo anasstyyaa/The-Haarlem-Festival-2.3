@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 session_start();
 error_reporting(E_ALL);
@@ -249,12 +249,14 @@ switch ($routeInfo[0]) {
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
 
+            $danceRpository = new \App\Repositories\DanceEventRepository;
+            $danceService = new \App\Services\DanceEventService($danceRpository);
 
             $eventRepo = new App\Repositories\EventRepository();
             $eventService = new App\Services\EventService($eventRepo);
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $repository);
 
-            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService);
+            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService,  $danceService);
             $communicationService = new \App\Services\CommunicationService();
             $service = new \App\Services\UserService($repository, $authService, $communicationService);
             $controller = new $class($service, $ticketService);
@@ -294,7 +296,8 @@ switch ($routeInfo[0]) {
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
             $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
-
+            $danceRpository = new \App\Repositories\DanceEventRepository;
+            $danceService = new \App\Services\DanceEventService($danceRpository);
             $userRepo = new App\Repositories\UserRepository();
             $eventRepo = new App\Repositories\EventRepository();
             $eventService = new App\Services\EventService($eventRepo);
@@ -302,7 +305,7 @@ switch ($routeInfo[0]) {
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
-            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService);
+            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService,  $danceService);
             $controller = new $class($ticketRepo, $ticketService);
         } elseif ($class === 'App\Controllers\PaymentController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();

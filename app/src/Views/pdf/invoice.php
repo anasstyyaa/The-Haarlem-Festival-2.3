@@ -45,14 +45,16 @@ $totalVat = 0;
         <tr>
             <td class="info-box">
                 <strong style="color: #d32f2f;">BILL TO:</strong><br>
-                <div style="font-size: 16px; font-weight: bold; margin-top: 5px;"><?= htmlspecialchars($user['full_name']) ?></div>
-                <?= htmlspecialchars($user['email']) ?><br>
-                <?= htmlspecialchars($user['phone'] ?? '') ?>
+                <div style="font-size: 16px; font-weight: bold; margin-top: 5px;">
+                    <?= htmlspecialchars($customer->fullName) ?>
+                </div>
+                <?= htmlspecialchars($customer->email) ?><br>
+                <?= htmlspecialchars($customer->phoneNumber ?? '') ?>
             </td>
             <td class="info-box" style="text-align: right;">
                 <strong>Invoice #:</strong> INV-<?= $orderId ?><br>
-                <strong>Invoice Date:</strong> <?= $user['invoice_date'] ?><br>
-                <strong>Payment Date:</strong> <?= $user['payment_date'] ?><br>
+                <strong>Invoice Date:</strong> <?= date('d-m-Y') ?><br>
+                <strong>Payment Date:</strong> <?= date('d-m-Y') ?><br>
                 <strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">PAID</span>
             </td>
         </tr>
@@ -69,28 +71,22 @@ $totalVat = 0;
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($tickets as $ticket): 
-                $qty = $ticket->getNumberOfPeople() ?: 1;
-                $lineTotalIncl = $ticket->getTotalPrice();
-
-                $vatRate = 0.09; 
-                $lineVat = $lineTotalIncl - ($lineTotalIncl / (1 + $vatRate));
-                $lineExcl = $lineTotalIncl - $lineVat;
-
-                $totalExclVat += $lineExcl;
-                $totalVat += $lineVat;
-            ?>
-            <tr>
-                <td>
-                    <div style="font-weight: bold;"><?= $service->getEventNameFromTicket($ticket) ?></div>
-                    <div style="font-size: 11px; color: #666;">Loc: <?= $service->getEventAddress($ticket) ?></div>
-                </td>
-                <td style="text-align: center;"><?= $qty ?></td>
-                <td style="text-align: right;">&euro;<?= number_format($lineExcl / $qty, 2) ?></td>
-                <td style="text-align: right;">&euro;<?= number_format($lineExcl, 2) ?></td>
-                <td style="text-align: right; color: #888;"><?= ($vatRate * 100) ?>%</td>
-            </tr>
-            <?php endforeach; ?>
+            <?php 
+                $totalExclVat = 0;
+                foreach ($tickets as $ticket): 
+                    $itemTotalExcl = $ticket->totalPrice / 1.09;
+                    $totalExclVat += $itemTotalExcl;
+                ?>
+                    <tr>
+                        <td><?= htmlspecialchars($ticket->title) ?></td>
+                        <td style="text-align: center;"><?= $ticket->guestCount ?></td>
+                        <td style="text-align: right;">&euro;<?= number_format($ticket->unitPrice / 1.09, 2) ?></td>
+                        <td style="text-align: right;">&euro;<?= number_format($itemTotalExcl, 2) ?></td>
+                        <td style="text-align: right;">9%</td>
+                    </tr>
+                <?php endforeach; 
+                $totalVat = $totalExclVat * 0.09;
+                ?>
         </tbody>
     </table>
 

@@ -74,19 +74,14 @@ $totalVat = 0;
             <?php 
                 $totalExclVat = 0;
                 foreach ($tickets as $ticket): 
-                    // Our unitPrice in ViewModel is the GROSS price (including 9% VAT)
-                    $unitExcl = $ticket->unitPrice / 1.09;
-                    $rowTotalExcl = $unitExcl * $ticket->guestCount;
-                    $totalExclVat += $rowTotalExcl;
+                    $itemTotalExcl = $ticket->totalPrice / 1.09;
+                    $totalExclVat += $itemTotalExcl;
                 ?>
                     <tr>
-                        <td>
-                            <strong><?= htmlspecialchars($ticket->title) ?></strong><br>
-                            <small><?= htmlspecialchars($ticket->date) ?> @ <?= htmlspecialchars($ticket->startTime) ?></small>
-                        </td>
+                        <td><?= htmlspecialchars($ticket->title) ?></td>
                         <td style="text-align: center;"><?= $ticket->guestCount ?></td>
-                        <td style="text-align: right;">&euro;<?= number_format($unitExcl, 2) ?></td>
-                        <td style="text-align: right;">&euro;<?= number_format($rowTotalExcl, 2) ?></td>
+                        <td style="text-align: right;">&euro;<?= number_format($ticket->unitPrice / 1.09, 2) ?></td>
+                        <td style="text-align: right;">&euro;<?= number_format($itemTotalExcl, 2) ?></td>
                         <td style="text-align: right;">9%</td>
                     </tr>
                 <?php endforeach; 

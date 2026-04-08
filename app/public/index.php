@@ -11,8 +11,6 @@ error_reporting(E_ALL);
 // ini_set('log_errors', '1');     // log instead
 
 use FastRoute\RouteCollector;
-use App\Models\Enums\EventTypeEnum;
-use App\Repositories\TicketRepository;
 
 use function FastRoute\simpleDispatcher;
 

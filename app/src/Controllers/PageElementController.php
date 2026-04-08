@@ -43,28 +43,6 @@ class PageElementController
       header('Location: /admin/home/index');
     }
 
-    // public function update(array $vars): void
-    // {
-    //     $id = (int)$vars['id'];
-
-    //     $element = $this->service->getElementById($id);
-
-    //     if (!$element) {
-    //         header('Location: /admin/page-elements');
-    //         exit;
-    //     }
-
-    //     $element->setSection($_POST['section']);
-    //     $element->setType($_POST['type']);
-    //     $element->setContent($_POST['content']);
-    //     $element->setOrder((int)$_POST['display_order']);
-
-    //     $this->service->updateElement($element);
-
-    //     header('Location: /admin/page-elements');
-    //     exit;
-    // }
-
     public function delete(array $vars): void
     {
         $id = (int)$vars['id'];
@@ -81,22 +59,14 @@ class PageElementController
 {
     $id = (int)$vars['id'];
 
-    if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+    $fileName = $this->imgService->uploadImage('image', 'general', 'img');
+
+    if (!$fileName) {
         echo "Upload failed.";
         return;
     }
 
-    $file = $_FILES['image'];
-
-    $fileName = uniqid() . '_' . basename($file['name']);
-    $targetPath = __DIR__ . '/../../public/assets/images/' . $fileName;
-
-    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-        echo "Failed to move uploaded file.";
-        return;
-    }
-
-    $imgURL = '/assets/images/' . $fileName;
+    $imgURL = '/assets/images/general/' . $fileName;
     $altText = $_POST['altText'] ?? '';
 
     $this->imgService->updateImage($id, $imgURL, $altText);
@@ -104,6 +74,7 @@ class PageElementController
     header('Location: /admin/home/index');
     exit;
 }
+
 public function showButtonEditForm(array $vars): void
 {
     $id = (int)$vars['id'];
@@ -136,39 +107,34 @@ public function createForm(): void
 
     require __DIR__ . "/../Views/admin/elements/create_" . $type . ".php";
 }
-  public function store()
-    {
-        $type = $_POST['type'];
-        $section = (int)$_POST['section'];
-        $pageName = $_POST['pageName'];
-        if ($type === 'image') {
+ public function store()
+{
+    $type = $_POST['type'];
+    $section = (int)$_POST['section'];
+    $pageName = $_POST['pageName'];
 
-        if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+    if ($type === 'image') {
+
+        $folder = 'pages/' . $pageName;
+
+        $fileName = $this->imgService->uploadImage('image', $folder, 'img');
+
+        if (!$fileName) {
             echo "Upload failed.";
             return;
         }
 
-        $file = $_FILES['image'];
-
-        $fileName = uniqid() . '_' . basename($file['name']);
-        $targetPath = __DIR__ . '/../../public/assets/images/' . $fileName;
-
-        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-            echo "Failed to move uploaded file.";
-            return;
-        }
-
-        $_POST['imgURL'] = '/assets/images/' . $fileName;
+        $_POST['imgURL'] = '/assets/images/' . $folder . '/' . $fileName;
     }
 
-        $this->pageService->createElement(
-            $type,
-            $section,
-            $pageName, 
-            $_POST
-        );
+    $this->pageService->createElement(
+        $type,
+        $section,
+        $pageName,
+        $_POST
+    );
 
-        header("Location: /admin/home/index");
-        exit;
-    }
+    header("Location: /admin/home/index");
+    exit;
+}
 }

@@ -71,12 +71,20 @@ use App\ViewModels\PageElementViewModel;
                                         </a>
                                     <?php endif; ?>
 
-                                    <form method="POST" action="/admin/elements/delete" onsubmit="return confirm('Delete this element?')" class="m-0">
-                                        <input type="hidden" name="id" value="<?= $element->getId() ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i> Delete
-                                        </button>
-                                    </form>
+                                    
+                            <?php if($element instanceof TextModel){ ?>
+                                <a href="/admin/elements/delete/text/<?= $element->getId() ?>" class="delete-btn">
+                                    Delete Text
+                                </a>
+                            <?php } elseif($element instanceof ImageModel){?>
+                                <a href="/admin/elements/delete/image/<?= $element->getId() ?>" class="delete-btn">
+                                        Delete Image
+                                </a> 
+                            <?php } elseif($element instanceof ButtonModel){?>
+                                <a href="/admin/elements/delete/button/<?= $element->getId() ?>" class="delete-btn">
+                                        Delete Button
+                                </a> 
+                            <?php } ?>
                                 </div>
                             </td>
                         </tr>

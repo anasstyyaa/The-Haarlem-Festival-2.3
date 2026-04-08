@@ -10,8 +10,9 @@ class TextService implements ITextService
 {
     private ITextRepository $textRepository;
     public function __construct(
+       ITextRepository $textRepository
     ) {
-         $this->textRepository=new TextRepository();
+         $this->textRepository= $textRepository;
       }
     public function getById(int $id): ?TextModel
     {

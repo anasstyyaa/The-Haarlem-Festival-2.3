@@ -10,8 +10,9 @@ class ButtonService implements IButtonService
     private ButtonRepository $buttonRepository;
 
     public function __construct(
+        ButtonRepository $buttonRepository
     ) {
-        $this->buttonRepository = new ButtonRepository();
+        $this->buttonRepository = $buttonRepository;
     }
 
    public function getById(int $id): ?ButtonModel

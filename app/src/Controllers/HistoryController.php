@@ -4,36 +4,25 @@ namespace App\Controllers;
 
 use App\Framework\Controller;
 use App\Services\Interfaces\IHistoryService;
-use App\Services\Interfaces\IPageElementService;
-use App\ViewModels\PageElementViewModel;
 
 class HistoryController extends Controller
 {
     private IHistoryService $service;
 
-    private IPageElementService $pageService;
-
-    public function __construct(IHistoryService $service, IPageElementService $pageService)
+    public function __construct(IHistoryService $service)
     {
         $this->service = $service;
-        $this->pageService = $pageService;
     }
-
 
     public function index(): void
     {
         try {
-            $vm = $this->buildPageVM('history');
             $this->view('event/historyEvent/index', $this->service->getIndexPageData());
         } catch (\Exception $e) {
             error_log($e->getMessage());
             $this->internalServerError();
         }
     }
-    private function buildPageVM(string $pageName): PageElementViewModel
-    {
-        $sections = $this->pageService->getPageSections($pageName);
-        return new PageElementViewModel($sections);}
 
     public function adminIndex(): void
     {

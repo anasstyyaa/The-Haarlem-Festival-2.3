@@ -409,7 +409,7 @@ switch ($routeInfo[0]) {
                 $pageService
             );
 
-            $controller = new $class($historyService, $pageService);
+            $controller = new $class($historyService);
 
         } elseif ($class === 'App\Controllers\VenueController') {
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
@@ -456,6 +456,31 @@ switch ($routeInfo[0]) {
             $textRepo = new \App\Repositories\TextRepository();
             $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
              $controller = new $class($pageService);
+        }elseif ($class === 'App\Controllers\KidsEventController') {
+            $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+
+            $kidsRepo = new \App\Repositories\KidsEventRepository();
+            $kidsService = new \App\Services\KidsEventService($kidsRepo);
+           
+            $extraKidsRepo = new \App\Repositories\ExtraKidsEventRepository();
+            $extraKidsService = new \App\Services\ExtraKidsEventService($extraKidsRepo);
+
+
+            $controller = new $class($pageService, $kidsService, $extraKidsService);
+        } elseif ($class === 'App\Controllers\PageElementController'){
+            $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+            $textService = new \App\Services\TextService($textRepo);
+            $imgService = new \App\Services\ImageService($imageRepo);
+            $buttonService = new \App\Services\ButtonService($buttonRepo);
+            $controller = new $class($pageService, $textService, $imgService, $buttonService);
         } else {
             $controller = new $class();
         }

@@ -6,6 +6,9 @@ use App\Models\ImageModel;
 
 interface IImageRepository
 {
-      public function getById(int $id): ?ImageModel;
-     public function updateImage(int $id, string $imgURL, string $altText): bool;
+    public function getById(int $id): ?ImageModel;
+
+    public function createImage(string $imgURL, string $altText): int;
+
+    public function updateImage(int $id, string $imgURL, string $altText): bool;
 }

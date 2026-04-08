@@ -120,16 +120,16 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/profile/delete', ['App\Controllers\UserController', 'deleteSelf']);
     // History routes
     $r->addRoute('GET', '/history', ['App\Controllers\HistoryController', 'index']);
-    $r->addRoute('GET', '/history/booking', ['App\Controllers\HistoryController', 'booking']);
-    $r->addRoute('POST', '/history/book', ['App\Controllers\HistoryController', 'book']);
+    $r->addRoute('GET', '/history/booking', ['App\Controllers\HistoryController', 'bookingTour']);
+    $r->addRoute('POST', '/history/book', ['App\Controllers\HistoryController', 'createBooking']);
 
     $r->addRoute('GET', '/admin/history', ['App\Controllers\HistoryController', 'adminIndex']);
-    $r->addRoute('GET', '/admin/history/venues', ['App\Controllers\HistoryController', 'adminVenues']);
-    $r->addRoute('GET', '/admin/history/venues/create', ['App\Controllers\HistoryController', 'createVenue']);
-    $r->addRoute('POST', '/admin/history/venues/create', ['App\Controllers\HistoryController', 'storeVenue']);
-    $r->addRoute('GET', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'editVenue']);
-    $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\HistoryController', 'updateVenue']);
-    $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\HistoryController', 'deleteVenue']);
+    $r->addRoute('GET', '/admin/history/venues', ['App\Controllers\HistoryController', 'adminIndex']);
+    $r->addRoute('GET', '/admin/history/venues/create', ['App\Controllers\VenueController', 'createVenue']);
+    $r->addRoute('POST', '/admin/history/venues/create', ['App\Controllers\VenueController', 'storeVenue']);
+    $r->addRoute('GET', '/admin/history/venues/edit', ['App\Controllers\VenueController', 'editVenue']);
+    $r->addRoute('POST', '/admin/history/venues/edit', ['App\Controllers\VenueController', 'updateVenue']);
+    $r->addRoute('POST', '/admin/history/venues/delete', ['App\Controllers\VenueController', 'deleteVenue']);
 
     $r->addRoute('GET', '/history/stops/{id:\d+}', ['App\Controllers\HistoryController', 'getStops']);
 
@@ -239,17 +239,36 @@ switch ($routeInfo[0]) {
 
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
-            $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
+            $imageRepository = new \App\Repositories\ImageRepository();
 
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
-
 
             $eventRepo = new App\Repositories\EventRepository();
             $eventService = new App\Services\EventService($eventRepo);
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $repository);
 
-            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService);
+            $historyService = new \App\Services\HistoryService(
+                $historyEventRepository,
+                $historyVenueRepository,
+                $imageRepository,
+                $personalProgramService
+            );
+
+            $ticketService = new \App\Services\TicketService(
+                $ticketRepo,
+                $restaurantSessionService,
+                $restaurantService,
+                $jazzEventService,
+                $historyService,
+                $kidsEventService,
+                $historyVenueRepository,
+                $artistService,
+                $jazzPassService,
+                $eventService,
+                $personalProgramService
+            );
+
             $communicationService = new \App\Services\CommunicationService();
             $service = new \App\Services\UserService($repository, $authService, $communicationService);
             $controller = new $class($service, $authService, $ticketService);
@@ -288,16 +307,38 @@ switch ($routeInfo[0]) {
 
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
-            $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
+            $imageRepository = new \App\Repositories\ImageRepository();
 
             $userRepo = new App\Repositories\UserRepository();
             $eventRepo = new App\Repositories\EventRepository();
             $eventService = new App\Services\EventService($eventRepo);
-            $ticketRepo =  new \App\Repositories\TicketRepository();
+            $ticketRepo = new \App\Repositories\TicketRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
+
+            $historyService = new \App\Services\HistoryService(
+                $historyEventRepository,
+                $historyVenueRepository,
+                $imageRepository,
+                $personalProgramService
+            );
+
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
-            $ticketService = new \App\Services\TicketService($ticketRepo, $restaurantSessionService, $restaurantService, $jazzEventService, $historyService, $kidsEventService, $historyVenueRepository, $artistService, $jazzPassService, $eventService, $personalProgramService);
+
+            $ticketService = new \App\Services\TicketService(
+                $ticketRepo,
+                $restaurantSessionService,
+                $restaurantService,
+                $jazzEventService,
+                $historyService,
+                $kidsEventService,
+                $historyVenueRepository,
+                $artistService,
+                $jazzPassService,
+                $eventService,
+                $personalProgramService
+            );
+
             $controller = new $class($ticketRepo, $ticketService);
         } elseif ($class === 'App\Controllers\PaymentController') {
             $restaurantRepo = new \App\Repositories\Yummy\RestaurantRepository();
@@ -326,13 +367,35 @@ switch ($routeInfo[0]) {
         } elseif ($class === 'App\Controllers\HistoryController') {
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
-            $historyService = new \App\Services\HistoryService($historyEventRepository, $historyVenueRepository);
-
+            $imageRepository = new \App\Repositories\ImageRepository();
             $userRepo = new \App\Repositories\UserRepository();
             $eventRepo = new \App\Repositories\EventRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
 
-            $controller = new $class($historyService, $personalProgramService);
+            $historyService = new \App\Services\HistoryService(
+                $historyEventRepository,
+                $historyVenueRepository,
+                $imageRepository,
+                $personalProgramService
+            );
+
+            $controller = new $class($historyService);
+        } elseif ($class === 'App\Controllers\VenueController') {
+            $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
+            $historyEventRepository = new \App\Repositories\HistoryEventRepository();
+            $imageRepository = new \App\Repositories\ImageRepository();
+            $userRepo = new \App\Repositories\UserRepository();
+            $eventRepo = new \App\Repositories\EventRepository();
+            $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
+
+            $historyService = new \App\Services\HistoryService(
+                $historyEventRepository,
+                $historyVenueRepository,
+                $imageRepository,
+                $personalProgramService
+            );
+
+            $controller = new $class($historyService);
         } else {
             $controller = new $class();
         }

@@ -19,7 +19,7 @@ class Controller
     protected function requireRole(string $role): void
     {
         $user = $this->getCurrentUser();
-        
+
         if (!$user || ($user['role'] ?? '') !== $role) {
             $_SESSION['error'] = "Access Denied: You do not have the $role role.";
             header('Location: /login');
@@ -36,10 +36,27 @@ class Controller
     {
         $this->requireRole('Employee');
     }
-    
+
     protected function redirect(string $url): void
     {
         header("Location: $url");
         exit;
+    }
+    protected function requirePost(string $redirectUrl = '/'): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect($redirectUrl);
+        }
+    }
+    protected function view(string $path, array $data = []): void
+    {
+        extract($data);
+        require __DIR__ . "/../Views/$path.php";
+    }
+
+    protected function internalServerError(): void
+    {
+        http_response_code(500);
+        echo "Internal server error.";
     }
 }

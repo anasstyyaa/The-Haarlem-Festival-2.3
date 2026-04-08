@@ -4,9 +4,9 @@
 
 use App\ViewModels\PageElementViewModel;
 
-/** @var PageElementViewModel $vm */
+/** @var PageElementViewModel $pageVM */
 
-$sections = $vm->getSections();
+$sections = $pageVM->getSections();
 $heroElements = $sections[4] ?? [];
 ?>
 

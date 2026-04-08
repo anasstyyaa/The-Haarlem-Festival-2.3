@@ -425,7 +425,7 @@ switch ($routeInfo[0]) {
             );
             $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo, $kidsEventService);
 
-            $controller = new $class($paymentService, $communicationService, $userService);
+            $controller = new $class($paymentService, $communicationService, $userService, $ticketService);
         } elseif ($class === 'App\Controllers\HistoryController') {
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();

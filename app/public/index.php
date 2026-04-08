@@ -380,7 +380,10 @@ switch ($routeInfo[0]) {
             $communicationService = new \App\Services\CommunicationService();
             $ticketRepo =  new \App\Repositories\TicketRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
-
+            $eventRepo = new \App\Repositories\EventRepository();
+            $eventService = new \App\Services\EventService($eventRepo); 
+            $artistRepository = new \App\Repositories\ArtistRepository(); 
+            $artistService = new \App\Services\ArtistService($artistRepository); 
             $jazzEventRepository = new \App\Repositories\JazzEventRepository();
             $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
             $jazzPassRepository = new \App\Repositories\JazzPassRepository();

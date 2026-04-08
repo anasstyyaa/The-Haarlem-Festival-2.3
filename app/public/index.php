@@ -395,15 +395,21 @@ switch ($routeInfo[0]) {
             $userService = new \App\Services\UserService($userRepo, $authService, $userCommunicationService);
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
             $historyEventRepository = new \App\Repositories\HistoryEventRepository();
-            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo);
-            $imageRepository = new \App\Repositories\ImageRepository();
+            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo, $kidsEventService);
             $danceRpository = new \App\Repositories\DanceEventRepository;
             $danceService = new \App\Services\DanceEventService($danceRpository);
+            $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $imageRepository = new \App\Repositories\ImageRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
             $historyService = new \App\Services\HistoryService(
                 $historyEventRepository,
                 $historyVenueRepository,
                 $imageRepository,
-                $personalProgramService
+                $personalProgramService,
+                $pageService
             );
             
             $ticketService = new \App\Services\TicketService(

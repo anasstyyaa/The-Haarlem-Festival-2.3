@@ -10,6 +10,7 @@ use App\Repositories\Interfaces\IImageRepository;
 use App\Services\Interfaces\IHistoryService;
 use App\Services\Interfaces\IPersonalProgramService;
 use App\ViewModels\PageElementViewModel;
+use App\Services\Interfaces\IPageElementService;
 
 class HistoryService implements IHistoryService
 {
@@ -17,20 +18,21 @@ class HistoryService implements IHistoryService
     private IHistoryVenueRepository $historyVenueRepo;
     private IImageRepository $imageRepository;
     private IPersonalProgramService $programService;
-    private PageElementService $pageService;
+    private IPageElementService $pageService;
     private ImageService $imageService;
 
     public function __construct(
         IHistoryEventRepository $historyEventRepo,
         IHistoryVenueRepository $historyVenueRepo,
         IImageRepository $imageRepository,
-        IPersonalProgramService $programService
+        IPersonalProgramService $programService,
+        IPageElementService $pageService
     ) {
         $this->historyEventRepo = $historyEventRepo;
         $this->historyVenueRepo = $historyVenueRepo;
         $this->imageRepository = $imageRepository;
         $this->programService = $programService;
-        $this->pageService = new PageElementService();
+        $this->pageService = $pageService;
         $this->imageService = new ImageService($imageRepository);
     }
 

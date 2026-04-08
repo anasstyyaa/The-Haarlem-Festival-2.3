@@ -253,11 +253,18 @@ switch ($routeInfo[0]) {
             $eventService = new App\Services\EventService($eventRepo);
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $repository);
 
+             $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+
             $historyService = new \App\Services\HistoryService(
                 $historyEventRepository,
                 $historyVenueRepository,
                 $imageRepository,
-                $personalProgramService
+                $personalProgramService,
+                $pageService
             );
 
             $ticketService = new \App\Services\TicketService(
@@ -324,11 +331,18 @@ switch ($routeInfo[0]) {
             $ticketRepo = new \App\Repositories\TicketRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
 
+             $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+
             $historyService = new \App\Services\HistoryService(
                 $historyEventRepository,
                 $historyVenueRepository,
                 $imageRepository,
-                $personalProgramService
+                $personalProgramService,
+                $pageService
             );
 
             $kidsEventRepo = new \App\Repositories\KidsEventRepository();
@@ -391,10 +405,11 @@ switch ($routeInfo[0]) {
                 $historyEventRepository,
                 $historyVenueRepository,
                 $imageRepository,
-                $personalProgramService
+                $personalProgramService,
+                $pageService
             );
 
-            $controller = new $class($historyService, $pageElementService);
+            $controller = new $class($historyService, $pageService);
 
         } elseif ($class === 'App\Controllers\VenueController') {
             $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
@@ -404,11 +419,18 @@ switch ($routeInfo[0]) {
             $eventRepo = new \App\Repositories\EventRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
 
+             $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+
             $historyService = new \App\Services\HistoryService(
                 $historyEventRepository,
                 $historyVenueRepository,
                 $imageRepository,
-                $personalProgramService
+                $personalProgramService,
+                $pageService
             );
 
             $controller = new $class($historyService);

@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 session_start();
 error_reporting(E_ALL);
@@ -105,6 +105,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/admin/extrakids/delete', ['App\Controllers\KidsEventController', 'deleteExtra']);
     $r->addRoute('GET',  '/admin/elements/createForm', ['App\Controllers\PageElementController', 'createForm']);
     $r->addRoute('POST',  '/admin/elements/store', ['App\Controllers\PageElementController', 'store']);
+    $r->addRoute('GET', '/admin/elements/delete/{type}/{id:\d+}', ['App\Controllers\PageElementController', 'delete']);
+
+     $r->addRoute('GET',  '/admin/elements/editButton/{id:\d+}', ['App\Controllers\PageElementController', 'showButtonEditForm']);
+    $r->addRoute('POST',  '/admin/elements/editButton/{id:\d+}', ['App\Controllers\PageElementController', 'saveButtonChanges']);
+
 
     $r->addRoute('POST',  '/admin/export-csv', ['App\Controllers\TicketController', 'exportCsv']);
     $r->addRoute('POST',  '/admin/export-excel', ['App\Controllers\TicketController', 'exportExcel']);
@@ -271,7 +276,7 @@ switch ($routeInfo[0]) {
 
             $communicationService = new \App\Services\CommunicationService();
             $service = new \App\Services\UserService($repository, $authService, $communicationService);
-            $controller = new $class($service, $authService, $ticketService);
+            $controller = new $class($service, $ticketService);
         } elseif ($class === 'App\Controllers\RestaurantController') {
             $pageElementService = new \App\Services\PageElementService(new \App\Repositories\PageElementRepository());
             $repository = new \App\Repositories\Yummy\RestaurantRepository();

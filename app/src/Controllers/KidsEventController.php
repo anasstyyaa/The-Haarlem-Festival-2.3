@@ -26,21 +26,7 @@ class KidsEventController
    public function index(): void
 {
      $vm = $this->buildPageVM('kids');
-
     $kidsEvents = $this->service->getAll();
-   //  var_dump($kidsEvents);
-//    var_dump($elements);
-// die();
-//     foreach ($vm->getSections() as $section => $elements) {
-//     foreach ($elements as $element) {
-//         echo get_class($element) . ' -> ';
-//         echo $element instanceof \App\Models\ImageModel
-//             ? $element->getImgURL()
-//             : $element->getContent();
-//         echo "\n";
-//     }
-// }
-// die();
     $vmKids = new KidsEventViewModel($kidsEvents);
       $extraEvents = $this->extraKidsService->getAllEvents();
         $extraViewModel = new ExtraKidsEventViewModel($extraEvents);

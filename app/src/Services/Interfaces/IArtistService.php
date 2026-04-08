@@ -19,4 +19,6 @@ interface IArtistService
     
     public function getJazzLineup(): array;
     
+    public function getDanceArtists(): array;
+    
 }

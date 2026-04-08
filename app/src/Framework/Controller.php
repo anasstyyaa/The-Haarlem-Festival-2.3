@@ -4,8 +4,6 @@ namespace App\Framework;
 
 class Controller
 {
-    // all methods are protected because this allows the method to be accessed only by the class itself and any class that extends it
-
     protected function getCurrentUser(): ?array
     {
         return $_SESSION['user'] ?? null;
@@ -37,21 +35,43 @@ class Controller
         $this->requireRole('Employee');
     }
 
-    protected function redirect(string $url): void
+    protected function redirect(string $url, ?string $flashMessage = null, string $type = 'success'): void
     {
+        if ($flashMessage) {
+            if ($type === 'danger' || $type === 'error') {
+                $_SESSION['error'] = $flashMessage;
+            } else {
+                $_SESSION['flash_success'] = $flashMessage;
+            }
+        }
+
         header("Location: $url");
         exit;
     }
+
     protected function requirePost(string $redirectUrl = '/'): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect($redirectUrl);
         }
     }
+
     protected function view(string $path, array $data = []): void
     {
         extract($data);
-        require __DIR__ . "/../Views/$path.php";
+
+        $fullPath = __DIR__ . '/../Views/' . $path . '.php';
+
+        if (file_exists($fullPath)) {
+            require $fullPath;
+        } else {
+            throw new \Exception("View not found: $path");
+        }
+    }
+
+    protected function render(string $viewPath, array $data = []): void
+    {
+        $this->view($viewPath, $data);
     }
 
     protected function internalServerError(): void

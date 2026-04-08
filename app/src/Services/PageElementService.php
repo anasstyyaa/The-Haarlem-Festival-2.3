@@ -67,19 +67,19 @@ public function createElement(string $type,int $section,string $pageName,array $
             $subId = $this->textRepo->create($data['content']);
             break;
 
-        // case 'image':
-        //     $subId = $this->imageRepo->createImage(
-        //         $data['imgURL'],
-        //         $data['altText']
-        //     );
-        //     break;
+        case 'image':
+            $subId = $this->imageRepo->createImage(
+                $data['imgURL'],
+                $data['altText']
+            );
+            break;
 
-        // case 'button':
-        //     $subId = $this->buttonRepo->createButton(
-        //         $data['text'],
-        //         $data['path']
-        //     );
-        //     break;
+        case 'button':
+            $subId = $this->buttonRepo->create(
+                $data['text'],
+                $data['path']
+            );
+            break;
 
         default:
             throw new \Exception("Invalid type");
@@ -96,4 +96,18 @@ public function createElement(string $type,int $section,string $pageName,array $
         $position
     );
 }
+ public function delete(int $id, $type):bool{
+    switch ($type) {
+    case 'text':
+        $this->textRepo->delete($id);
+        break;
+     case 'image':
+        $this->imageRepo->delete($id);
+        break;
+     case 'button':
+        $this->buttonRepo->delete($id);
+        break;
+}
+    return $this->pageElementRepository->delete($id, $type);
+ }
 }

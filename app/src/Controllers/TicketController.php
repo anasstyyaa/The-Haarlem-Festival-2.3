@@ -5,11 +5,11 @@ namespace App\Controllers;
 use App\Models\PersonalProgram;
 use App\Repositories\TicketRepository;
 use App\Services\Interfaces\ITicketService;
-
+use App\ViewModels\TicketViewModel;
 use App\Exceptions\CapacityException;
+use App\Framework\Controller;
 
-
-class TicketController
+class TicketController extends Controller
 {
 
     private TicketRepository $ticketRepository;
@@ -25,32 +25,35 @@ class TicketController
     public function index(): void
     {
         $program = $_SESSION['program'] ?? new PersonalProgram();
-        $tickets = $program->getTickets();
+        $rawTickets = $this->ticketService->hydrateTickets($program->getTickets());
 
-        $tickets = $this->ticketService->hydrateTickets($tickets);
+        // transforming raw models into viewModels
+        $viewTickets = [];
+        $grandTotal = 0.0;
 
-        require __DIR__ . '/../Views/personalProgram/personalProgram.php';
-    
+        foreach ($rawTickets as $ticket) {
+            $vm = new TicketViewModel($ticket);
+            $viewTickets[] = $vm;
+            $grandTotal += $vm->totalPrice;
+        }
+
+        $this->render('personalProgram/personalProgram', [
+            'viewTickets' => $viewTickets,
+            'grandTotal'  => $grandTotal
+        ]);
     }
 
     public function addTicket(): void
     {
-        $data = $_POST; 
-        
         try {
-            $this->ticketService->addToProgram($data, $_SESSION['user']['id'] ?? null);
-            $_SESSION['flash_success'] = "Ticket was successfully added to your Personal Program!";
+            $this->ticketService->addToProgram($_POST, $_SESSION['user']['id'] ?? null);
+            $this->redirect($_SERVER['HTTP_REFERER'] ?? '/', "Ticket added to your program!");
         } catch (CapacityException $e) {
             //if it's a capacity issue, progrram will sned user back to the event page to pick a smaller number
-            $_SESSION['flash_error'] = $e->getMessage();
-            header("Location: " . $_SERVER['HTTP_REFERER']);
-            exit;
+            $this->redirect($_SERVER['HTTP_REFERER'], $e->getMessage(), 'error');
         } catch (\Exception $e) {
-            $_SESSION['error'] = "Something went wrong.";
+            $this->redirect($_SERVER['HTTP_REFERER'] ?? '/', "Something went wrong.", 'error');
         }
-
-        header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/'));
-        exit;
     }
 
 
@@ -59,19 +62,14 @@ class TicketController
         $ticketId = (int)($_POST['ticket_id'] ?? 0);
 
         if ($ticketId <= 0) {
-            $_SESSION['error'] = "Invalid item selected.";
-            header('Location: /personalProgram');
-            exit;
+            $this->redirect('/personalProgram', "Invalid item selected.", 'error');
         }
 
         $program = $_SESSION['program'] ?? new PersonalProgram();
         $program->removeTicket($ticketId);
 
         $_SESSION['program'] = $program;
-        $_SESSION['flash_success'] = "Item removed from your Personal Program.";
-
-        header('Location: /personalProgram');
-        exit;
+        $this->redirect('/personalProgram', "Item removed from program.");
     }
 
     public function updateQuantity() {
@@ -82,8 +80,7 @@ class TicketController
             $this->ticketService->updateProgramQuantity($itemId, $action);
         }
 
-        header('Location: /personalProgram');
-        exit;
+        $this->redirect('/personalProgram');
     }
 
     /**
@@ -140,21 +137,21 @@ public function scan(): void
     }
 }
 
-    private function requireEmployee(): void //checks if current user is employee
-    {
-        try {
-            if (!isset($_SESSION['user'])) {
-                throw new \Exception("User not logged in.");
-            }
-            if (($_SESSION['user']['role'] ?? '') !== 'Employee') {
-                throw new \Exception("User is not an employee.");
-            }
-        } catch (\Exception $e) {
-            error_log("Access error: " . $e->getMessage());
-            echo "Access denied. Employees only.";
-            exit;
-        }
-    }
+    // private function requireEmployee(): void //checks if current user is employee
+    // {
+    //     try {
+    //         if (!isset($_SESSION['user'])) {
+    //             throw new \Exception("User not logged in.");
+    //         }
+    //         if (($_SESSION['user']['role'] ?? '') !== 'Employee') {
+    //             throw new \Exception("User is not an employee.");
+    //         }
+    //     } catch (\Exception $e) {
+    //         error_log("Access error: " . $e->getMessage());
+    //         echo "Access denied. Employees only.";
+    //         exit;
+    //     }
+    // }
     
     public function scanPage(): void
     {

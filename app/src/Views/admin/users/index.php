@@ -98,7 +98,13 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
-        </table>
+            <?php 
+                $baseUrl = '/admin/users'; 
+                $queryParams = $filters; // using the filters array from users controller
+                $paginationTheme = 'dark';
+                require __DIR__ . '/../../partials/pagination.php'; 
+            ?>
+            </table>
     </div>
 </div>
 

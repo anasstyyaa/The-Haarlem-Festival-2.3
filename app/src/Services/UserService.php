@@ -17,6 +17,8 @@ class UserService implements IUserService
     private IAuthService $authService;
     private ICommunicationService $communicationService;
 
+    private const UPLOAD_PATH = '/assets/uploads/users/';
+
     public function __construct(IUserRepository $userRepository, IAuthService $authService, ICommunicationService $communicationService)
     {
         $this->userRepository = $userRepository;
@@ -29,12 +31,26 @@ class UserService implements IUserService
         return $this->userRepository->getAll();
     }
 
+    public function getPaginatedUsers(string $search = '', string $role = '', string $sort = '', int $page = 1): array
+    {
+        $limit = 10; // users per page
+        $users = $this->userRepository->getAllFiltered($search, $role, $sort, $page, $limit);
+        $totalUsers = $this->userRepository->countAllFiltered($search, $role);
+
+        return [
+            'users' => $users,
+            'total_pages' => ceil($totalUsers / $limit),
+            'current_page' => $page,
+            'total_results' => $totalUsers
+        ];
+    }
+
     public function getUserById(int $id): ?UserModel
     {
         return $this->userRepository->getById($id);
     }
 
-    public function createUser(UserModel $user, string $password, ?array $file): void
+    public function createUser(UserModel $user, string $password, ?array $file): bool
     {
         $this->authService->validateUser($user, $password, true);
 
@@ -53,6 +69,52 @@ class UserService implements IUserService
         if (!$this->userRepository->create($user)) {
             throw new Exception("Database error: Could not create user.");
         }
+
+        return true;
+    }
+
+    public function processCreateUser(array $data, ?array $file): bool 
+    {
+        if ($this->userRepository->getByUsername(trim($data['userName'] ?? ''))) {
+            throw new \InvalidArgumentException("Username is already taken.");
+        }
+
+        $user = new UserModel(
+            0,
+            strtolower(trim($data['email'])),
+            '', // Password hashed in createUser
+            trim($data['userName'] ?? ''),
+            trim($data['fullName'] ?? ''),
+            trim($data['phoneNumber'] ?? ''),
+            $data['role'] ?? 'User',
+            date('Y-m-d H:i:s')
+        );
+
+        $imgName = $this->handleSecureUpload($file, 'user');
+        if ($imgName) {
+            $user->setProfilePicture(self::UPLOAD_PATH . $imgName);
+        }
+
+        return $this->createUser($user, $data['password'] ?? '', $file);
+    }
+
+    public function processUpdateUser(int $id, array $data, ?array $file): bool 
+    {
+        $user = $this->userRepository->getById($id);
+        if (!$user) throw new \Exception("User not found.");
+
+        $user->setEmail(strtolower(trim($data['email'])));
+        $user->setFullName(trim($data['fullName']));
+        $user->setUserName(trim($data['userName']));
+        $user->setPhoneNumber(trim($data['phoneNumber']));
+        $user->setRole($data['role']);
+
+        $imgName = $this->handleSecureUpload($file, 'user');
+        if ($imgName) {
+            $user->setProfilePicture(self::UPLOAD_PATH . $imgName);
+        }
+
+        return $this->userRepository->update($user);
     }
 
     public function updateUser(UserModel $user, ?array $file = null): void
@@ -186,6 +248,9 @@ class UserService implements IUserService
 
     private function handleSecureUpload(array $file, string $prefix): ?string
     {
+        if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) return null;
+        if ($file['error'] !== UPLOAD_ERR_OK) return null;
+
         // validating MIME type (actual file content, not just extension)
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($file['tmp_name']);
@@ -193,7 +258,11 @@ class UserService implements IUserService
 
         if (!in_array($mimeType, $allowed)) return null;
 
-        $uploadDir = __DIR__ . '/../../public/assets/uploads/users/';
+        $uploadDir = __DIR__ . '/../../public' . self::UPLOAD_PATH;
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+        
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
         $newName = uniqid($prefix . '_', true) . '.' . $ext;
 

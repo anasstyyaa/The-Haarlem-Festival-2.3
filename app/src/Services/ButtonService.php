@@ -23,8 +23,8 @@ class ButtonService implements IButtonService
     {
          return $this->buttonRepository->mapToModel($row);
     }
-    public function saveButtonTextChanges($id, $newText){
-        return $this->buttonRepository->saveButtonTextChanges($id,$newText);
+     public function saveButtonChanges($id, $newText, $newPAth){
+        return $this->buttonRepository->saveButtonChanges($id,$newText,$newPAth);
     }
 
 }

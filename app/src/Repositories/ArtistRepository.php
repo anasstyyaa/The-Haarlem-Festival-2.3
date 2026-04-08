@@ -46,6 +46,28 @@ class ArtistRepository extends Repository implements IArtistRepository{
 
         return $artists;
     }
+    
+    public function getDanceArtists(): array
+{
+    $stmt = $this->connection->prepare("
+        SELECT *
+        FROM Artist
+        WHERE deleted_at IS NULL
+        AND ArtistType = :artistType
+        ORDER BY ArtistID ASC
+    ");
+
+    $stmt->execute([
+        'artistType' => 'dance'
+    ]);
+
+    $artists = [];
+    while ($artist = $stmt->fetchObject(ArtistModel::class)) {
+        $artists[] = $artist;
+    }
+
+    return $artists;
+}
 
     public function create(ArtistModel $artist): bool
     {

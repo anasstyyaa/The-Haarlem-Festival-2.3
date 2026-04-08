@@ -55,4 +55,12 @@ class ImageRepository extends Repository implements IImageRepository
         'altText' => $altText
     ]);
 }
+public function delete(int $id):bool
+    {
+        $sql = "DELETE FROM image WHERE id = :id";
+
+        $stmt = $this->connection->prepare($sql);
+
+        return $stmt->execute(['id' => $id]);
+    }
 }

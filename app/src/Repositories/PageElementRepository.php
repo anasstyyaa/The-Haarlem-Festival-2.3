@@ -86,4 +86,12 @@ public function create(
         'position' => $position
     ]);
 }
+public function delete(int $id, $type):bool
+    {
+        $sql = "DELETE FROM pageElement WHERE subElementId = :subElementId AND type = :type";
+
+        $stmt = $this->connection->prepare($sql);
+
+        return $stmt->execute(['subElementId' => $id, 'type' => $type]);
+    }
 }

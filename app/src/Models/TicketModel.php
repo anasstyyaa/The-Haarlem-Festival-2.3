@@ -120,4 +120,5 @@ class TicketModel
     {
         $this->uniqueTicketToken = $token;
     }
+
 }

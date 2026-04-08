@@ -25,6 +25,11 @@ class ImageService implements IImageService
         return $this->imageRepository->updateImage($id, $imgURL, $altText);
     }
 
+    public function createImage(string $imgURL, string $altText): int
+    {
+        return $this->imageRepository->createImage($imgURL, $altText);
+    }
+
     public function uploadImage(string $inputName, string $folder, string $prefix): ?string
     {
         if (!isset($_FILES[$inputName]) || $_FILES[$inputName]['error'] !== UPLOAD_ERR_OK) {

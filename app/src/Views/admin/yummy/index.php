@@ -9,13 +9,10 @@ use App\Models\ButtonModel;
 
 <?php require __DIR__ . '/../../partials/adminHeader.php'; ?>
 
-
 <?php foreach ($vm->getSections() as $section => $elements): ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-    <h2 class="h4 mb-0">
-        <i class="bi bi-layers-half me-2"></i>Section: <?= htmlspecialchars($section) ?>
-    </h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-pencil-square me-2"></i>Manage Banner Section</h2>
 </div>
 
 <div class="card shadow-sm border-0 mb-4">
@@ -53,12 +50,19 @@ use App\Models\ButtonModel;
                                 </a>
                             <?php endif; ?>
 
-                            <form method="POST" action="/admin/elements/delete" onsubmit="return confirm('Delete this element?')" class="m-0">
-                                <input type="hidden" name="id" value="<?= $element->getId() ?>">
-                                <button class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
-                            </form>
+                            <?php if($element instanceof TextModel){ ?>
+                                <a href="/admin/elements/delete/text/<?= $element->getId() ?>" class="delete-btn">
+                                    Delete Text
+                                </a>
+                            <?php } elseif($element instanceof ImageModel){?>
+                                <a href="/admin/elements/delete/image/<?= $element->getId() ?>" class="delete-btn">
+                                        Delete Image
+                                </a> 
+                            <?php } elseif($element instanceof ButtonModel){?>
+                                <a href="/admin/elements/delete/button/<?= $element->getId() ?>" class="delete-btn">
+                                        Delete Button
+                                </a> 
+                            <?php } ?>
                         </div>
                     </td>
                 </tr>
@@ -69,7 +73,7 @@ use App\Models\ButtonModel;
     <div class="card-footer bg-white py-3">
         <form method="GET" action="/admin/elements/createForm" class="row g-2 align-items-center justify-content-center">
             <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
-            <input type="hidden" name="pageName" value="<?= htmlspecialchars($pageName) ?>">
+            <input type="hidden" name="pageName" value="yummy">
             
             <div class="col-auto">
                 <label class="small fw-bold text-muted">Add New:</label>

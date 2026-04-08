@@ -9,13 +9,11 @@ use App\ViewModels\PageElementViewModel;
 use App\Services\PasswordResetService;
 use App\Services\Mailer;
 use App\Services\Interfaces\IPasswordResetService;
-use App\Services\PageElementService;
 
 class AuthController
 {
     private AuthService $auth;
     private IPasswordResetService $passwordReset;
-    private PageElementService $pageService;
 
     public function __construct()
     {
@@ -33,7 +31,6 @@ class AuthController
             $mailer,
             $appUrl
         );
-         $this->pageService = new PageElementService();
     }
 
 
@@ -47,21 +44,12 @@ class AuthController
         return ob_get_clean();
     }
 
-    // GET 
-    public function index(): string
-    {
-      $vm = $this->buildPageVM('home');
-
-    return $this->render('home/index', [
-        'vm' => $vm
-    ]);
-     }
-    //build VM
-    private function buildPageVM(string $pageName): PageElementViewModel
-{
-    $sections = $this->pageService->getPageSections($pageName);
-    return new PageElementViewModel($sections);
-}
+    
+    // public function index(): string
+    // {
+     
+    //  }
+    
 
     // GET /register
     public function showRegisterForm(): string

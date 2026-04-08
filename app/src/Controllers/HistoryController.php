@@ -6,6 +6,7 @@ use App\Models\HistoryVenueModel;
 use App\Repositories\ImageRepository;
 use App\Services\ButtonService;
 use App\Services\Interfaces\IHistoryService;
+use App\Services\Interfaces\IPageElementService;
 use App\Services\Interfaces\IPersonalProgramService;
 use App\Services\PageElementService;
 use App\ViewModels\PageElementViewModel;
@@ -15,16 +16,16 @@ class HistoryController
     private IHistoryService $service;
     private IPersonalProgramService $programService;
 
-    private PageElementService $pageService;
+    private IPageElementService $pageService;
     private ImageRepository $imageRepo;
     private ButtonService $buttonService;
 
-    public function __construct(IHistoryService $service, IPersonalProgramService $programService)
+    public function __construct(IHistoryService $service, IPersonalProgramService $programService, IPageElementService $pageService)
     {
         $this->service = $service;
         $this->programService = $programService;
 
-        $this->pageService = new PageElementService();
+        $this->pageService = $pageService;
         $this->imageRepo = new ImageRepository();
         $this->buttonService = new ButtonService();
     }

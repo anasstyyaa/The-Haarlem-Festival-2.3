@@ -17,8 +17,8 @@ use App\Repositories\TicketRepository;
 use function FastRoute\simpleDispatcher;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
-    //$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);
-    $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
+    $r->addRoute('GET', '/', ['App\Controllers\HomeController', 'index']);
+   // $r->addRoute('GET', '/', ['App\Controllers\AuthController', 'index']);
 
     $r->addRoute('GET', '/login', ['App\Controllers\AuthController', 'showLoginForm']);
     $r->addRoute('POST', '/login', ['App\Controllers\AuthController', 'login']);
@@ -340,8 +340,13 @@ switch ($routeInfo[0]) {
             $userRepo = new \App\Repositories\UserRepository();
             $eventRepo = new \App\Repositories\EventRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
+             $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
 
-            $controller = new $class($historyService, $personalProgramService);
+            $controller = new $class($historyService, $personalProgramService, $pageService);
 
         }elseif ($class === 'App\Controllers\KidsEventController') {
             $pageElementRepository = new \App\Repositories\PageElementRepository();
@@ -358,7 +363,14 @@ switch ($routeInfo[0]) {
 
 
             $controller = new $class($pageService, $kidsService, $extraKidsService);
-        } 
+        } elseif ($class === 'App\Controllers\HomeController'){
+            $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+             $controller = new $class($pageService);
+        }
          else {
             $controller = new $class();
         }

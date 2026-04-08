@@ -14,12 +14,16 @@ class HomeController
     $this->pageService = $pageService;
 }
 
-    public function index()
+    public function index():void
     {
-     $sections = $this->pageService->getPageSections("home");
-    $vm = new PageElementViewModel($sections);
+     $vm = $this->buildPageVM("home");
       require __DIR__ . '/../Views/home/index.php';
     }
+     private function buildPageVM(string $pageName): PageElementViewModel
+{
+    $sections = $this->pageService->getPageSections($pageName);
+    return new PageElementViewModel($sections);
+}
 
     public function adminIndex(): void
 {

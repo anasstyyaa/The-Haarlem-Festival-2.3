@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Repositories\KidsEventRepository;
+use App\Repositories\Interfaces\IKidsEventRepository;
 use App\Models\KidsEventModel;
 use App\Services\Interfaces\IKidsEventService;
 
 class KidsEventService implements IKidsEventService
 {
-    private KidsEventRepository $repository;
+    private IKidsEventRepository $repository;
 
-    public function __construct(KidsEventRepository $repository)
+    public function __construct(IKidsEventRepository $repository)
     {
         $this->repository = $repository;
     }

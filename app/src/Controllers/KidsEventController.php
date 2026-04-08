@@ -40,7 +40,7 @@ private function buildPageVM(string $pageName): PageElementViewModel
  public function adminIndex(): void
 {
     $vm = $this->buildPageVM('kids');
-    $kidsEvents = $this->service->getAll();
+    $kidsEvents = $this->kidsService->getAll();
     $vmKids = new KidsEventViewModel($kidsEvents);
     $extraEvents = $this->extraKidsService->getAllEvents();
     $extraViewModel = new ExtraKidsEventViewModel($extraEvents); 
@@ -54,8 +54,7 @@ public function create(): void
 public function edit(array $vars): void
 {
     $id = (int)$vars['id'];
-    $event = $this->service->getEventById($id);
-
+    $event = $this->kidsService->getEventById($id);
 
     require __DIR__ . '/../Views/admin/kids/kidsEventForm.php';
 }
@@ -63,29 +62,20 @@ public function edit(array $vars): void
 public function save(): void
 {
     $id        = $_POST['id'] ?? null;
-    $startTime = $_POST['startTime'] ?? '';
-    $endTime   = $_POST['endTime'] ?? '';
-    $type = $_POST['type'] ?? '';
-    $location = $_POST['location'] ?? '';
-    $limit = (int)($_POST['limit'] ?? 0);
-    $eventDate = $_POST['eventDate'] ?? '';
+    $startTime = $_POST['startTime'];
+    $endTime   = $_POST['endTime'];
+    $type = $_POST['type'];
+    $location = $_POST['location'];
+    $limit = (int)($_POST['limit']);
+    $eventDate = $_POST['eventDate'];
    $day = date('l', strtotime($eventDate));
 
-    $event = new KidsEventModel(
-       $id ? (int)$id : 0,
-       $day,
-       $startTime,
-       $endTime,
-       $type,
-       $location,
-       $limit,
-    $eventDate
-          );
+    $event = new KidsEventModel($id ? (int)$id : 0, $day, $startTime, $endTime, $type, $location, $limit, $eventDate);
 
     if ($id) {
-        $this->service->update($event);
+        $this->kidsService->update($event);
     } else {
-        $this->service->create($event);
+        $this->kidsService->create($event);
     }
 
     header("Location: /admin/kidsPage");
@@ -101,7 +91,7 @@ public function delete(): void
         return;
     }
 
-    $this->service->delete($id);
+    $this->kidsService->delete($id);
 
     header("Location: /admin/kidsPage");
     exit;
@@ -132,14 +122,12 @@ public function delete(): void
 
         $id = $_POST['id'] ?? null;
 
-        $event = $id 
-            ? $this->extraKidsService->getEventById((int)$id) 
-            : new ExtraKidsEventModel();
+        $event = $id ? $this->extraKidsService->getEventById((int)$id)  : new ExtraKidsEventModel();
 
-        $event->setName($_POST['name'] ?? '');
-        $event->setDescription($_POST['description'] ?? '');
+        $event->setName($_POST['name']);
+        $event->setDescription($_POST['description']);
 
-        // 📸 HANDLE IMAGE UPLOAD
+        // IMAGE UPLOAD
         if (!empty($_FILES['image']['name'])) {
             $uploadDir = __DIR__ . '/../../public/assets/images';
 

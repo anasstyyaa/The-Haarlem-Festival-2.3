@@ -221,6 +221,7 @@ class CommunicationService implements ICommunicationService
             'jazz'     => 'Grote Markt, 2011 RD Haarlem',
             'jazzpass' => 'Festival Access - Various Locations',
             'history'  => 'Church of St. Bavo (Meeting Point)',
+            'kids'     => 'Teylers Museum',
             default    => 'Haarlem Festival Venue'
         };
     }

@@ -12,3 +12,7 @@
 
     <button type="submit">Save Changes</button>
 </form>
+
+<div style="text-align:center;margin-top:20px;">
+    <a href="/admin/home/index">Back</a>
+</div>

@@ -7,6 +7,10 @@ use App\Models\PersonalProgram;
 
 interface IPaymentService {
 
+    public function prepareCheckout(PersonalProgram $program, int $userId): string;
+    public function completePurchase(string $orderId, string $stripeId, int $userId): void ;
+    public function handleFailedPayment(string $orderId, int $userId): void ;
+    public function prepareRepayCheckout(string $orderId): string;
     public function finalizeOrder(string $orderId, string $stripeSessionId): array; 
     public function releaseExpiredOrder(string $orderId): void;
     public function savePaidTicket(TicketModel $ticket, string $stripeId): bool;

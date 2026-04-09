@@ -3,6 +3,7 @@ use App\ViewModels\KidsEventViewModel;
 use App\ViewModels\PageElementViewModel;
 use App\Models\TextModel;
 use App\Models\ImageModel;
+use App\Models\ButtonModel;
 /** @var KidsEventViewModel $vmKids */
 /** @var PageElementViewModel $vm */
 use App\ViewModels\ExtraKidsEventViewModel;
@@ -70,82 +71,93 @@ td img {
 
 <h1 style="text-align:center;">Admin Page Manager</h1>
 
-<a href="/admin/sections/create">
-    <button class="add-btn">Add Section</button>
-</a>
-
-
 <?php foreach ($vm->getSections() as $section => $elements): ?>
 
-<h2 class="section-title">
-    Section: <?= htmlspecialchars($section) ?>
-</h2>
+<div class="card shadow-sm border-0 mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th class="ps-3" style="width: 15%;">Element ID</th>
+                    <th style="width: 50%;">Preview</th>
+                    <th class="text-center" style="width: 35%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($elements as $element): ?>
+                <tr>
+                    <td class="ps-3 text-muted small">
+                        #<?= htmlspecialchars($element->getId()) ?>
+                    </td>
 
-<table>
-<thead>
-<tr>
-    <th>Element ID</th>
-    <th>Preview</th>
-    <th>Actions</th>
-</tr>
-</thead>
+                    <td>
+                        <div class="admin-element-preview border rounded bg-light" style="max-height: 120px; overflow: hidden; max-width: 300px;">
+                            <?= $element->render(); ?>
+                        </div>
+                    </td>
 
-<tbody>
+                    <td>
+                        <div class="d-flex justify-content-center gap-2">
 
-<?php foreach ($elements as $element): ?>
+                            <?php if($element instanceof TextModel): ?>
+                                <a href="/admin/elements/edit/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            <?php elseif($element instanceof ImageModel): ?>
+                                <a href="/admin/elements/editImg/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            <?php elseif($element instanceof ButtonModel): ?>
+                                <a href="/admin/elements/editButton/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            <?php endif; ?>
 
-<tr>
-<td><?= htmlspecialchars($element->getId()) ?></td>
+                            <?php if($element instanceof TextModel): ?>
+                                <a href="/admin/elements/delete/text/<?= $element->getId() ?>" class="delete-btn">Delete Text</a>
+                            <?php elseif($element instanceof ImageModel): ?>
+                                <a href="/admin/elements/delete/image/<?= $element->getId() ?>" class="delete-btn">Delete Image</a>
+                            <?php elseif($element instanceof ButtonModel): ?>
+                                <a href="/admin/elements/delete/button/<?= $element->getId() ?>" class="delete-btn">Delete Button</a>
+                            <?php endif; ?>
 
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 
-<td>
-    <?= $element->render(); ?>
-</td>
+    <div class="card-footer bg-white py-3">
+        <form method="GET" action="/admin/elements/createForm" class="row g-2 align-items-center justify-content-center">
+            <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
+            <input type="hidden" name="pageName" value="kids">
 
-<td>
-<div class="actions">
-<?php if($element instanceof TextModel){ ?>
- <a href="/admin/elements/edit/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </a>
-                                    <?php } elseif($element instanceof ImageModel){?>
-                                   <a href="/admin/elements/editImg/<?= $element->getId() ?>" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </a> <?php } ?>
+            <div class="col-auto">
+                <label class="small fw-bold text-muted">Add New:</label>
+            </div>
 
-<form method="POST" action="/admin/elements/delete"
-onsubmit="return confirm('Delete this element?')">
-<input type="hidden" name="id" value="<?= $element->getId() ?>">
-<button class="delete-btn">Delete</button>
-</form>
+            <div class="col-auto">
+                <select name="type" class="form-select form-select-sm">
+                    <option value="text">Text</option>
+                    <option value="image">Image</option>
+                    <option value="button">Button</option>
+                </select>
+            </div>
 
+            <div class="col-auto">
+                <button class="btn btn-sm btn-success">
+                    <i class="bi bi-plus-lg"></i> Create Element
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
-</td>
-
-</tr>
 
 <?php endforeach; ?>
-
 </tbody>
 </table>
-
-<div style="text-align:center;">
-<form method="GET" action="/admin/elements/createForm">
-     <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
-    <input type="hidden" name="pageName" value="kids">
-    
-    <select name="type">
-        <option value="text">Text</option>
-        <option value="image">Image</option>
-        <option value="button">Button</option>
-    </select>
-
-    <button>Create</button>
-</form>
-</div>
-
-<?php endforeach; ?>
-
 
 
 <h2 style="text-align:center;">Kids Events</h2>

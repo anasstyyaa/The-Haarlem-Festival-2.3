@@ -230,7 +230,7 @@ class CommunicationService implements ICommunicationService
         $details = $ticket->getEvent()->getDetails();
         $type = strtolower($ticket->getEvent()->getEventType()->value);
 
-        if ($type === 'reservation' && is_object($details)) { //add for kids
+        if ($type === 'reservation' && is_object($details)) { 
             $session = $details->getSessionData();
             return $session ? (new \DateTime($session->getStartTime()))->format('l, d F Y') : 'Date TBD';
         }
@@ -238,6 +238,11 @@ class CommunicationService implements ICommunicationService
         if ($type === 'jazz' && is_array($details) && isset($details['jazzEvent'])) {
             return (new \DateTime($details['jazzEvent']->getStartDateTime()))->format('l, d F Y');
         }
+
+         if ($type === 'kids' && is_object($details)) {
+        return (new \DateTime($details->getEventDate()))
+            ->format('l, d F Y');
+    }
 
         return "Check Schedule for Details";
     }

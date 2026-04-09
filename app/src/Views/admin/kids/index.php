@@ -159,119 +159,119 @@ td img {
 </tbody>
 </table>
 
+<!-- KIDS EVENTS -->
 
-<h2 style="text-align:center;">Kids Events</h2>
-<div class="edit-btn">
-   <a href="/admin/kids-events/create" class="edit-btn">
-    Add Kids Event
-</a>
-</div>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Day</th>
-<th>Start</th>
-<th>End</th>
-<th>Type</th>
-<th>Location</th>
-<th>Limit</th>
-<th>Actions</th>
-</tr>
-</thead>
+<div class="card shadow-sm mb-5">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Kids Events</h4>
+        <a href="/admin/kids-events/create" class="btn btn-success btn-sm">+ Add Event</a>
+    </div>
 
-<tbody>
+<div class="table-responsive">
+    <table class="table table-striped align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Day</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Limit</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
 
-<?php foreach ($vmKids->kidsEvents as $event): ?>
+        <tbody>
+            <?php foreach ($vmKids->kidsEvents as $event): ?>
+                <tr>
+                    <td><?= htmlspecialchars($event->getId()) ?></td>
+                    <td><?= htmlspecialchars($event->getDay()) ?></td>
+                    <td><?= htmlspecialchars($event->getStartTime()) ?></td>
+                    <td><?= htmlspecialchars($event->getEndTime()) ?></td>
+                    <td><?= htmlspecialchars($event->getType()) ?></td>
+                    <td><?= htmlspecialchars($event->getLocation()) ?></td>
+                    <td><?= htmlspecialchars($event->getLimit()) ?></td>
 
-<tr>
-<td><?= htmlspecialchars($event->getId()) ?></td>
-<td><?= htmlspecialchars($event->getDay()) ?></td>
-<td><?= htmlspecialchars($event->getStartTime()) ?></td>
-<td><?= htmlspecialchars($event->getEndTime()) ?></td>
-<td><?= htmlspecialchars($event->getType()) ?></td>
-<td><?= htmlspecialchars($event->getLocation()) ?></td>
-<td><?= htmlspecialchars($event->getLimit()) ?></td>
-<td>
-<div class="actions">
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="/admin/kids-events/edit/<?= $event->getId() ?>" class="btn btn-sm btn-outline-primary">Edit</a>
 
-<a href="/admin/kids-events/edit/<?= $event->getId() ?>"  class="edit-btn">
-Edit
-</a>
-
-<form method="POST" action="/admin/kids-events/delete"
-onsubmit="return confirm('Delete this event?')">
-<input type="hidden" name="id" value="<?= $event->getId() ?>">
-<button class="delete-btn">Delete</button>
-</form>
-
-</div>
-</td>
-
-</tr>
-
-<?php endforeach; ?>
-
-</tbody>
-</table>
-<h2 style="text-align:center;">Extra Kids Events</h2>
-
-<div class="edit-btn">
-   <a href="/admin/extrakids/create" class="edit-btn">
-        Add Extra Kids Event
-   </a>
+                            <form method="POST" action="/admin/kids-events/delete"
+                                  onsubmit="return confirm('Delete this event?')">
+                                <input type="hidden" name="id" value="<?= $event->getId() ?>">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>
 
-<table>
-<thead>
-<tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Description</th>
-    <th>Image</th>
-    <th>Actions</th>
-</tr>
-</thead>
-
-<tbody>
-
-<?php foreach ($extraViewModel->events as $event): ?>
-
-<tr>
-<td><?= htmlspecialchars($event['id']) ?></td>
-<td><?= htmlspecialchars($event['name']) ?></td>
-<td><?= htmlspecialchars($event['description']) ?></td>
-
-<td>
-    <?php if (!empty($event['image'])): ?>
-        <img src="<?= htmlspecialchars($event['image']) ?>" alt="event image">
-    <?php else: ?>
-        No image
-    <?php endif; ?>
-</td>
-
-<td>
-<div class="actions">
-
-    <a href="/admin/extrakids/edit/<?= $event['id'] ?>" class="edit-btn">
-        Edit
-    </a>
-
-    <form method="POST" action="/admin/extrakids/delete"
-          onsubmit="return confirm('Delete this extra event?')">
-        <input type="hidden" name="id" value="<?= $event['id'] ?>">
-        <button class="delete-btn">Delete</button>
-    </form>
 
 </div>
-</td>
 
-</tr>
+<!-- EXTRA KIDS EVENTS -->
 
-<?php endforeach; ?>
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Extra Kids Events</h4>
+        <a href="/admin/extrakids/create" class="btn btn-success btn-sm">+ Add Extra</a>
+    </div>
 
-</tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-striped align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th style="width:5%">ID</th>
+                <th style="width:15%">Name</th>
+                <th style="width:40%">Description</th>
+                <th style="width:15%">Image</th>
+                <th class="text-center" style="width:25%">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <?php foreach ($extraViewModel->events as $event): ?>
+                <tr>
+                    <td><?= htmlspecialchars($event['id']) ?></td>
+                    <td><?= htmlspecialchars($event['name']) ?></td>
+                    <td class="text-truncate" style="max-width:300px;">
+                        <?= htmlspecialchars($event['description']) ?>
+                    </td>
+
+                    <td>
+                        <?php if (!empty($event['image'])): ?>
+                            <img 
+                                src="<?= htmlspecialchars($event['image']) ?>" 
+                                class="img-fluid rounded"
+                                style="max-width:100px; max-height:80px; object-fit:cover;"
+                            >
+                        <?php else: ?>
+                            <span class="text-muted">No image</span>
+                        <?php endif; ?>
+                    </td>
+
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="/admin/extrakids/edit/<?= $event['id'] ?>" class="btn btn-sm btn-outline-primary">Edit</a>
+
+                            <form method="POST" action="/admin/extrakids/delete"
+                                  onsubmit="return confirm('Delete this extra event?')">
+                                <input type="hidden" name="id" value="<?= $event['id'] ?>">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+</div>
 
 </body>
 </html>

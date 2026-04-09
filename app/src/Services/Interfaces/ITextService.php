@@ -7,5 +7,5 @@ use App\Models\TextModel;
 interface ITextService
 {
 public function getById(int $id): ?TextModel;
-    public function saveTextChanges($id, $newText);
+    public function saveTextChanges(int $id, string $newText);
 }

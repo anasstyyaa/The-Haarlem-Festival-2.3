@@ -277,7 +277,7 @@ class TicketService implements ITicketService
          }
       }
 
-      $eventId = $this->eventService->checkEventType($subEventId, $eventType); //check for newly created events
+      $eventId = $this->eventService->checkEventType($subEventId, $eventType);
 
       if ($eventId === 0) {
          throw new \Exception("Configuration Error: No Event found for Type: $eventType.");
@@ -311,4 +311,39 @@ class TicketService implements ITicketService
       }
       $_SESSION['program'] = $program;
    }
+ public function getPaginatedTickets(int $page = 1): array
+{
+    $limit = 10;
+
+    $tickets = $this->ticketRepository->getAllWithDetailsPaginated($page, $limit);
+    $total = $this->ticketRepository->countAllWithDetails();
+
+    return [
+        'tickets' => $tickets,
+        'total_pages' => ceil($total / $limit),
+        'current_page' => $page,
+        'total_results' => $total
+    ];
+}
+public function getExportData(array $requestedColumns): array//check
+{
+    $tickets = $this->ticketRepository->getAllWithDetails();
+
+    if (empty($tickets)) {
+        throw new \Exception("No data available");
+    }
+
+    $validColumns = array_keys($tickets[0]);
+
+    $selectedColumns = array_intersect($requestedColumns, $validColumns);
+
+    if (empty($selectedColumns)) {
+        throw new \Exception("No valid columns selected");
+    }
+
+    return [
+        'columns' => $selectedColumns,
+        'rows' => $tickets
+    ];
+}
 }

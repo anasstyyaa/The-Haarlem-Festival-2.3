@@ -88,7 +88,7 @@ class EventRepository extends Repository implements IEventRepository
             return (int)$row['id'];
         }
 
-        $tempEvent = new EventModel(0, EventTypeEnum::from($eventType), $subEventId); // id = 0 because the create method will assign the new ID after insertion
+        $tempEvent = new EventModel(0, EventTypeEnum::from($eventType), $subEventId); 
 
         $this->create($tempEvent);
 

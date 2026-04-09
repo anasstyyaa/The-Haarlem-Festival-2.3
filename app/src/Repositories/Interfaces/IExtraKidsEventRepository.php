@@ -13,4 +13,5 @@ interface IExtraKidsEventRepository
     public function create(ExtraKidsEventModel $event): bool;
 
     public function delete(int $id): bool;
+     public function update(ExtraKidsEventModel $event): bool;
 }

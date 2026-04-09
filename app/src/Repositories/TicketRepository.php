@@ -133,13 +133,57 @@ class TicketRepository extends Repository implements ITicketRepository
         return $stmt->execute(['orderId' => $orderId]);
     }
 
-    // public function getAll(): array
-    // {
-    //     $sql = "SELECT * FROM Tickets ORDER BY id DESC";
-    //     $stmt = $this->connection->query($sql);
+ public function getAllWithDetailsPaginated(int $page, int $limit): array
+{
+    $offset = ($page - 1) * $limit;
 
-    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // }
+    $sql = "
+        SELECT 
+            t.id,
+            t.user_id,
+            u.Email,
+            u.FullName,
+            t.event_id,
+            e.eventType,
+            t.sub_event_id,
+            t.number_of_people,
+            t.unit_price,
+            t.total_price,
+            t.status,
+            t.is_scanned,
+            t.created_at
+        FROM Tickets t
+        LEFT JOIN Users u ON u.Id = t.user_id
+        LEFT JOIN Event e ON e.id = t.event_id
+        WHERE 1=1
+    ";
+
+
+    $sql .= " ORDER BY t.id DESC
+              OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+
+    $stmt = $this->connection->prepare($sql);
+
+    $stmt->bindValue('offset', $offset, \PDO::PARAM_INT);
+    $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+
+    $stmt->execute();
+
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+}
+public function countAllWithDetails(): int
+{
+    $sql = "SELECT COUNT(*) 
+            FROM Tickets t
+            LEFT JOIN Users u ON u.Id = t.user_id
+            WHERE 1=1";
+
+    $stmt = $this->connection->prepare($sql);
+    $stmt->execute();
+
+    return (int)$stmt->fetchColumn();
+}
+
 
     public function getAllWithDetails(): array // limit and offset + kidsevent duplicate event checker
     {

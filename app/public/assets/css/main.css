@@ -2214,12 +2214,374 @@ body.admin-page #sidebar .nav-item {
     border: none;
 }
 
-.site-layout {
-    min-height: 100vh;
+.section4 {
+  position: relative;
+  height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8%;
+  color: white;
+}
+
+.section4 img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1; /* behind text */
+}
+
+/* overlay */
+.section4::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(60, 15, 0, 0.7), rgba(60, 15, 0, 0.2));
+  z-index: 0;
+}
+
+/* Hero text & buttons */
+.section4 h1, .section1 p, .section1 a {
+  position: relative;
+  z-index: 1; /* on top of image */
+}
+
+.section4 h1 { font-size: 4rem; margin-bottom: 10px; }
+.section4 p { max-width: 600px; margin-bottom: 20px; }
+
+.section4 a:first-of-type {
+  background: #f7c9bc;
+  color: #4b1608;
+}
+.section4 a:last-of-type {
+  border: 1px solid #fff;
+  color: #fff;
+}
+
+/* ========== SECTION 2 ABOUT ========== */
+.section5 {
+  background: #4b1608;
+  color: white;
+  padding: 80px 8%;
+  text-align: left;
+}
+
+.section5 h3 {
+  display: inline-block;
+  width: 120px;
+  margin: 20px 20px 0 0;
+  font-size: 28px;
+  color: #ff8a2a;
+}
+
+
+/* ========== SECTION 3 DATES ========== */
+.section6 {
+  background: #5c1a08;
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.section6 p {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 140px;
+  height: 140px;
+  margin: 15px;
+
+  border-radius: 50%;
+  background: rgba(255, 140, 60, 0.3);
+
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.locations-flat {
+    background: #4b1608;
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.location-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+/* Title */
+.locations-title {
+    width: 100%;
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+/* Intro */
+.locations-intro {
+    width: 100%;
+    max-width: 700px;
+    text-align: center;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* Cards */
+.location-item {
+    width: 180px;
+    text-align: center;
+}
+
+/* Images */
+.location-item img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* Titles */
+.location-item h3 {
+    margin: 6px 0;
+    font-size: 1.2rem;
+}
+
+/* Text */
+.location-item p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .location-item {
+        width: 140px;
+    }
+
+    .location-item img {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+
+    
+/* ===== DETAIL PAGE ===== */
+.kids-detail {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 20px;
+}
+
+.kids-detail h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* BACK BUTTON */
+.kids-detail a {
+    display: inline-block;
+    margin-bottom: 20px;
+    text-decoration: none;
+    color: #555;
+}
+
+.kids-detail a:hover {
+    text-decoration: underline;
+}
+
+/* IMAGE */
+.detail-img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+/* DESCRIPTION */
+.detail-description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #333;
+}
+  /* ===== HERO / PAGE TITLE ===== */
+
+.kids-events h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+}
+
+/* ===== GRID ===== */
+.kids-events {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.kids-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    width: 100%;
+}
+
+/* ===== CARD ===== */
+.kids-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
     display: flex;
     flex-direction: column;
 }
+.site-layout {
+    min-height: 100vh;}
 
+.kids-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+/* IMAGE */
+.kids-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+/* CONTENT */
+.kids-card h3 {
+    font-size: 1.4rem;
+    margin: 15px;
+}
+
+.kids-card p {
+    font-size: 0.95rem;
+    margin: 0 15px 20px;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* BUTTON */
+.kids-card a {
+    margin: 0 15px 20px;
+    padding: 10px;
+    text-align: center;
+    background: #ff7a18;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.kids-card a:hover {
+    background: #e56710;
+}.section3 {
+    display: flex;
+    flex-wrap: wrap;              
+    align-items: center;
+    justify-content: space-between;
+
+    background-color: #FEDBCE;
+    color: #4b1608; 
+
+    padding: 50px;
+    gap: 20px;
+}
+
+/* TITLE (always first element) */
+.section3 > :first-child {
+    width: 100%;                  
+    color: #8E3D18;
+    font-size: 1.8rem;
+    margin-bottom: -130px;
+}
+
+/* TEXT */
+.section3 p {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* IMAGE */
+.section3 img {
+    width: 500px;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.section2 {
+    background-color: #4b1608;
+    padding-bottom: 50px;
+    padding-top: 50px;
+    padding-left: 100px;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    gap: 20px;
+}
+
+/* left group */
+.section2 p:nth-child(1) { grid-column: 1; grid-row: 1; }
+.section2 p:nth-child(2) { grid-column: 1; grid-row: 2; }
+
+/* image */
+.section2 img { 
+    grid-column: 2; 
+    grid-row: 1 / span 2;
+    width: 600px;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* right group */
+.section2 p:nth-child(4) { grid-column: 3; grid-row: 1; }
+.section2 p:nth-child(5) { grid-column: 3; grid-row: 2; }
+
+.section2 p {
+    background-color: #FEC8C1;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 0;
+    max-width: 220px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+
+    .card-custom {
+        background-color: #fff;
+        color: #000;
+        border-radius: 10px;
+    }
+
+    .section-wrapper {
+        margin-bottom: 40px;
+    }
+
+    .kids-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+    .kids-background{
+ background-color: #4b1608;
+        color: #fff;
+    }
 .site-content {
     flex: 1;
 }

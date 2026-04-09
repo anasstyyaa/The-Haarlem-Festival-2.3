@@ -16,6 +16,5 @@ interface IEventService
 
     public function delete(int $id): bool;
 
-
     public function checkEventType(int $subEventId, string $eventType):int;
     }

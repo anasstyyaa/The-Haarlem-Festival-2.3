@@ -4,10 +4,6 @@ namespace App\Services;
 use App\Services\Interfaces\IPageElementService;
 use App\Repositories\Interfaces\IPageElementRepository;
 use App\Models\PageElementModel;
-use App\Repositories\ButtonRepository;
-use App\Repositories\ImageRepository;
-use App\Repositories\TextRepository;
-use App\Repositories\PageElementRepository;
 
 use App\Repositories\Interfaces\IButtonRepository;
 use App\Repositories\Interfaces\IImageRepository;
@@ -35,83 +31,121 @@ class PageElementService implements IPageElementService
      /**
      * @return PageElementModel[]
      */
-    public function getByPageName(string $pageName): array
+      public function getByPageName(string $pageName): array
     {
      return $this->pageElementRepository->getByPageName($pageName);
     }
-
     public function getById(int $id): ?PageElementModel
     {
        return $this->pageElementRepository->getById($id);
     }
-    public function getPageSections(string $pageName): array
-{
-    $elements = $this->getByPageName($pageName);
-    $sections = [];
+   public function getPageSections(string $pageName): array
+    {
+        if (trim($pageName) === '') {
+            throw new \InvalidArgumentException("Page name cannot be empty");
+        }
 
-    foreach ($elements as $el) {
-        $model = match ($el->getType()) {
-            'text' => $this->textRepo->getById($el->getSubElementId()),
-            'image' => $this->imageRepo->getById($el->getSubElementId()),
-            'button' => $this->buttonRepo->getById($el->getSubElementId()),
-            default => null
-        };
+        try {
+            $elements = $this->pageElementRepository->getByPageName($pageName);
+            $sections = [];
 
-        if ($model !== null) {
-            $sections[$el->getSection()][] = $model;
+            foreach ($elements as $el) {
+                $model = match ($el->getType()) {
+                    'text' => $this->textRepo->getById($el->getSubElementId()),
+                    'image' => $this->imageRepo->getById($el->getSubElementId()),
+                    'button' => $this->buttonRepo->getById($el->getSubElementId()),
+                    default => null
+                };
+
+                if ($model) {
+                    $sections[$el->getSection()][] = $model;
+                }
+            }
+
+            return $sections;
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return [];
         }
     }
 
-    return $sections;
-}
-public function createElement(string $type,int $section,string $pageName,array $data): bool {
+    public function createElement(string $type, int $section, string $pageName, array $data): bool
+    {
+        if (!in_array($type, ['text', 'image', 'button'])) {
+            throw new \InvalidArgumentException("Invalid type");
+        }
 
-    switch ($type) {
-        case 'text':
-            $subId = $this->textRepo->create($data['content']);
-            break;
+        if ($section < 0) {
+            throw new \InvalidArgumentException("Invalid section");
+        }
 
-        case 'image':
-            $subId = $this->imageRepo->createImage(
-                $data['imgURL'],
-                $data['altText']
+        try {
+            switch ($type) {
+                case 'text':
+                    if (empty($data['content'])) {
+                        throw new \Exception("Content required");
+                    }
+                    $subId = $this->textRepo->create($data['content']);
+                    break;
+
+                case 'image':
+                    if (empty($data['imgURL'])) {
+                        throw new \Exception("Image URL required");
+                    }
+                    $subId = $this->imageRepo->createImage(
+                        $data['imgURL'],
+                        $data['altText'] ?? ''
+                    );
+                    break;
+
+                case 'button':
+                    if (empty($data['text']) || empty($data['path'])) {
+                        throw new \Exception("Button data required");
+                    }
+                    $subId = $this->buttonRepo->create(
+                        $data['text'],
+                        $data['path']
+                    );
+                    break;
+            }
+
+            $position = $this->pageElementRepository
+                ->getNextPosition($pageName, $section);
+
+            return $this->pageElementRepository->create(
+                $subId,
+                $type,
+                $pageName,
+                $section,
+                $position
             );
-            break;
 
-        case 'button':
-            $subId = $this->buttonRepo->create(
-                $data['text'],
-                $data['path']
-            );
-            break;
-
-        default:
-            throw new \Exception("Invalid type");
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
 
-    $position = $this->pageElementRepository
-        ->getNextPosition($pageName, $section);
+    public function delete(int $id, string $type): bool
+    {
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("Invalid ID");
+        }
 
-    return $this->pageElementRepository->create(
-        $subId,
-        $type,
-        $pageName,
-        $section,
-        $position
-    );
-}
- public function delete(int $id, $type):bool{
-    switch ($type) {
-    case 'text':
-        $this->textRepo->delete($id);
-        break;
-     case 'image':
-        $this->imageRepo->delete($id);
-        break;
-     case 'button':
-        $this->buttonRepo->delete($id);
-        break;
-}
-    return $this->pageElementRepository->delete($id, $type);
- }
+        try {
+            match ($type) {
+                'text' => $this->textRepo->delete($id),
+                'image' => $this->imageRepo->delete($id),
+                'button' => $this->buttonRepo->delete($id),
+                default => throw new \Exception("Invalid type")
+            };
+
+            return $this->pageElementRepository->delete($id, $type);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
 }

@@ -11,36 +11,42 @@ use App\Framework\Controller;
 
 class TicketController extends Controller
 {
-
     private TicketRepository $ticketRepository;
     private ITicketService $ticketService;
 
-
-    public function __construct(TicketRepository $ticketRepository,  ITicketService $ticketService)
-    {
+    public function __construct(
+        TicketRepository $ticketRepository,
+        ITicketService $ticketService
+    ) {
         $this->ticketRepository = $ticketRepository;
         $this->ticketService = $ticketService;
     }
 
     public function index(): void
     {
-        $program = $_SESSION['program'] ?? new PersonalProgram();
-        $rawTickets = $this->ticketService->hydrateTickets($program->getTickets());
+        try {
+            $program = $_SESSION['program'] ?? new PersonalProgram();
+            $rawTickets = $this->ticketService->hydrateTickets($program->getTickets());
 
-        // transforming raw models into viewModels
-        $viewTickets = [];
-        $grandTotal = 0.0;
+            $viewTickets = [];
+            $grandTotal = 0.0;
 
-        foreach ($rawTickets as $ticket) {
-            $vm = new TicketViewModel($ticket);
-            $viewTickets[] = $vm;
-            $grandTotal += $vm->totalPrice;
+            foreach ($rawTickets as $ticket) {
+                $vm = new TicketViewModel($ticket);
+                $viewTickets[] = $vm;
+                $grandTotal += $vm->totalPrice;
+            }
+
+            $this->render('personalProgram/personalProgram', [
+                'viewTickets' => $viewTickets,
+                'grandTotal'  => $grandTotal
+            ]);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            http_response_code(500);
+            echo "Error loading personal program.";
         }
-
-        $this->render('personalProgram/personalProgram', [
-            'viewTickets' => $viewTickets,
-            'grandTotal'  => $grandTotal
-        ]);
     }
 
     public function addTicket(): void
@@ -48,40 +54,53 @@ class TicketController extends Controller
         try {
             $this->ticketService->addToProgram($_POST, $_SESSION['user']['id'] ?? null);
             $this->redirect($_SERVER['HTTP_REFERER'] ?? '/', "Ticket added to your program!");
+
         } catch (CapacityException $e) {
-            $this->redirect($_SERVER['HTTP_REFERER'], $e->getMessage(), 'error');
-        } catch (\Exception $e) {
+            $this->redirect($_SERVER['HTTP_REFERER'] ?? '/', $e->getMessage(), 'error');
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
             $this->redirect($_SERVER['HTTP_REFERER'] ?? '/', "Something went wrong.", 'error');
         }
     }
 
-
     public function removeTicket(): void
     {
-        $ticketId = (int)($_POST['ticket_id'] ?? 0);
+        try {
+            $ticketId = (int)($_POST['ticket_id'] ?? 0);
 
-        if ($ticketId <= 0) {
-            $this->redirect('/personalProgram', "Invalid item selected.", 'error');
+            if ($ticketId <= 0) {
+                throw new \Exception("Invalid ticket ID");
+            }
+
+            $program = $_SESSION['program'] ?? new PersonalProgram();
+            $program->removeTicket($ticketId);
+
+            $_SESSION['program'] = $program;
+
+            $this->redirect('/personalProgram', "Item removed from program.");
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            $this->redirect('/personalProgram', "Error removing item.", 'error');
         }
-
-        $program = $_SESSION['program'] ?? new PersonalProgram();
-        $program->removeTicket($ticketId);
-
-        $_SESSION['program'] = $program;
-        $this->redirect('/personalProgram', "Item removed from program.");
     }
 
     public function updateQuantity()
     {
+        try{
         $itemId = $_POST['program_item_id'] ?? null;
         $action = $_POST['action'] ?? null;
 
-        if ($itemId && $action) {
             $this->ticketService->updateProgramQuantity($itemId, $action);
-        }
 
-        $this->redirect('/personalProgram');
-    }
+            $this->redirect('/personalProgram');
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            $this->redirect('/personalProgram', "Error updating quantity.", 'error');
+        }
+}
 
     public function scan(): void
     {
@@ -123,70 +142,83 @@ class TicketController extends Controller
         }
     }
 
-    public function adminIndex()
+  public function adminIndex(): void
     {
-        $tickets = $this->ticketRepository->getAllWithDetails();
+         $this->requireAdmin();
+        try {
+            $this->requireAdmin();
 
-        require __DIR__ . '/../Views/admin/dashboard.php';
-    }
-    public function exportCsv(): void
-    {
-        $tickets = $this->ticketRepository->getAllWithDetails();
+            $page = (int)($_GET['page'] ?? 1);
+            $data = $this->ticketService->getPaginatedTickets($page);
 
-        $selectedColumns = array_intersect(
-            $_POST['columns'] ?? [],
-            array_keys($tickets[0] ?? [])
-        );
-        if (empty($selectedColumns)) {
-            header("Location: /admin");
-            exit;
+            $this->render('admin/dashboard', [
+                'tickets' => $data['tickets'],
+                'totalPages' => $data['total_pages'],
+                'currentPage' => $data['current_page'],
+                'totalResults' => $data['total_results']
+            ]);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            http_response_code(500);
+            echo "Error loading admin dashboard.";
         }
+    }
+
+   public function exportCsv(): void
+{
+    try {
+        $data = $this->ticketService->getExportData($_POST['columns'] ?? []);
 
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="tickets.csv"');
 
         $output = fopen('php://output', 'w');
 
-        fputcsv($output, $selectedColumns);
+        fputcsv($output, $data['columns']);
 
-        foreach ($tickets as $row) {
+        foreach ($data['rows'] as $row) {
             fputcsv(
                 $output,
-                array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+                array_map(fn($col) => $row[$col] ?? '', $data['columns'])
             );
         }
 
         fclose($output);
         exit;
-    }
-    public function exportExcel(): void
-    {
-        $tickets = $this->ticketRepository->getAllWithDetails();
 
-        $selectedColumns = array_intersect(
-            $_POST['columns'] ?? [],
-            array_keys($tickets[0] ?? [])
-        );
-        if (empty($selectedColumns)) {
-            header("Location: /admin");
-            exit;
-        }
+    } catch (\Throwable $e) {
+        error_log($e->getMessage());
+        header("Location: /admin");
+        exit;
+    }
+}
+   public function exportExcel(): void
+{
+    try {
+        $data = $this->ticketService->getExportData($_POST['columns'] ?? []);
 
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="tickets.xls"');
 
         $output = fopen('php://output', 'w');
 
-        fputcsv($output, $selectedColumns);
+        fputcsv($output, $data['columns']);
 
-        foreach ($tickets as $row) {
+        foreach ($data['rows'] as $row) {
             fputcsv(
                 $output,
-                array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+                array_map(fn($col) => $row[$col] ?? '', $data['columns'])
             );
         }
 
         fclose($output);
         exit;
+
+    } catch (\Throwable $e) {
+        error_log($e->getMessage());
+        header("Location: /admin");
+        exit;
     }
 }
+} 

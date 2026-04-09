@@ -35,7 +35,7 @@ class HistoryController extends Controller
         }
     }
 
-    public function bookingTour(): void
+    public function bookingTour(): void 
     {
         try {
             $this->view('event/historyEvent/booking', $this->service->getBookingTourPageData());
@@ -45,12 +45,18 @@ class HistoryController extends Controller
         }
     }
 
-    public function createBooking(): void
+    public function createBooking(): void // handles booking form submission.
     {
         try {
             $this->requirePost('/history/booking');
 
-            $userId = $_SESSION['user_id'] ?? ($_SESSION['user']['id'] ?? null);
+            $userId = null;
+
+            if (isset($_SESSION['user_id'])) {
+                $userId = $_SESSION['user_id'];
+            } elseif (isset($_SESSION['user']['id'])) {
+                $userId = $_SESSION['user']['id'];
+            }
             $numberOfPeople = $this->service->createBookingFromRequest($_POST, $userId);
 
             $_SESSION['flash_success'] = "Your booking for $numberOfPeople people has been successfully added to your Personal Program.";
@@ -79,7 +85,7 @@ class HistoryController extends Controller
         }
     }
 
-    public function storeTour(): void
+    public function storeTour(): void 
     {
         try {
             $this->requireAdmin();
@@ -201,7 +207,7 @@ class HistoryController extends Controller
             $this->internalServerError();
         }
     }
-    
+
     public function getStops($vars): void
     {
         try {

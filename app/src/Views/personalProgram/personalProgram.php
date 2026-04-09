@@ -35,8 +35,8 @@
                                 <th class="ps-4">Event</th>
                                 <th>Location</th>
                                 <th>Schedule</th>
-                                <th class="text-center">Price</th>
-                                <th class="text-end pe-4">Action</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-end pe-4">Price</th>
                             </tr>
                         </thead>
                         <tbody>

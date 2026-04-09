@@ -83,9 +83,6 @@ class TicketController extends Controller
         $this->redirect('/personalProgram');
     }
 
-    /**
-     * Simple ticket scan method for employees
-     */
     public function scan(): void
     {
 
@@ -125,7 +122,6 @@ class TicketController extends Controller
             echo $e->getMessage();
         }
     }
-
 
     public function adminIndex()
     {

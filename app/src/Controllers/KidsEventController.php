@@ -1,6 +1,7 @@
 <?php 
 namespace App\Controllers;
 
+use App\Framework\Controller;
 use App\Services\Interfaces\IKidsEventService;
 use App\ViewModels\KidsEventViewModel;
 use App\Models\KidsEventModel;
@@ -12,7 +13,7 @@ use App\Services\Interfaces\IExtraKidsEventService;
 use App\Models\ExtraKidsEventModel;
 use App\ViewModels\ExtraKidsEventViewModel;
 
-class KidsEventController
+class KidsEventController extends Controller
 {
     private IPageElementService $pageService;
     private IKidsEventService $kidsService;
@@ -48,6 +49,7 @@ private function buildPageVM(string $pageName): PageElementViewModel
 
 public function adminIndex(): void
 {
+     $this->requireAdmin();
     try {
         $vm = $this->buildPageVM('kids');
         $kidsEvents = $this->kidsService->getAll();
@@ -66,6 +68,7 @@ public function adminIndex(): void
 
 public function create(): void
 {
+     $this->requireAdmin();
     try {
         require __DIR__ . '/../Views/admin/kids/kidsEventForm.php';
     } catch (\Throwable $e) {
@@ -76,6 +79,7 @@ public function create(): void
 
 public function edit(array $vars): void
 {
+     $this->requireAdmin();
     try {
         $id = (int)$vars['id'];
         $event = $this->kidsService->getEventById($id);
@@ -90,6 +94,7 @@ public function edit(array $vars): void
 
 public function save(): void
 {
+     $this->requireAdmin();
     try {
         $id = $_POST['id'] ?? null;
         $startTime = $_POST['startTime'];
@@ -129,6 +134,7 @@ public function save(): void
 
 public function delete(): void
 {
+     $this->requireAdmin();
     try {
         $id = (int)($_POST['id'] ?? 0);
 
@@ -169,6 +175,7 @@ public function detail($vars)
 
 public function createExtra(): void
 {
+     $this->requireAdmin();
     try {
         require __DIR__ . '/../Views/admin/kids/extraKidsEventForm.php';
     } catch (\Throwable $e) {
@@ -179,6 +186,7 @@ public function createExtra(): void
 
 public function storeExtra()
 {
+     $this->requireAdmin();
     try {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -224,6 +232,7 @@ public function storeExtra()
 
 public function deleteExtra(): void
 {
+     $this->requireAdmin();
     try {
         $id = (int)($_POST['id']);
         $this->extraKidsService->deleteEvent($id);
@@ -239,6 +248,7 @@ public function deleteExtra(): void
 
 public function editExtra(array $vars): void
 {
+     $this->requireAdmin();
     try {
         $id = (int)$vars['id'];
         $event = $this->extraKidsService->getEventById($id);

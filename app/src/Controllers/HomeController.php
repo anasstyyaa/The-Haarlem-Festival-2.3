@@ -2,10 +2,11 @@
 
 namespace App\Controllers;
 
+use App\Framework\Controller;
 use App\Services\Interfaces\IPageElementService;
 use App\ViewModels\PageElementViewModel;
 
-class HomeController
+class HomeController extends Controller
 {
     private IPageElementService $pageService;
 
@@ -40,6 +41,7 @@ class HomeController
 
     public function adminIndex(): void
     {
+         $this->requireAdmin();
         try {
             $sections = $this->pageService->getPageSections("home");
             $vm = new PageElementViewModel($sections);

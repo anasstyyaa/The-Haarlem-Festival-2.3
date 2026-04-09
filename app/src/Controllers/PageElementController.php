@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Framework\Controller;
 use App\Services\Interfaces\IPageElementService;
 use App\Services\Interfaces\ITextService;
 use App\Services\Interfaces\IImageService;
 use App\Services\Interfaces\IButtonService;
 
-class PageElementController
+class PageElementController extends Controller
 {
     private IPageElementService $pageService;
     private ITextService $textService;
@@ -28,6 +29,7 @@ class PageElementController
 
     public function showEditForm(array $vars): void
     {
+         $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
             $text = $this->textService->getById($id);
@@ -41,6 +43,7 @@ class PageElementController
 
     public function showImgEditForm(array $vars): void
     {
+         $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
             $img = $this->imgService->getById($id);
@@ -54,6 +57,7 @@ class PageElementController
 
     public function saveTextChanges(array $vars): void
     {
+         $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
             $newText = $_POST['newText'];
@@ -70,6 +74,7 @@ class PageElementController
 
     public function delete(array $vars): void
     {
+         $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
             $type = $vars['type'];
@@ -89,6 +94,7 @@ class PageElementController
 
     public function saveImgChanges(array $vars): void
     {
+         $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
 
@@ -114,6 +120,7 @@ class PageElementController
 
     public function showButtonEditForm(array $vars): void
     {
+         $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
             $button = $this->buttonService->getById($id);
@@ -127,6 +134,7 @@ class PageElementController
 
     public function saveButtonChanges(array $vars): void
     {
+         $this->requireAdmin();
         try {
             $id = (int)$vars['id'];
 
@@ -146,6 +154,7 @@ class PageElementController
 
     public function createForm(): void
     {
+         $this->requireAdmin();
         try {
             $type = $_GET['type'] ?? null;
             $section = $_GET['section'] ?? null;
@@ -165,6 +174,7 @@ class PageElementController
 
     public function store(): void
     {
+         $this->requireAdmin();
         try {
             $type = $_POST['type'];
             $section = (int)$_POST['section'];

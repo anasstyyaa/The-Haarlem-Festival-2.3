@@ -160,6 +160,7 @@ class TicketController extends Controller
 
     public function adminIndex(): void
     {
+         $this->requireAdmin();
         try {
             $this->requireAdmin();
 
@@ -180,79 +181,60 @@ class TicketController extends Controller
         }
     }
 
-    public function exportCsv(): void
-    {
-        try {
-            $tickets = $this->ticketRepository->getAllWithDetails();
+   public function exportCsv(): void
+{
+    try {
+        $data = $this->ticketService->getExportData($_POST['columns'] ?? []);
 
-            $selectedColumns = array_intersect(
-                $_POST['columns'] ?? [],
-                array_keys($tickets[0] ?? [])
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="tickets.csv"');
+
+        $output = fopen('php://output', 'w');
+
+        fputcsv($output, $data['columns']);
+
+        foreach ($data['rows'] as $row) {
+            fputcsv(
+                $output,
+                array_map(fn($col) => $row[$col] ?? '', $data['columns'])
             );
-
-            if (empty($selectedColumns)) {
-                throw new \Exception("No columns selected");
-            }
-
-            header('Content-Type: text/csv');
-            header('Content-Disposition: attachment; filename="tickets.csv"');
-
-            $output = fopen('php://output', 'w');
-
-            fputcsv($output, $selectedColumns);
-
-            foreach ($tickets as $row) {
-                fputcsv(
-                    $output,
-                    array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
-                );
-            }
-
-            fclose($output);
-            exit;
-
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            header("Location: /admin");
-            exit;
         }
+
+        fclose($output);
+        exit;
+
+    } catch (\Throwable $e) {
+        error_log($e->getMessage());
+        header("Location: /admin");
+        exit;
     }
+}
+   public function exportExcel(): void
+{
+    try {
+        $data = $this->ticketService->getExportData($_POST['columns'] ?? []);
 
-    public function exportExcel(): void
-    {
-        try {
-            $tickets = $this->ticketRepository->getAllWithDetails();
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="tickets.xls"');
 
-            $selectedColumns = array_intersect(
-                $_POST['columns'] ?? [],
-                array_keys($tickets[0] ?? [])
+        $output = fopen('php://output', 'w');
+
+        fputcsv($output, $data['columns']);
+
+        foreach ($data['rows'] as $row) {
+            fputcsv(
+                $output,
+                array_map(fn($col) => $row[$col] ?? '', $data['columns'])
             );
-
-            if (empty($selectedColumns)) {
-                throw new \Exception("No columns selected");
-            }
-
-            header('Content-Type: application/vnd.ms-excel');
-            header('Content-Disposition: attachment; filename="tickets.xls"');
-
-            $output = fopen('php://output', 'w');
-
-            fputcsv($output, $selectedColumns);
-
-            foreach ($tickets as $row) {
-                fputcsv(
-                    $output,
-                    array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
-                );
-            }
-
-            fclose($output);
-            exit;
-
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            header("Location: /admin");
-            exit;
         }
+
+        fclose($output);
+        exit;
+
+    } catch (\Throwable $e) {
+        error_log($e->getMessage());
+        header("Location: /admin");
+        exit;
     }
+}
 }

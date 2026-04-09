@@ -21,5 +21,6 @@ interface ITicketService
     public function countTicketsByUserId(int $userId): int;
     public function getUserTicketsPaginated(int $userId, int $page = 1): array;
     public function getPaginatedTickets(int $page = 1): array;
+    public function getExportData(array $requestedColumns): array;
     
 }

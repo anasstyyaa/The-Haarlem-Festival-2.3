@@ -297,4 +297,25 @@ class TicketService implements ITicketService
         'total_results' => $total
     ];
 }
+public function getExportData(array $requestedColumns): array
+{
+    $tickets = $this->ticketRepository->getAllWithDetails();
+
+    if (empty($tickets)) {
+        throw new \Exception("No data available");
+    }
+
+    $validColumns = array_keys($tickets[0]);
+
+    $selectedColumns = array_intersect($requestedColumns, $validColumns);
+
+    if (empty($selectedColumns)) {
+        throw new \Exception("No valid columns selected");
+    }
+
+    return [
+        'columns' => $selectedColumns,
+        'rows' => $tickets
+    ];
+}
 }

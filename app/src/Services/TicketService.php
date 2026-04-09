@@ -249,7 +249,7 @@ class TicketService implements ITicketService
          }
       }
 
-      $eventId = $this->eventService->checkEventType($subEventId, $eventType);//check for newly created events
+      $eventId = $this->eventService->checkEventType($subEventId, $eventType);
 
       if ($eventId === 0) {
          throw new \Exception("Configuration Error: No Event found for Type: $eventType.");
@@ -297,7 +297,7 @@ class TicketService implements ITicketService
         'total_results' => $total
     ];
 }
-public function getExportData(array $requestedColumns): array
+public function getExportData(array $requestedColumns): array//check
 {
     $tickets = $this->ticketRepository->getAllWithDetails();
 

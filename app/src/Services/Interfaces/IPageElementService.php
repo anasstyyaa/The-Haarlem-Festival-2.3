@@ -10,5 +10,5 @@ interface IPageElementService
     public function getPageSections(string $pageName): array;
     public function getById(int $id): ?PageElementModel;
     public function createElement(string $type,int $section,string $pageName,array $data): bool;
-    public function delete(int $id, $type):bool;
+    public function delete(int $id, string $type):bool;
 }

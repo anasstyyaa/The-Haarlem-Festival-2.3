@@ -15,17 +15,41 @@ class ButtonService implements IButtonService
         $this->buttonRepository = $buttonRepository;
     }
 
-   public function getById(int $id): ?ButtonModel
+    public function getById(int $id): ?ButtonModel
     {
-        return $this->buttonRepository->getById($id);
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("Invalid button ID");
+        }
+
+        try {
+            return $this->buttonRepository->getById($id);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            throw new \Exception("Failed to fetch button");
+        }
     }
 
-    public function mapToModel(array $row): ButtonModel
+    public function saveButtonChanges( $id,  $text, $path): bool
     {
-         return $this->buttonRepository->mapToModel($row);
-    }
-     public function saveButtonChanges($id, $newText, $newPAth){
-        return $this->buttonRepository->saveButtonChanges($id,$newText,$newPAth);
-    }
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("Invalid button ID");
+        }
 
+        if (trim($text) === '') {
+            throw new \InvalidArgumentException("Button text cannot be empty");
+        }
+
+        if (!filter_var($path, FILTER_VALIDATE_URL) && !str_starts_with($path, '/')) {
+            throw new \InvalidArgumentException("Invalid path");
+        }
+
+        try {
+            return $this->buttonRepository->saveButtonChanges($id, $text, $path);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            throw new \Exception("Failed to update button");
+        }
+    }
 }
+
+

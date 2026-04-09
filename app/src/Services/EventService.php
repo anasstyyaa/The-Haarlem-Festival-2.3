@@ -14,35 +14,69 @@ class EventService implements IEventService
         $this->repository = new EventRepository();
     }
 
-     public function getAll(): array
+    public function getAll(): array
     {
-      return $this->repository->getAll();
+        try {
+            return $this->repository->getAll();
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return [];
+        }
     }
 
     public function getById(int $id): ?EventModel
     {
-       return $this->repository->getById($id);
+        try {
+            return $this->repository->getById($id);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return null;
+        }
     }
 
     public function create(EventModel $event): bool
     {
-       return $this->repository->create($event);
+        try {
+            return $this->repository->create($event);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
 
     public function update(EventModel $event): bool
     {
-      return $this->repository->update($event);
+        try {
+            return $this->repository->update($event);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
 
     public function delete(int $id): bool
     {
-       return $this->repository->delete($id);
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("Invalid event ID");
+        }
+
+        try {
+            return $this->repository->delete($id);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
 
 
     public function checkEventType(int $subEventId, string $eventType):int
     {
+      try{
       return $this->repository->checkEventType($subEventId, $eventType);
+      }  catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return 0;
+        }
     }
 
 }

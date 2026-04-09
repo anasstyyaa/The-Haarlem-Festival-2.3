@@ -14,13 +14,36 @@ class TextService implements ITextService
     ) {
          $this->textRepository= $textRepository;
       }
-    public function getById(int $id): ?TextModel
+        public function getById(int $id): ?TextModel
     {
-       return $this->textRepository->getById($id);
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("Invalid text ID");
+        }
+
+        try {
+            return $this->textRepository->getById($id);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return null;
+        }
     }
 
-    public function saveTextChanges($id, $newText){
-       $this->textRepository->saveTextChanges($id, $newText);
+    public function saveTextChanges(int $id, string $newText): bool
+    {
+        if ($id <= 0) {
+            throw new \InvalidArgumentException("Invalid text ID");
+        }
+
+        if (trim($newText) === '') {
+            throw new \InvalidArgumentException("Text cannot be empty");
+        }
+
+        try {
+            return $this->textRepository->saveTextChanges($id, $newText);
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
     
 }

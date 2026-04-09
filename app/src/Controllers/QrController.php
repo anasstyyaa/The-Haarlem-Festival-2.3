@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use chillerlan\QRCode\QRCode;
@@ -8,15 +9,24 @@ class QrController
 {
     public function index(): void
     {
-        $text = $_GET['text'] ?? 'test';
+        try {
+            $text = trim($_GET['text'] ?? '');
 
-        $options = new QROptions([
-            'scale' => 5,
-            'outputBase64' => false,
-        ]);
+            if ($text === '') {
+                $text = 'invalid';
+            }
 
-        header('Content-Type: image/svg+xml');
-        echo (new QRCode($options))->render($text);
-        exit;
+            $options = new QROptions([
+                'scale' => 5,
+                'outputBase64' => false,
+            ]);
+
+            header('Content-Type: image/svg+xml');
+            echo (new QRCode($options))->render($text);
+        } catch (\Exception $e) {
+            error_log('QR error: ' . $e->getMessage());
+            http_response_code(500);
+            echo 'Failed to generate QR code.';
+        }
     }
 }

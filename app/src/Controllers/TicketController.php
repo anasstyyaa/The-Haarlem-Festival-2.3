@@ -86,15 +86,11 @@ class TicketController extends Controller
         }
     }
 
-    public function updateQuantity(): void
+    public function updateQuantity()
     {
-        try {
-            $itemId = $_POST['program_item_id'] ?? null;
-            $action = $_POST['action'] ?? null;
-
-            if (!$itemId || !$action) {
-                throw new \Exception("Invalid request");
-            }
+        try{
+        $itemId = $_POST['program_item_id'] ?? null;
+        $action = $_POST['action'] ?? null;
 
             $this->ticketService->updateProgramQuantity($itemId, $action);
 
@@ -104,61 +100,49 @@ class TicketController extends Controller
             error_log($e->getMessage());
             $this->redirect('/personalProgram', "Error updating quantity.", 'error');
         }
-    }
+}
 
     public function scan(): void
     {
-        $this->requireEmployee();
 
         try {
+            $this->requireEmployee();
+
             $token = $_GET['token'] ?? '';
+            error_log('SCAN TOKEN: [' . $token . ']');
+            $result = $this->ticketService->scanTicket($token);
 
-            if ($token === '') {
-                throw new \Exception("No token provided");
-            }
+            $this->view('employee/scanResult', $result);
+        } catch (\InvalidArgumentException $e) {
+            $this->view('employee/scanResult', [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'ticket' => null
+            ]);
+        } catch (\Exception $e) {
+            error_log('Scan error: ' . $e->getMessage());
 
-            $ticket = $this->ticketRepository->getByToken($token);
-
-            if (!$ticket) {
-                throw new \Exception("Invalid ticket");
-            }
-
-            if ($ticket['is_scanned'] == 1) {
-                $status = 'warning';
-                $message = 'This ticket has already been scanned.';
-            } else {
-                $this->ticketRepository->markAsScanned($token);
-                $status = 'success';
-                $message = 'Ticket is valid. Entry allowed.';
-            }
-
-            require __DIR__ . '/../Views/employee/scanResult.php';
-
-        } catch (\Throwable $e) {
-            error_log("Scan error: " . $e->getMessage());
-
-            $status = 'error';
-            $message = $e->getMessage();
-            $ticket = null;
-
-            require __DIR__ . '/../Views/employee/scanResult.php';
+            $this->view('employee/scanResult', [
+                'status' => 'error',
+                'message' => 'Something went wrong.',
+                'ticket' => null
+            ]);
         }
     }
+
 
     public function scanPage(): void
     {
         try {
             $this->requireEmployee();
-            require __DIR__ . '/../Views/employee/scan.php';
-
-        } catch (\Throwable $e) {
-            error_log($e->getMessage());
-            http_response_code(403);
-            echo "Access denied.";
+            $this->view('employee/scan');
+        } catch (\Exception $e) {
+            error_log('Scan page error: ' . $e->getMessage());
+            echo $e->getMessage();
         }
     }
 
-    public function adminIndex(): void
+  public function adminIndex(): void
     {
          $this->requireAdmin();
         try {
@@ -237,4 +221,4 @@ class TicketController extends Controller
         exit;
     }
 }
-}
+} 

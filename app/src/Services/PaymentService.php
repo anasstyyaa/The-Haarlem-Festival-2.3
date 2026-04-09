@@ -2,46 +2,101 @@
 
 namespace App\Services;
 
+use App\Services\Interfaces\ICommunicationService;
 use App\Services\Interfaces\IPaymentService;
 use App\Services\Interfaces\Yummy\IRestaurantSessionService;
 use App\Services\Interfaces\IJazzEventService;
 use App\Services\Interfaces\IJazzPassService;
-use App\Repositories\Interfaces\ITicketRepository;
+use App\Services\Interfaces\ITicketService;
 use App\Repositories\Interfaces\IEventRepository;
 use App\Repositories\Interfaces\IUserRepository;
 use App\Models\PersonalProgram;
 use App\Models\TicketModel;
 use App\Services\Interfaces\IKidsEventService;
+use App\Services\Interfaces\IStripeGateway;
+use App\ViewModels\TicketViewModel; 
+use App\ViewModels\CustomerViewModel;
 
 class PaymentService implements IPaymentService
 {
 
     public function __construct(
-        private ITicketRepository $ticketRepository, 
+        private ITicketService $ticketService, 
         private IRestaurantSessionService $restaurantSessionService,
         private IJazzEventService $jazzService,
         private IJazzPassService $jazzPassService,
         private IUserRepository $userRepository,
         private IEventRepository $eventRepository,
-        private IKidsEventService $kidsService
+        private IKidsEventService $kidsService,
+        private ICommunicationService $communicationService,
+        private IStripeGateway $stripeGateway
     ) {}
+
+    public function prepareCheckout(PersonalProgram $program, int $userId): string 
+    {
+        $orderId = $this->createPendingOrder($program, $userId);
+        $tickets = $this->getTicketsByOrderId($orderId);
+        return $this->generateStripeUrlForOrder($tickets, $orderId);
+
+    }
+
+    public function completePurchase(string $orderId, string $stripeId, int $userId): void 
+    {
+        $tickets = $this->finalizeOrder($orderId, $stripeId);
+
+        $userModel = $this->userRepository->getById($userId);
+        $customer = new CustomerViewModel($userModel, $orderId);
+        $ticketViewModels = array_map(fn($t) => new TicketViewModel($t), $tickets);
+        
+        // by placing try / catch here, i avoid error "payment failed" appear on user's screen while in fact only email falure happend   
+        try {
+            $this->communicationService->sendOrderConfirmation($customer, $ticketViewModels, $orderId);
+        } catch (\Exception $e) {
+            error_log("Silent Error: Order confirmation email failed for {$orderId}");
+        }
+          
+        
+    }
+
+    public function prepareRepayCheckout(string $orderId): string 
+    {
+        $tickets = $this->getTicketsByOrderId($orderId);
+        
+        if (empty($tickets)) {
+            throw new \Exception("Order not found or has no tickets.");
+        }
+
+        return $this->generateStripeUrlForOrder($tickets, $orderId);
+    }
+
+    public function handleFailedPayment(string $orderId, int $userId): void 
+    {
+        $user = $this->userRepository->getById($userId);
+        
+        if ($user) {
+            $userData = [
+                'email' => $user->getEmail(), 
+                'full_name' => $user->getFullName()
+            ];
+            $this->communicationService->sendPaymentReminder($userData, $orderId);
+        }
+    }
 
     public function finalizeOrder(string $orderId, string $stripeId): array 
     {
         $tickets = $this->getTicketsByOrderId($orderId);
 
         if (empty($tickets)) {
-            return [];
+            throw new \App\Exceptions\OrderException("Finalization failed: No tickets found for Order {$orderId}.");
         }
 
-        $this->ticketRepository->updateTicketsToPaid($orderId, $stripeId);
+        $this->ticketService->updateTicketsToPaid($orderId, $stripeId);
+
         foreach ($tickets as $ticket) {
             $event = $ticket->getEvent();
             $qty = $ticket->getNumberOfPeople();
-            //$targetId = $ticket->getProgramItemId();
-            $targetId = $event->getSubEventId() ?: $ticket->getProgramItemId(); // fallback to program item id if sub event id is not set
+            $targetId = $event->getSubEventId() ?: $ticket->getProgramItemId(); 
 
-            // Ensure targetId exists before trying to update capacity
             if (!$targetId) continue;
 
             match (strtolower($event->getEventType()->value)) {
@@ -58,18 +113,17 @@ class PaymentService implements IPaymentService
 
     public function releaseExpiredOrder(string $orderId): void 
     {
-        $tickets = $this->ticketRepository->getTicketsByOrderId($orderId);
+        $tickets = $this->ticketService->getTicketsByOrderId($orderId);
         foreach ($tickets as $t) {
             $event = $this->eventRepository->getById($t['event_id']);
             if ($event && strcasecmp($event->getEventType()->value, 'reservation') === 0) {
                 $this->restaurantSessionService->updateCapacity((int)$t['program_item_id'], (int)$t['number_of_people']);
             }
         }
-        $this->ticketRepository->markAsExpired($orderId);
+        $this->ticketService->markAsExpired($orderId);
     }
 
-    public function savePaidTicket(TicketModel $ticket, string $stripeId): bool {
-        // avoiding user = null 
+    public function savePaidTicket(TicketModel $ticket, string $stripeId): bool { 
         if ($ticket->getUser() === null) {
             $currentUserId = $_SESSION['user']['id'] ?? null;
             
@@ -79,7 +133,7 @@ class PaymentService implements IPaymentService
             }
         }
 
-        return $this->ticketRepository->savePaidTicket($ticket, $stripeId);
+        return $this->ticketService->savePaidTicket($ticket, $stripeId);
     }
 
     public function createPendingOrder(PersonalProgram $program, int $userId): string 
@@ -91,7 +145,7 @@ class PaymentService implements IPaymentService
             if (!$ticket->getUser()) {
                 $ticket->setUser($user);
             }
-            $this->ticketRepository->savePendingTicket($ticket, $tempOrderId);
+            $this->ticketService->savePendingTicket($ticket, $tempOrderId);
         }
 
         return $tempOrderId;
@@ -99,7 +153,7 @@ class PaymentService implements IPaymentService
 
     public function isOrderExpired(string $orderId): bool 
     {
-        $tickets = $this->ticketRepository->getTicketsByOrderId($orderId);
+        $tickets = $this->ticketService->getTicketsByOrderId($orderId);
         if (empty($tickets)) return true;
 
         $createdAt = new \DateTime($tickets[0]['created_at']);
@@ -112,20 +166,20 @@ class PaymentService implements IPaymentService
     }
 
     public function savePendingTicket(TicketModel $ticket, string $tempOrderId): bool {
-        return $this->ticketRepository->savePendingTicket($ticket, $tempOrderId);
+        return $this->ticketService->savePendingTicket($ticket, $tempOrderId);
     }
 
     public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool{
-        return $this->ticketRepository->updateTicketsToPaid($orderId, $actualStripeId);
+        return $this->ticketService->updateTicketsToPaid($orderId, $actualStripeId);
     }
 
     public function markOrderAsExpired(string $orderId): void {
-        $this->ticketRepository->markAsExpired($orderId);
+        $this->ticketService->markAsExpired($orderId);
     }
 
     public function getTicketsByOrderId(string $orderId): array
     {
-        $rawTickets = $this->ticketRepository->getTicketsByOrderId($orderId);
+        $rawTickets = $this->ticketService->getTicketsByOrderId($orderId);
         $populatedTickets = [];
 
         foreach ($rawTickets as $row) {
@@ -141,42 +195,16 @@ class PaymentService implements IPaymentService
             );
             $ticket->setProgramItemId((int)$row['program_item_id']);
 
-            $this->populateTicketDetails($ticket);
-
             $populatedTickets[] = $ticket;
         }
-        return $populatedTickets;
+
+        return $this->ticketService->hydrateTickets($populatedTickets);
     }
 
-    private function populateTicketDetails(TicketModel $ticket): void
+    private function generateStripeUrlForOrder(array $tickets, string $orderId): string 
     {
-        $event = $ticket->getEvent();
-        //$subId = $ticket->getProgramItemId() ?: $event->getSubEventId();
-        $subId = $event->getSubEventId() ?: $ticket->getProgramItemId(); // fallback to program item id if sub event id is not set
-        $type = strtolower($event->getEventType()->value);
-
-        if ($type === 'reservation') {
-            $repo = new \App\Repositories\Yummy\RestaurantRepository();
-            $sessRepo = new \App\Repositories\Yummy\RestaurantSessionRepository();
-            $session = $sessRepo->getSessionById($subId);
-            if ($session) {
-                $restaurant = $repo->getById($session->getRestaurantId());
-                $restaurant->setSessionData($session);
-                $event->setDetails($restaurant);
-            }
-        } 
-        elseif ($type === 'jazz') {
-            $jazzRepo = new \App\Repositories\JazzEventRepository();
-            $artistRepo = new \App\Repositories\ArtistRepository();
-            $jazzEvent = $jazzRepo->getById($subId);
-            if ($jazzEvent) {
-                $event->setDetails([
-                    'artist' => $artistRepo->getById($jazzEvent->getArtistId()),
-                    'jazzEvent' => $jazzEvent
-                ]);
-            }
-        }
-        // add similar blocks for 'tour' and 'kids'
+        $ticketViewModels = array_map(fn($t) => new TicketViewModel($t), $tickets);
+        return $this->stripeGateway->createCheckoutSession($ticketViewModels, $orderId);
     }
 
 }

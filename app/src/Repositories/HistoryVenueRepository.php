@@ -37,7 +37,7 @@ class HistoryVenueRepository extends Repository implements IHistoryVenueReposito
 
     public function getById(int $venueId): ?HistoryVenueModel
     {
-       $sql = "
+        $sql = "
     SELECT
         v.id AS venueId,
         v.venueName,

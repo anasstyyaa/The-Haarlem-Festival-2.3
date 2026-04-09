@@ -1,40 +1,29 @@
 <?php require __DIR__ . '/../partials/header.php'; ?>
 
-<div style="text-align:center; padding:50px;">
-    <h2>Scan Ticket</h2>
+<div class="scan-page">
+    <div class="scan-page-card">
+        <h2 class="scan-page-title">Scan Ticket</h2>
 
-    <p>Scan QR code using camera:</p>
+        <p class="scan-page-text">Scan QR code using camera:</p>
+        <div id="reader" class="scan-page-reader"></div>
 
-    <div id="reader" style="width:300px; margin:0 auto;"></div>
+        <div class="scan-page-divider">or</div>
 
-    <br><br>
+        <p class="scan-page-text">Paste token manually:</p>
 
-    <p>Or paste token manually:</p>
-
-    <form method="GET" action="/scan">
-        <input type="text" name="token" placeholder="Enter ticket token" style="padding:10px; width:300px;">
-        <br><br>
-        <button type="submit" style="padding:10px 20px;">Scan</button>
-    </form>
+        <form method="GET" action="/scan" class="scan-page-form">
+            <input
+                type="text"
+                name="token"
+                placeholder="Enter ticket token"
+                class="scan-page-input"
+            >
+            <button type="submit" class="scan-page-button">Scan</button>
+        </form>
+    </div>
 </div>
 
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-<script>
-    function onScanSuccess(decodedText, decodedResult) {
-    alert(decodedText);
-}
-
-    function onScanFailure(error) {
-        //this ignores scan failures
-    }
-
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: 250 },
-        false
-    );
-
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-</script>
+<script src="/js/scan.js"></script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

@@ -16,7 +16,7 @@ use App\Services\Interfaces\IArtistService;
 use App\Services\Interfaces\IJazzPassService;
 use App\Services\Interfaces\IDanceEventService;
 use App\Models\HistoryVenueModel;
-use App\Models\ArtistModel; 
+use App\Models\ArtistModel;
 
 use App\Services\Interfaces\IEventService;
 use App\Services\Interfaces\IPersonalProgramService;
@@ -48,6 +48,33 @@ class TicketService implements ITicketService
    {
       return $this->ticketRepository->getByToken($token);
    }
+   public function scanTicket(string $token): array
+   {
+      if ($token === '') {
+         throw new \InvalidArgumentException('No ticket token provided.');
+      }
+
+      $ticket = $this->getByToken($token);
+      if (!$ticket) {
+         throw new \InvalidArgumentException('Invalid ticket.');
+      }
+
+      if ((int)$ticket['is_scanned'] === 1) {
+         return [
+            'status' => 'warning',
+            'message' => 'This ticket has already been scanned.',
+            'ticket' => $ticket
+         ];
+      }
+
+      $this->markAsScanned($token);
+
+      return [
+         'status' => 'success',
+         'message' => 'Ticket is valid. Entry allowed.',
+         'ticket' => $ticket
+      ];
+   }
 
    public function markAsScanned(string $token): bool
    {
@@ -69,7 +96,7 @@ class TicketService implements ITicketService
       return $this->ticketRepository->markAsExpired($orderId);
    }
 
-   
+
    public function getAllWithDetails(): array
    {
       return $this->ticketRepository->getAllWithDetails();
@@ -87,7 +114,7 @@ class TicketService implements ITicketService
 
    public function getUserTicketsPaginated(int $userId, int $page = 1): array
    {
-      $limit = 5; 
+      $limit = 5;
       $tickets = $this->ticketRepository->getTicketsByUserIdPaginated($userId, $page, $limit);
       $totalTickets = $this->ticketRepository->countTicketsByUserId($userId);
       $hydratedTickets = $this->hydrateTickets($tickets);
@@ -100,7 +127,8 @@ class TicketService implements ITicketService
       ];
    }
 
-   public function countTicketsByUserId(int $userId): int {
+   public function countTicketsByUserId(int $userId): int
+   {
       return $this->ticketRepository->countTicketsByUserId($userId);
    }
 
@@ -129,13 +157,13 @@ class TicketService implements ITicketService
             if ($jazzEvent) {
                $artist = $this->artistService->getArtistById($jazzEvent->getArtistId());
                if ($artist instanceof \App\Models\ArtistModel) {
-                     $jazzEvent->setArtist($artist);
+                  $jazzEvent->setArtist($artist);
                }
 
                $venueInfo = $this->jazzEventService->getVenueInfoByJazzEventId($jazzEvent->getId());
                if (!empty($venueInfo['VenueName'])) {
-                     $location = $venueInfo['VenueName'] . (!empty($venueInfo['HallName']) ? ' - ' . $venueInfo['HallName'] : '');
-                     $jazzEvent->setVenueName($location);
+                  $location = $venueInfo['VenueName'] . (!empty($venueInfo['HallName']) ? ' - ' . $venueInfo['HallName'] : '');
+                  $jazzEvent->setVenueName($location);
                }
 
                $event->setDetails($jazzEvent);
@@ -151,14 +179,14 @@ class TicketService implements ITicketService
          }
 
          if (strcasecmp($event->getEventType()->value, 'tour') === 0) {
-            $targetHistoryId = $event->getSubEventId(); 
+            $targetHistoryId = $event->getSubEventId();
             $allSessions = $this->historyService->getAllSessions();
             $historyEvent = null;
 
             foreach ($allSessions as $session) {
                if ($session->getHistoryEventId() === $targetHistoryId) {
-                     $historyEvent = $session;
-                     break;
+                  $historyEvent = $session;
+                  break;
                }
             }
 
@@ -166,19 +194,19 @@ class TicketService implements ITicketService
                $stops = $this->historyVenueRepository->getStopsByEventId($targetHistoryId);
 
                if (!empty($stops)) {
-                     $firstStop = $stops[0];
+                  $firstStop = $stops[0];
 
-                     $venue = new HistoryVenueModel(
-                        (int)($firstStop['venueId'] ?? 0),
-                        $firstStop['venueName'] ?? '',
-                        $firstStop['details'] ?? null,
-                        $firstStop['location'] ?? null,
-                        isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null,
-                        $firstStop['imgURL'] ?? null,
-                        $firstStop['altText'] ?? null
-                     );
+                  $venue = new HistoryVenueModel(
+                     (int)($firstStop['venueId'] ?? 0),
+                     $firstStop['venueName'] ?? '',
+                     $firstStop['details'] ?? null,
+                     $firstStop['location'] ?? null,
+                     isset($firstStop['imageId']) ? (int)$firstStop['imageId'] : null,
+                     $firstStop['imgURL'] ?? null,
+                     $firstStop['altText'] ?? null
+                  );
 
-                     $historyEvent->setVenue($venue);
+                  $historyEvent->setVenue($venue);
                }
                $event->setDetails($historyEvent);
             }
@@ -197,14 +225,14 @@ class TicketService implements ITicketService
 
             if ($danceEvent) {
                $artist = $this->artistService->getArtistById($danceEvent->getArtistId());
-               
+
                if ($artist instanceof ArtistModel) {
-                     $danceEvent->setArtist($artist);
+                  $danceEvent->setArtist($artist);
                }
 
                $venueInfo = $this->danceEventService->getVenueInfoByDanceEventId($danceEvent->getId());
                if ($venueInfo) {
-                     $danceEvent->setVenueName($venueInfo['VenueName']);
+                  $danceEvent->setVenueName($venueInfo['VenueName']);
                }
 
                $event->setDetails($danceEvent);

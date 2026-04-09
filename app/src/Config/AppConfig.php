@@ -14,4 +14,5 @@ class AppConfig
         
         return "{$protocol}://{$host}";
     }
+    
 }

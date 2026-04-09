@@ -17,6 +17,9 @@ interface IHistoryService
     public function updateSession(HistoryEventModel $event): bool;
     public function deleteSession(int $eventId): bool;
 
+    public function createTourFromForm(array $post): HistoryEventModel;
+    public function updateTourFromForm(array $post): HistoryEventModel;
+    
     public function getAllVenues(): array;
     public function getVenueById(int $venueId): ?HistoryVenueModel;
 

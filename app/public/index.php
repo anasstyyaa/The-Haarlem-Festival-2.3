@@ -336,7 +336,7 @@ switch ($routeInfo[0]) {
             $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo); 
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
 
-             $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $pageElementRepository = new \App\Repositories\PageElementRepository();
             $buttonRepo = new \App\Repositories\ButtonRepository();
             $imageRepo = new \App\Repositories\ImageRepository();
             $textRepo = new \App\Repositories\TextRepository();
@@ -378,17 +378,52 @@ switch ($routeInfo[0]) {
             $communicationService = new \App\Services\CommunicationService();
             $ticketRepo =  new \App\Repositories\TicketRepository();
             $personalProgramService = new \App\Services\PersonalProgramService($eventRepo, $userRepo);
-
+            $eventRepo = new \App\Repositories\EventRepository();
+            $eventService = new \App\Services\EventService($eventRepo); 
+            $artistRepository = new \App\Repositories\ArtistRepository(); 
+            $artistService = new \App\Services\ArtistService($artistRepository); 
             $jazzEventRepository = new \App\Repositories\JazzEventRepository();
             $jazzEventService = new \App\Services\JazzEventService($jazzEventRepository);
             $jazzPassRepository = new \App\Repositories\JazzPassRepository();
             $jazzPassService = new \App\Services\JazzPassService($jazzPassRepository);
-
+            $kidsEventRepo = new \App\Repositories\KidsEventRepository();
+            $kidsEventService = new \App\Services\KidsEventService($kidsEventRepo);
             $authService = new \App\Services\AuthService($userRepo);
             $userCommunicationService = new \App\Services\CommunicationService();
             $userService = new \App\Services\UserService($userRepo, $authService, $userCommunicationService);
-
-            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo);
+            $historyVenueRepository = new \App\Repositories\HistoryVenueRepository();
+            $historyEventRepository = new \App\Repositories\HistoryEventRepository();
+            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo, $kidsEventService);
+            $danceRpository = new \App\Repositories\DanceEventRepository;
+            $danceService = new \App\Services\DanceEventService($danceRpository);
+            $pageElementRepository = new \App\Repositories\PageElementRepository();
+            $buttonRepo = new \App\Repositories\ButtonRepository();
+            $imageRepo = new \App\Repositories\ImageRepository();
+            $textRepo = new \App\Repositories\TextRepository();
+            $imageRepository = new \App\Repositories\ImageRepository();
+            $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
+            $historyService = new \App\Services\HistoryService(
+                $historyEventRepository,
+                $historyVenueRepository,
+                $imageRepository,
+                $personalProgramService,
+                $pageService
+            );            
+            $ticketService = new \App\Services\TicketService(
+                $ticketRepo,
+                $restaurantSessionService,
+                $restaurantService,
+                $jazzEventService,
+                $historyService,
+                $kidsEventService,
+                $historyVenueRepository,
+                $artistService,
+                $jazzPassService,
+                $eventService,
+                $personalProgramService,
+                $danceService
+            );
+            $paymentService = new \App\Services\PaymentService($ticketRepo, $restaurantSessionService, $jazzEventService, $jazzPassService, $userRepo, $eventRepo, $kidsEventService);
 
             $controller = new $class($paymentService, $communicationService, $userService);
         } elseif ($class === 'App\Controllers\HistoryController') {
@@ -404,8 +439,7 @@ switch ($routeInfo[0]) {
             $imageRepo = new \App\Repositories\ImageRepository();
             $textRepo = new \App\Repositories\TextRepository();
             $pageService = new \App\Services\PageElementService($pageElementRepository,$buttonRepo,$imageRepo,$textRepo);
-
-              $historyService = new \App\Services\HistoryService(
+            $historyService = new \App\Services\HistoryService(
                 $historyEventRepository,
                 $historyVenueRepository,
                 $imageRepository,

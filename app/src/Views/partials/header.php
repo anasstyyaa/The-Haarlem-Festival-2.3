@@ -61,13 +61,15 @@
   </nav>
 
   <div class="nav-icons">
-    <a href="#" class="icon-link" title="Language">
+    
+    <!-- no need for now -->
+    <!-- <a href="#" class="icon-link" title="Language">
         <i class="bi bi-globe"></i>
     </a>
-
+    
     <a href="#" class="icon-link" title="Search">
         <i class="bi bi-search"></i>
-    </a>
+    </a> -->
     
     <a href="/personalProgram" class="icon-link" title="Personal Program">
         <i class="bi bi-ticket-perforated"></i>

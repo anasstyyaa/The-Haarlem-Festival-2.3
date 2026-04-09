@@ -294,9 +294,29 @@ class HistoryService implements IHistoryService
 
     public function createBookingFromRequest(array $post, ?int $userId): int
     {
-        $eventId = (int)($post['eventId'] ?? 0);
-        $individualCount = (int)($post['individualCount'] ?? 0);
-        $familyCount = (int)($post['familyCount'] ?? 0);
+        if (!isset($post['eventId'], $post['individualCount'], $post['familyCount'])) {
+            throw new \InvalidArgumentException('Missing booking data.');
+        }
+
+        $eventId = $post['eventId'];
+        $individualCount = $post['individualCount'];
+        $familyCount = $post['familyCount'];
+
+        if (!is_numeric($eventId)) {
+            throw new \InvalidArgumentException('Please select a valid tour.');
+        }
+
+        if (!is_numeric($individualCount)) {
+            throw new \InvalidArgumentException('Invalid individual ticket count.');
+        }
+
+        if (!is_numeric($familyCount)) {
+            throw new \InvalidArgumentException('Invalid family ticket count.');
+        }
+
+        $eventId = (int)$eventId;
+        $individualCount = (int)$individualCount;
+        $familyCount = (int)$familyCount;
 
         $numberOfPeople = $individualCount + ($familyCount * 4);
 

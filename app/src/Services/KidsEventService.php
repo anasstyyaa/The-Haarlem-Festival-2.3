@@ -15,66 +15,175 @@ class KidsEventService implements IKidsEventService
         $this->repository = $repository;
     }
 
-    
     public function getAll(): array
     {
-        return $this->repository->getAll();
+        try {
+            return $this->repository->getAll();
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return [];
+        }
     }
 
-    
     public function getEventById(int $id): ?KidsEventModel
     {
-        return $this->repository->getById($id);
+        try {
+            if ($id <= 0) {
+                throw new \InvalidArgumentException("Invalid event ID");
+            }
+
+            return $this->repository->getById($id);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return null;
+        }
     }
 
-   
     public function getEventBySchedule(string $day, string $startTime, string $endTime): ?KidsEventModel
     {
-        return $this->repository->getIdBySchedule($day, $startTime, $endTime);
+        try {
+            if (empty($day) || empty($startTime) || empty($endTime)) {
+                throw new \InvalidArgumentException("Invalid schedule data");
+            }
+
+            return $this->repository->getIdBySchedule($day, $startTime, $endTime);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return null;
+        }
     }
-    public function create(KidsEventModel $event): bool{
-        return $this->repository->create($event);
-    }
-      public function update(KidsEventModel $event): bool
+
+    public function create(KidsEventModel $event): bool
     {
-        return $this->repository->update($event);
+        try {
+            $this->validateEvent($event);
+            return $this->repository->create($event);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
+
+    public function update(KidsEventModel $event): bool
+    {
+        try {
+            if ($event->getId() <= 0) {
+                throw new \InvalidArgumentException("Invalid event ID");
+            }
+
+            $this->validateEvent($event);
+            return $this->repository->update($event);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
     public function delete(int $id): bool
-{
-    return $this->repository->delete($id);
-}
-public function mapDayToDate(string $dayName): ?string
-{
-  //  $dayName = strtolower(trim($dayName));
-    $daysMap = [
-        'Monday'    => 1,
-        'Tuesday'   => 2,
-        'Wednesday' => 3,
-        'Thursday'  => 4,
-        'Friday'    => 5,
-        'Saturday'  => 6,
-        'Sunday'    => 7,
-    ];
+    {
+        try {
+            if ($id <= 0) {
+                throw new \InvalidArgumentException("Invalid ID");
+            }
 
-    //if (!isset($daysMap[$dayName])) return null;
+            return $this->repository->delete($id);
 
-    $today = (int)date('N'); 
-    $targetDay = $daysMap[$dayName];
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
 
-    $diff = ($targetDay - $today + 7) % 7; 
-    $diff = $diff === 0 ? 7 : $diff; 
+    public function mapDayToDate(string $dayName): ?string
+    {
+        try {
+            if (empty($dayName)) {
+                throw new \InvalidArgumentException("Day name required");
+            }
 
-    return date('Y-m-d', strtotime("+$diff days"));
-}
-public function decreaseCapacity(int $id, int $qty): void
-{
-    $event = $this->repository->getById($id);
+            $daysMap = [
+                'Monday' => 1,
+                'Tuesday' => 2,
+                'Wednesday' => 3,
+                'Thursday' => 4,
+                'Friday' => 5,
+                'Saturday' => 6,
+                'Sunday' => 7,
+            ];
 
-    if (!$event) return;
+            if (!isset($daysMap[$dayName])) {
+                throw new \InvalidArgumentException("Invalid day name");
+            }
 
-    $newLimit = max(0, $event->getLimit() - $qty);
-    $event->setLimit($newLimit);
+            $today = (int)date('N');
+            $targetDay = $daysMap[$dayName];
 
-    $this->repository->update($event);
-}
+            $diff = ($targetDay - $today + 7) % 7;
+            $diff = $diff === 0 ? 7 : $diff;
+
+            return date('Y-m-d', strtotime("+$diff days"));
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+            return null;
+        }
+    }
+
+    public function decreaseCapacity(int $id, int $qty): void
+    {
+        try {
+            if ($id <= 0 || $qty <= 0) {
+                throw new \InvalidArgumentException("Invalid input");
+            }
+
+            $event = $this->repository->getById($id);
+
+            if (!$event) {
+                throw new \Exception("Event not found");
+            }
+
+            $newLimit = max(0, $event->getLimit() - $qty);
+            $event->setLimit($newLimit);
+
+            $this->repository->update($event);
+
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
+        }
+    }
+
+    private function validateEvent(KidsEventModel $event): void
+    {
+        if (empty($event->getDay())) {
+            throw new \InvalidArgumentException("Day is required");
+        }
+
+        if (empty($event->getStartTime()) || empty($event->getEndTime())) {
+            throw new \InvalidArgumentException("Start and end time required");
+        }
+
+        if (strtotime($event->getStartTime()) >= strtotime($event->getEndTime())) {
+            throw new \InvalidArgumentException("Start time must be before end time");
+        }
+
+        if (empty($event->getType())) {
+            throw new \InvalidArgumentException("Type is required");
+        }
+
+        if (empty($event->getLocation())) {
+            throw new \InvalidArgumentException("Location is required");
+        }
+
+        if ($event->getLimit() < 0) {
+            throw new \InvalidArgumentException("Limit cannot be negative");
+        }
+
+        if (empty($event->getEventDate())) {
+            throw new \InvalidArgumentException("Event date required");
+        }
+    }
 }

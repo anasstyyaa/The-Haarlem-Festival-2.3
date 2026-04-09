@@ -20,14 +20,14 @@ class HistoryVenueModel
     public function __construct(
         int $venueId,
         string $venueName,
-        ?string $details,
-        ?string $location,
-        ?int $imageId,
-        ?string $imgURL,
-        ?string $altText
-        ?int $detailImageId,
-        ?string $detailImgURL,
-        ?string $detailAltText
+        ?string $details = null,
+        ?string $location = null,
+        ?int $imageId = null,
+        ?string $imgURL = null,
+        ?string $altText = null,
+        ?int $detailImageId = null,
+        ?string $detailImgURL = null,
+        ?string $detailAltText = null
     ) {
         $this->venueId = $venueId;
         $this->venueName = $venueName;

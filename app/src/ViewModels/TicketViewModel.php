@@ -7,6 +7,7 @@ use App\Models\Yummy\RestaurantModel;
 use App\Models\HistoryEventModel; 
 use App\Models\JazzEventModel;
 use App\Models\KidsEventModel; 
+use App\Models\JazzPassModel;
 use App\Models\DanceEventModel; 
 
 class TicketViewModel {
@@ -58,7 +59,7 @@ class TicketViewModel {
             }
         }
 
-        if ($details instanceof \App\Models\HistoryEventModel) {
+        if ($details instanceof HistoryEventModel) {
             $venue = $details->getVenue();
             $this->title = "History Tour (" . $details->getLanguage() . ")";
             $this->location = $venue ? $venue->getVenueName() : "Haarlem Center";
@@ -72,7 +73,7 @@ class TicketViewModel {
             $this->language = $details->getLanguage();
         }
 
-        if ($details instanceof \App\Models\JazzEventModel) {
+        if ($details instanceof JazzEventModel) {
             $artist = $details->getArtist();
             $this->title = $artist ? $artist->getName() : "Jazz Performance";
             $this->location = $details->getVenueName();
@@ -86,7 +87,15 @@ class TicketViewModel {
             }
         }
 
-        // 4. Kids Mapping
+        if ($details instanceof JazzPassModel) {
+            $this->title = $details->getTitle();
+            $this->image = $details->getImageUrl() ?: "/assets/images/jazz/jazz_pass_default.jpg";
+            $this->location = "All Jazz Venues";
+            $this->date = "Festival Pass"; 
+            $this->startTime = "Access All Day";
+            $this->endTime = "";
+        }
+
         if ($details instanceof KidsEventModel) {
             $this->title = $details->getType();
             $this->location = $details->getLocation();
@@ -99,8 +108,6 @@ class TicketViewModel {
         if ($details instanceof \App\Models\DanceEventModel) {
             $artist = $details->getArtist();
             $this->title = $details->getDisplayTitle() ?? ($artist ? $artist->getName() : "Dance Event");
-            
-            // Map the DJ/Artist's specific image
             $this->image = $artist ? $artist->getImageUrl() : null;
             
             $this->location = $details->getVenueName() ?? "Haarlem";

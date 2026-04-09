@@ -17,5 +17,6 @@ interface ITicketRepository {
     public function getTicketsByUserId(int $userId): array;
     public function getTicketsByUserIdPaginated(int $userId, int $page = 1, int $limit = 5): array; 
     public function countTicketsByUserId(int $userId): int; 
-
+     public function getAllWithDetailsPaginated(int $page, int $limit): array;
+     public function countAllWithDetails(): int;
 }

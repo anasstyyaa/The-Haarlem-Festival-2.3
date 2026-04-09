@@ -159,12 +159,21 @@ public function scan(): void
         require __DIR__ . '/../Views/employee/scan.php';
     }
 
-      public function adminIndex()
-    {
-        $tickets = $this->ticketRepository->getAllWithDetails();
+    public function adminIndex()
+{
+    $this->requireAdmin();
 
-        require __DIR__ . '/../Views/admin/dashboard.php';
-    }
+    $page = (int)($_GET['page'] ?? 1);
+
+    $data = $this->ticketService->getPaginatedTickets($page);
+
+    $this->render('admin/dashboard', [
+        'tickets' => $data['tickets'],
+        'totalPages' => $data['total_pages'],
+        'currentPage' => $data['current_page'],
+        'totalResults' => $data['total_results']
+    ]);
+}
   public function exportCsv(): void
 {
     $tickets = $this->ticketRepository->getAllWithDetails();

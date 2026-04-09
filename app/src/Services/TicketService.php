@@ -283,4 +283,18 @@ class TicketService implements ITicketService
       }
       $_SESSION['program'] = $program;
    }
+ public function getPaginatedTickets(int $page = 1): array
+{
+    $limit = 10;
+
+    $tickets = $this->ticketRepository->getAllWithDetailsPaginated($page, $limit);
+    $total = $this->ticketRepository->countAllWithDetails();
+
+    return [
+        'tickets' => $tickets,
+        'total_pages' => ceil($total / $limit),
+        'current_page' => $page,
+        'total_results' => $total
+    ];
+}
 }

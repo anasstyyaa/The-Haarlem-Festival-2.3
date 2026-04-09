@@ -5,28 +5,27 @@ $status = $status ?? 'error';
 $message = $message ?? 'Unknown result.';
 $ticket = $ticket ?? null;
 
-$bgColor = '#f8d7da';
-$textColor = '#842029';
+$statusClass = 'scan-result--error';
 $icon = '❌';
 
 if ($status === 'success') {
-    $bgColor = '#d1e7dd';
-    $textColor = '#0f5132';
+    $statusClass = 'scan-result--success';
     $icon = '✅';
 } elseif ($status === 'warning') {
-    $bgColor = '#fff3cd';
-    $textColor = '#664d03';
+    $statusClass = 'scan-result--warning';
     $icon = '⚠️';
 }
 ?>
 
-<div style="max-width:700px; margin:40px auto; padding:20px;">
-    <div style="background-color: <?= $bgColor ?>; color: <?= $textColor ?>; padding:30px; border-radius:12px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-        <div style="font-size:60px; margin-bottom:10px;"><?= $icon ?></div>
-        <h2 style="margin-bottom:10px;"><?= htmlspecialchars($message) ?></h2>
+<div class="scan-result-page">
+    <div class="scan-result-card <?= $statusClass ?>">
+        <div class="scan-result-status-label <?= $statusClass ?>">
+            <?= strtoupper($status) ?>
+        </div>
+        <h2 class="scan-result-message"><?= htmlspecialchars($message) ?></h2>
 
         <?php if ($ticket): ?>
-            <div style="margin-top:20px; text-align:left; background:#fff; padding:20px; border-radius:10px; color:#333;">
+            <div class="scan-result-ticket">
                 <p><strong>Ticket ID:</strong> <?= htmlspecialchars((string)$ticket['id']) ?></p>
                 <p><strong>Event ID:</strong> <?= htmlspecialchars((string)$ticket['event_id']) ?></p>
                 <p><strong>People:</strong> <?= htmlspecialchars((string)$ticket['number_of_people']) ?></p>
@@ -34,8 +33,8 @@ if ($status === 'success') {
             </div>
         <?php endif; ?>
 
-        <div style="margin-top:25px;">
-            <a href="/employee/scan" style="display:inline-block; padding:12px 20px; background:#0d6efd; color:white; text-decoration:none; border-radius:8px;">
+        <div class="scan-result-actions">
+            <a href="/employee/scan" class="scan-result-button">
                 Scan Another Ticket
             </a>
         </div>

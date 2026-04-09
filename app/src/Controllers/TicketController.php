@@ -14,7 +14,7 @@ class TicketController extends Controller
 
     private TicketRepository $ticketRepository;
     private ITicketService $ticketService;
-    
+
 
     public function __construct(TicketRepository $ticketRepository,  ITicketService $ticketService)
     {
@@ -71,7 +71,8 @@ class TicketController extends Controller
         $this->redirect('/personalProgram', "Item removed from program.");
     }
 
-    public function updateQuantity() {
+    public function updateQuantity()
+    {
         $itemId = $_POST['program_item_id'] ?? null;
         $action = $_POST['action'] ?? null;
 
@@ -83,146 +84,113 @@ class TicketController extends Controller
     }
 
     /**
- * Simple ticket scan method for employees
- */
-public function scan(): void
-{
-    $this->requireEmployee();
+     * Simple ticket scan method for employees
+     */
+    public function scan(): void
+    {
 
-    try {
-        $token = $_GET['token'] ?? '';
-        if ($token === '') {
-            $status = 'error';
-            $message = 'No ticket token provided.';
-            $ticket = null;
+        try {
+            $this->requireEmployee();
 
-            require __DIR__ . '/../Views/employee/scanResult.php';
-            return;
+            $token = $_GET['token'] ?? '';
+            error_log('SCAN TOKEN: [' . $token . ']');
+            $result = $this->ticketService->scanTicket($token);
+
+            $this->view('employee/scanResult', $result);
+        } catch (\InvalidArgumentException $e) {
+            $this->view('employee/scanResult', [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'ticket' => null
+            ]);
+        } catch (\Exception $e) {
+            error_log('Scan error: ' . $e->getMessage());
+
+            $this->view('employee/scanResult', [
+                'status' => 'error',
+                'message' => 'Something went wrong.',
+                'ticket' => null
+            ]);
         }
-        $ticket = $this->ticketRepository->getByToken($token);
-
-        if (!$ticket) {
-            $status = 'error';
-            $message = 'Invalid ticket.';
-            $ticket = null;
-
-            require __DIR__ . '/../Views/employee/scanResult.php';
-            return;
-        }
-
-        if ($ticket['is_scanned'] == 1) {
-            $status = 'warning';
-            $message = 'This ticket has already been scanned.';
-
-            require __DIR__ . '/../Views/employee/scanResult.php';
-            return;
-        }
-
-        $this->ticketRepository->markAsScanned($token);
-
-        $status = 'success';
-        $message = 'Ticket is valid. Entry allowed.';
-
-        require __DIR__ . '/../Views/employee/scanResult.php';
-
-    } catch (\Exception $e) {
-        error_log("Scan error: " . $e->getMessage());
-
-        $status = 'error';
-        $message = 'Something went wrong.';
-        $ticket = null;
-
-        require __DIR__ . '/../Views/employee/scanResult.php';
     }
-}
 
-    // private function requireEmployee(): void //checks if current user is employee
-    // {
-    //     try {
-    //         if (!isset($_SESSION['user'])) {
-    //             throw new \Exception("User not logged in.");
-    //         }
-    //         if (($_SESSION['user']['role'] ?? '') !== 'Employee') {
-    //             throw new \Exception("User is not an employee.");
-    //         }
-    //     } catch (\Exception $e) {
-    //         error_log("Access error: " . $e->getMessage());
-    //         echo "Access denied. Employees only.";
-    //         exit;
-    //     }
-    // }
-    
+
     public function scanPage(): void
     {
-        $this->requireEmployee();
-
-        require __DIR__ . '/../Views/employee/scan.php';
+        try {
+            $this->requireEmployee();
+            $this->view('employee/scan');
+        } catch (\Exception $e) {
+            error_log('Scan page error: ' . $e->getMessage());
+            echo $e->getMessage();
+        }
     }
 
-      public function adminIndex()
+
+    public function adminIndex()
     {
         $tickets = $this->ticketRepository->getAllWithDetails();
 
         require __DIR__ . '/../Views/admin/dashboard.php';
     }
-  public function exportCsv(): void
-{
-    $tickets = $this->ticketRepository->getAllWithDetails();
+    public function exportCsv(): void
+    {
+        $tickets = $this->ticketRepository->getAllWithDetails();
 
-    $selectedColumns = array_intersect(
-        $_POST['columns'] ?? [],
-        array_keys($tickets[0] ?? [])
-    );
-    if (empty($selectedColumns)) {
-        header("Location: /admin");
+        $selectedColumns = array_intersect(
+            $_POST['columns'] ?? [],
+            array_keys($tickets[0] ?? [])
+        );
+        if (empty($selectedColumns)) {
+            header("Location: /admin");
+            exit;
+        }
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="tickets.csv"');
+
+        $output = fopen('php://output', 'w');
+
+        fputcsv($output, $selectedColumns);
+
+        foreach ($tickets as $row) {
+            fputcsv(
+                $output,
+                array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+            );
+        }
+
+        fclose($output);
         exit;
     }
+    public function exportExcel(): void
+    {
+        $tickets = $this->ticketRepository->getAllWithDetails();
 
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="tickets.csv"');
-
-    $output = fopen('php://output', 'w');
-
-    fputcsv($output, $selectedColumns);
-
-    foreach ($tickets as $row) {
-        fputcsv(
-            $output,
-            array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+        $selectedColumns = array_intersect(
+            $_POST['columns'] ?? [],
+            array_keys($tickets[0] ?? [])
         );
-    }
+        if (empty($selectedColumns)) {
+            header("Location: /admin");
+            exit;
+        }
 
-    fclose($output);
-    exit;
-}
- public function exportExcel(): void
-{
-    $tickets = $this->ticketRepository->getAllWithDetails();
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="tickets.xls"');
 
-    $selectedColumns = array_intersect(
-        $_POST['columns'] ?? [],
-        array_keys($tickets[0] ?? [])
-    );
-    if (empty($selectedColumns)) {
-        header("Location: /admin");
+        $output = fopen('php://output', 'w');
+
+        fputcsv($output, $selectedColumns);
+
+        foreach ($tickets as $row) {
+            fputcsv(
+                $output,
+                array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
+            );
+        }
+
+        fclose($output);
         exit;
     }
-
-   header('Content-Type: application/vnd.ms-excel');
-header('Content-Disposition: attachment; filename="tickets.xls"');
-
-    $output = fopen('php://output', 'w');
-
-    fputcsv($output, $selectedColumns);
-
-    foreach ($tickets as $row) {
-        fputcsv(
-            $output,
-            array_map(fn($col) => $row[$col] ?? '', $selectedColumns)
-        );
-    }
-
-    fclose($output);
-    exit;
-}
 }

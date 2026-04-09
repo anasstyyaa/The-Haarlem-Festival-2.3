@@ -1,7 +1,8 @@
 <?php
+
 namespace App\Repositories;
 
-use App\Repositories\Interfaces\ITicketRepository; 
+use App\Repositories\Interfaces\ITicketRepository;
 use App\Framework\Repository;
 use App\Models\TicketModel;
 use App\Models\EventModel;
@@ -38,27 +39,36 @@ class TicketRepository extends Repository implements ITicketRepository
             'uprice' => $ticket->getUnitPrice(),
             'tprice' => $ticket->getTotalPrice(),
             'stripe' => $stripeId,
-            'token'  => $token, 
-            'program_id' => $ticket->getProgramItemId() 
+            'token'  => $token,
+            'program_id' => $ticket->getProgramItemId()
         ]);
     }
 
-    public function getByToken(string $token): ?array //retrieves a ticket by its unique id, used while scanning to validate the tickets.
+    public function getByToken(string $token): ?array
     {
+        if ($token === '') {
+            return null;
+        }
+
         try {
-            $sql = "SELECT * FROM Tickets WHERE unique_ticket_token = :token";
+            error_log('REPO getByToken TOKEN: [' . $token . ']');
+
+            $sql = "SELECT TOP 1 * 
+                FROM Tickets 
+                WHERE unique_ticket_token = :token";
+
             $stmt = $this->connection->prepare($sql);
             $stmt->execute(['token' => $token]);
 
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+
             return $row ?: null;
         } catch (\Exception $e) {
-            error_log("Error fetching ticket by token: " . $e->getMessage());
             return null;
         }
     }
-    
+
     public function markAsScanned(string $token): bool  //marks tickets as scanned preventing it from being used again
     {
         try {
@@ -75,7 +85,7 @@ class TicketRepository extends Repository implements ITicketRepository
         }
     }
 
-    public function savePendingTicket(TicketModel $ticket, string $tempOrderId): bool 
+    public function savePendingTicket(TicketModel $ticket, string $tempOrderId): bool
     {
         $sql = "INSERT INTO Tickets (
                     user_id, event_id, sub_event_id, number_of_people, 
@@ -95,30 +105,30 @@ class TicketRepository extends Repository implements ITicketRepository
             'count'      => $ticket->getNumberOfPeople(),
             'uprice'     => $ticket->getUnitPrice(),
             'tprice'     => $ticket->getTotalPrice(),
-            'orderId'    => $tempOrderId, 
+            'orderId'    => $tempOrderId,
             'token'      => $token,
-            'program_id' => $ticket->getProgramItemId() 
+            'program_id' => $ticket->getProgramItemId()
         ]);
     }
 
-    public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool 
+    public function updateTicketsToPaid(string $orderId, string $actualStripeId): bool
     {
         $sql = "UPDATE Tickets SET [status] = 'paid'
                 WHERE stripe_session_id = :orderId AND [status] = 'pending'";
-        
+
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute([
             'orderId' => $orderId
         ]);
     }
 
-    public function markAsExpired(string $orderId): bool 
+    public function markAsExpired(string $orderId): bool
     {
         $sql = "UPDATE Tickets 
                 SET [status] = 'expired' 
                 WHERE stripe_session_id = :orderId 
                 AND [status] = 'pending'";
-                
+
         $stmt = $this->connection->prepare($sql);
         return $stmt->execute(['orderId' => $orderId]);
     }
@@ -131,7 +141,7 @@ class TicketRepository extends Repository implements ITicketRepository
     //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
     // }
 
-    public function getAllWithDetails(): array// limit and offset + kidsevent duplicate event checker
+    public function getAllWithDetails(): array // limit and offset + kidsevent duplicate event checker
     {
         $sql = "
             SELECT 
@@ -158,15 +168,15 @@ class TicketRepository extends Repository implements ITicketRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getTicketsByOrderId(string $orderId): array 
+    public function getTicketsByOrderId(string $orderId): array
     {
         $sql = "SELECT * FROM Tickets 
                 WHERE stripe_session_id = :orderId 
                 AND [status] = 'pending'";
-        
+
         $stmt = $this->connection->prepare($sql);
-        $stmt->execute(['orderId' => $orderId]); 
-        
+        $stmt->execute(['orderId' => $orderId]);
+
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
@@ -180,7 +190,7 @@ class TicketRepository extends Repository implements ITicketRepository
             FROM tickets t
             JOIN [event] e ON t.event_id = e.id
             WHERE t.user_id = :userId";
-                
+
         $stmt = $this->connection->prepare($sql);
         $stmt->execute(['userId' => $userId]);
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -200,7 +210,7 @@ class TicketRepository extends Repository implements ITicketRepository
             $ticket = new \App\Models\TicketModel(
                 (int)$row['id'],
                 $event,
-                null, 
+                null,
                 (int)$row['number_of_people'],
                 $row['unique_ticket_token'] ?? null
             );
@@ -220,13 +230,13 @@ class TicketRepository extends Repository implements ITicketRepository
                 WHERE t.user_id = :userId
                 ORDER BY t.id DESC
                 OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-                    
+
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue('userId', $userId, \PDO::PARAM_INT);
         $stmt->bindValue('offset', $offset, \PDO::PARAM_INT);
         $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
-        
+
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         $tickets = [];
@@ -234,10 +244,10 @@ class TicketRepository extends Repository implements ITicketRepository
             $enumType = \App\Models\Enums\EventTypeEnum::tryFrom($row['eventType']);
             $event = new \App\Models\EventModel((int)$row['event_id'], $enumType, (int)$row['subEventId']);
             $tickets[] = new \App\Models\TicketModel(
-                (int)$row['id'], 
-                $event, 
-                null, 
-                (int)$row['number_of_people'], 
+                (int)$row['id'],
+                $event,
+                null,
+                (int)$row['number_of_people'],
                 $row['unique_ticket_token'] ?? null
             );
         }
@@ -251,5 +261,4 @@ class TicketRepository extends Repository implements ITicketRepository
         $stmt->execute(['userId' => $userId]);
         return (int)$stmt->fetchColumn();
     }
-
 }
